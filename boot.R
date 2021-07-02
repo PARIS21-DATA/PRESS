@@ -1,0 +1,13 @@
+library(dplyr)
+library(reshape2)
+library(splitstackshape)
+library(tidyverse)
+library(plyr)
+library(cldr)
+library(cld2)
+library(cld3)
+library(beepr)
+library(slam)
+setwd("~/Dropbox/PARIS21/PRESS/PRESS 2020/Analysis")
+source("functions.R")
+
