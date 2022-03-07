@@ -3,3 +3,7 @@
 .RData
 .Ruserdata
 /YTreviewtemp
+/code/YTnewcodes
+/data/raw_data
+.DS_Store
+/data/intermediate
