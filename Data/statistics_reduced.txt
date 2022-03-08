@@ -1,0 +1,78 @@
+statis
+dhs
+survey
+census
+database
+big data
+data for decisions
+civil registr
+land registr 
+cadaster
+sdg indicator
+information system 
+birth registr
+national account
+price index 
+production index
+data science
+data for development 
+data journalism
+data for education
+education data 
+data for health
+peacebuilding data
+global data
+global pulse
+health data
+refugee data
+migration data
+data collection
+action through data
+data project
+open government data
+death regis
+vital registration
+crvs
+data portal
+devinfo
+data archive
+archive data
+data dissemination
+disseminate data
+microdata
+metadata
+data management
+data documentation
+quality data
+data quality
+access data
+open data
+use data
+produce data
+production data
+data user
+data producer
+data outreach
+data awareness
+data production
+data processing
+data access
+data harmonization
+harmonization data
+nsds
+mdg indicators
+data standards
+data curation
+curating data
+demographic data
+mdg monitoring
+sdg monitoring
+monitoring mdg
+monitoring sdg
+release data
+data release
+afristat
+ckan
+prsp monitoring
+data revolution
+lfs questionnaire
