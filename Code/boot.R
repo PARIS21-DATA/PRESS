@@ -1,6 +1,6 @@
 library(tidyverse)
 library(reshape2)
-library(splitstackshape)
+# library(splitstackshape)
 library(plyr)
 # only one of the packages are needed
 library(cldr)

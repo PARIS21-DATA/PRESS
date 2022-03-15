@@ -1,7 +1,6 @@
 
 rm(list = ls())
-press2021 = read_xlsx("./YTreviewtemp/PRESS 202112.xlsx")
-
+load("./YTreviewtemp/press2021_from_excel.rds")
 load("./YTreviewtemp/csa.rds")
 
 head(csa)
@@ -15,13 +14,17 @@ csa_long = csa %>%
 
 csa_number = csa_long %>%
   group_by(db_ref) %>%
-  summarise(n_of_domain  = n()) 
+  dplyr::summarise(n_of_domain  = n()) 
+
   
 press2021_csa = inner_join(press2021, csa_number) %>%
   filter(!is.na(usd_commitment)) %>%
   mutate(usd_commitment_per_domain = usd_commitment/n_of_domain) %>%
   select(-n_of_domain) %>%
   inner_join(csa_long)
+
+rm(csa_long)
+
 
 press2021_csa_iso = press2021_csa %>%
   filter(countrySpecific ) %>%
@@ -31,7 +34,7 @@ press2021_csa_iso = press2021_csa %>%
   mutate(iso = ifelse(ListRecip == "Kosovo", "XKX", iso)) %>%
   filter(!is.na(iso))  %>%
   filter(CommitmentDate <2020)
-
+rm(press2021_csa)
 
 press2021_csa_iso_domain_sum  = press2021_csa_iso %>%
   group_by(iso, CommitmentDate, domain) %>%
