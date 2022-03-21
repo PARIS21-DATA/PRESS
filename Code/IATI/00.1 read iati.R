@@ -1,13 +1,6 @@
-rm(crs)
 
-########
-# read IATI data
-########
 
-#??? to be documented: the IATI projects
-iati = read_csv("data/raw_data/IATI/activity.csv") #??? we can change here 
-save(iati, file = "data/intermediate/iati_2021.RDS") 
-load("data/intermediate/iati_2021.rds")
+load(iati_rds_path)
 names(iati)
 
 a = gsub(names(iati),pattern = "[-]|[(]|[ ]|[)]",replacement = "_")
