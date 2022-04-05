@@ -11,3 +11,4 @@ Data/Raw/CRS/txt/**
 data/raw/crs/crs_full.rds
 data/raw/CRS/zip/**
 data/raw/IATI
+data/intermediate

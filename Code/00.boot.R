@@ -17,7 +17,8 @@ packages <-
     "reader",
     "zoo", 
     "countrycode", 
-    "beepr"
+    "beepr", 
+    "cld2"
   )
 # Install uninstalled packages
 lapply(packages[!(packages %in% installed.packages())], install.packages)
