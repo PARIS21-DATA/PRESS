@@ -1,6 +1,6 @@
 
 rm(list = ls())
-
+crs_path_new <- "./Data/intermediate/crs03.rds"
 crs_path <- "./Data/intermediate/crs02.rds"
 df_crs_raw <- readRDS(crs_path)
 
@@ -56,7 +56,7 @@ df_crs = df_crs %>%
 
 table(df_crs$language) %>% print 
 
-save(df_crs, file = crs_path_new)
+# save(df_crs, file = crs_path_new)
 
 # load("./analysis/crs_2021_clean0.5_withLangDetect.Rds")
 
@@ -73,14 +73,16 @@ save(df_crs, file = crs_path_new)
 # preselect the definitely statistics project 
 
 # load("crs_2021_clean1_splitted.RDs")
-rm(list = ls())
+# rm(list = ls())
 
-load("./analysis/crs_2021_clean0.5_withLangDetect.Rds")
-df_crs_o = df_crs
-names(df_crs)
+# load("./analysis/crs_2021_clean0.5_withLangDetect.Rds")
+
+df_crs_backup = df_crs
 
 # beep(4)
-df_crs$data = grepl("statis|estadi", df_crs$projecttitle, ignore.case = T)
+df_crs <- df_crs %>%
+  mutate(data = grepl("statis|estadi", df_crs$projecttitle, ignore.case = T))
+  
 # df_crs$SCB = ifelse((df_crs$purposecode == 16062 ) & (!is.na(df_crs$purposecode)), 1, 0)
 # df_crs$POP = ifelse(( df_crs$purposecode  ==13010 ) & (!is.na(df_crs$purposecode)), 1, 0)
 # df_crs$data2 = grepl("data|datos|donne", df_crs$projecttitle, ignore.case = T)
@@ -98,12 +100,12 @@ df_crs$stats = df_crs$stats & (!df_crs$mining)
 table(df_crs$stats)
 
 
-df_crs = join(df_crs_o, df_crs[,c("projectID", "stats")], by="projectID")
+df_crs = join(df_crs_backup, df_crs[,c("projectID", "stats")], by="projectID")
 df_crs = df_crs %>%
   mutate(stats = ifelse(is.na(stats), FALSE, stats))
 # tail(df_crs)
 table(df_crs$stats)
-rm(df_crs_o)
+rm(df_crs_backup)
 
 # beep(4)
 
