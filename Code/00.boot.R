@@ -18,7 +18,9 @@ packages <-
     "zoo", 
     "countrycode", 
     "beepr", 
-    "cld2"
+    "cld2", 
+    "koRpus", 
+    "SnowballC"
   )
 # Install uninstalled packages
 lapply(packages[!(packages %in% installed.packages())], install.packages)

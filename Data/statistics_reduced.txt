@@ -1,5 +1,4 @@
-statis
-dhs
+statistics
 survey
 census
 database
@@ -32,9 +31,7 @@ data project
 open government data
 death regis
 vital registration
-crvs
 data portal
-devinfo
 data archive
 archive data
 data dissemination
@@ -59,7 +56,6 @@ data processing
 data access
 data harmonization
 harmonization data
-nsds
 mdg indicators
 data standards
 data curation
@@ -71,8 +67,5 @@ monitoring mdg
 monitoring sdg
 release data
 data release
-afristat
-ckan
 prsp monitoring
 data revolution
-lfs questionnaire
