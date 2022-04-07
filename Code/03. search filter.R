@@ -29,7 +29,7 @@ df_crs_backup <- df_crs
 
 
 df_crs <- df_crs %>%
-  select(title_id, projecttitle_lower, scb) %>%
+  select(title_id, projecttitle_lower) %>%
   filter(!duplicated(title_id)) 
 
 # beep(4)
@@ -53,35 +53,38 @@ df_crs <- df_crs %>%
 
 df_crs$mining = grepl("land mine|small arm|demining|demine|landmine", df_crs$projecttitle_lower, ignore.case = T)
 
+
+list_acronyms <- readLines("data/statistics_reduced_acronyms.txt")  %>%
+  trimws()
+
 df_crs <- df_crs %>%
-  mutate(text_detection_wo_mining = text_detection & !mining, 
-         text_detection_wo_mining_w_scb = text_detection_wo_mining | scb
+  mutate(text_detection = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | text_detection)
+
+
+df_crs <- df_crs %>%
+  mutate(text_detection_wo_mining = text_detection & !mining
          ) %>%
-  select(-scb, -projecttitle_lower, -projecttitle_stem)
+  select(-projecttitle_lower, -projecttitle_stem)
 
-table(df_crs$text_detection_wo_mining) %>% print
-table(df_crs$text_detection_wo_mining_w_scb) %>% print
+df_crs <- left_join(df_crs_backup, df_crs)
 
-which(is.na(df_crs$text_detection_wo_mining_w_scb))
-
-df_crs = left_join(df_crs_backup, df_crs) 
-df_crs <- df_crs %>%
-  select(-projecttitle_lower)
-
-# df_crs = df_crs %>%
-#   mutate(stats = ifelse(is.na(stats), FALSE, stats))
-# tail(df_crs)
 rm(df_crs_backup)
 
-# beep(4)
+langues <- c("en","fr","es")
+df_crs <- df_crs %>%
+  select(-projecttitle_lower) %>%
+  mutate(language = ifelse(language %in% langues, language, "other"))
 
-# crs = crs %>%
-#   slice(-which(is.na(crs$description_comb)))
-# 
-# which((crs$description_comb == " ")) %>% length
-# head(crs$description_comb,100)
+df_crs <- df_crs %>%
+  mutate( text_detection_wo_mining_w_scb = text_detection_wo_mining | scb)
+table(df_crs$text_detection_wo_mining) %>% print
+table(df_crs$text_detection_wo_mining_w_scb) %>% print
+which(is.na(df_crs$text_detection_wo_mining_w_scb))
 
-# df_crs_stats = df_crs %>% select(text_id, text_detection_wo_mining_w_scb) %>% unique 
-# which(duplicated(df_crs_stats$text_id))
+
+a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb) %>% unique %>% nrow
+b = df_crs %>% select(text_id) %>% unique %>% nrow
+
+print(paste0("There are ", a-b, " projects with same names but different purpose code"))
 
 saveRDS(df_crs,file = crs_path_new)
