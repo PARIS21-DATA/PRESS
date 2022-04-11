@@ -1,5 +1,4 @@
 # PRESS
 
-To download CRS raw data, please go to: https://stats.oecd.org/DownloadFiles.aspx?DatasetCode=CRS1 
+Due to file size, data files in `data/raw/crs` are not fully uploaded. You can download these data from [here](https://oecd-my.sharepoint.com/:f:/g/personal/yu_tian_oecd_org/ElcFbNhUusNKpUNn-LC5Kr4BxvQep1SEJ3lJ1u5xiX18AA?e=pwu3Fj). The .zip files are downloaded from [the OECD](https://stats.oecd.org/DownloadFiles.aspx?DatasetCode=CRS1). 
 
-CRVS projects now in the [./Data folder](https://github.com/PARIS21-DATA/PRESS/tree/main/Data). 
