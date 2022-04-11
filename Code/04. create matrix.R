@@ -14,7 +14,7 @@ source("code/00.3 functions_yu.R")
 # frthreshold = 5
 # esthreshold = 1
 
-dict_lang <- wlistV(lang)
+dict_lang <- wlistV(lang) %>% as.character()
 
 # Split into to two groups
 
@@ -74,6 +74,9 @@ nwords0 = tidy(corpus_crs_0) %>%
 # nwords[which(nwords != nwords0 )] 
 # nwords0[which(nwords != nwords0 )]
 dtm_crs_0 <- DTM(corpus_crs_0, dict = myDict)
+# list_high_freq_words_0 <- DTM(corpus_crs_0 , dict = dict_lang)
+# a <- tidy(list_high_freq_words_0)
+# a <- list_high_freq_words_0$dimnames$Docs
 
 list_high_freq_words_0 <- DTM(corpus_crs_0 , Min=Min.1, Max=1)$dimnames$Terms %>% unique
 myDict = myDict[!(myDict %in% list_high_freq_words_0)]

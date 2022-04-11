@@ -108,10 +108,14 @@ wlistV <- function(Lang){ # one of: "en", "fr", "es"
   pth <- paste("./data/whitelist_", Lang, ".txt", sep="")
   x <- read.table(pth, sep=",", header=FALSE, stringsAsFactors=FALSE)$V1
   
+  pth <- paste("./data/statistics_reduced_", Lang, ".txt", sep="")
+  x_temp <- read.table(pth, sep=",", header=FALSE, stringsAsFactors=FALSE)$V1
+  x <- c(x, x_temp) %>% unique
+  
   ## 2.b. NSO names
   nso <- read.csv("./data/nso.csv", sep=",", stringsAsFactors=FALSE)
   nso <- nso[nso$language != "",]
-  x <- c(x, unique(unlist(nso[nso$language==Lang,4:6])))
+  x <- c(x, unique(unlist(nso[nso$language==Lang,4:6]))) %>% unique
   
   x <- x[x!=""]
   x <- iconv(x, to='ASCII//TRANSLIT', sub=" ")
@@ -120,6 +124,10 @@ wlistV <- function(Lang){ # one of: "en", "fr", "es"
   ## 2.c. finalise dictionaries
   x <- preprocessing1V(x, language=Language)
   x <- tidy(x)$text
+  
+  pth <- paste("./data/statistics_reduced_acronyms_", Lang, ".txt", sep="")
+  x_acronyms <- read.table(pth, sep=",", header=FALSE, stringsAsFactors=FALSE)$V1
+  x <- c(x, x_acronyms)
   # x2 <- as.character(x1$content$content)
   
   ## 2.d. all keyword permutations
