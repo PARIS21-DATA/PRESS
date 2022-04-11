@@ -2,18 +2,14 @@
 .Rhistory
 .RData
 .Ruserdata
-# /YTreviewtemp
-code/YTnewcodes
-data/raw_data
+
 .DS_Store
 # data/intermediate
 Data/Raw/CRS/txt/**
 data/raw/crs/crs_full.rds
 data/raw/CRS/zip/**
 data/raw/IATI
-
-data/data_sub
-
+# data/data_sub
 # !data/intermediate
 # data/intermediate/*
 # !data/intermediate/crs02.rds
