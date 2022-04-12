@@ -52,6 +52,22 @@ df_crs <- df_crs %>%
 rm(df_crs_lang)
 rm(df_crs_raw)
 
+#!!! Added: DeepL attempt + string splitting into en/fr
+# try DeepL 
+install.packages("deeplr")
+library(deeplr)
+deepl_auth_key <- "fcec1af3-2663-3f39-7f16-dcd07b334f30:fx"
+
+df_crs_tmp <- df_crs %>% 
+  filter(language == "fr") %>%
+  head(50) %>%
+  mutate(lang_2 = deeplr::detect2(longdescription, auth_key = deepl_auth_key))
+
+df_crs_split <- df_crs %>%
+  separate(longdescription, sep = " / ", into = c("longdescription_en", "longdescription_fr")) %>%
+  mutate(lang_split = cld2::detect_language(longdescription_en)) %>%
+  filter(lang_split == "nl")
+table(df_crs_split$lang_split) %>% print
 
 which(is.na(df_crs$description_comb)) %>% print 
 which(df_crs$description_comb == "") %>% print
