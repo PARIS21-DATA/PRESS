@@ -45,11 +45,11 @@ df_crs$db_ref <- with(df_crs,
 
 source("code/01.2 check uniqueness of db_ref.r")
 
-df_crs$db_ref = paste0("df_", source, df_crs$db_ref) %>% as.factor
+df_crs$db_ref = paste0("df_", df_crs$source, df_crs$db_ref) %>% as.factor
 
 df_crs <- df_crs %>%
   select(db_ref, process_id) %>%
-  inner_join(df_crs_raw)
+  inner_join(df_crs_raw, by = "process_id")
 rm(df_crs_raw)
 gc()
 
