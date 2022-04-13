@@ -33,7 +33,7 @@ df_crs <- df_crs %>%
   filter(!duplicated(title_id)) 
 
 # beep(4)
-list_keywords <- readLines("data/statistics_reduced.txt")  %>%
+list_keywords <- readLines("data/statistics_reduced_en.txt")  %>%
   trimws()
 list_keywords_stem <- stem_and_concatenate(list_keywords)
 
