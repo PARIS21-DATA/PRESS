@@ -15,3 +15,7 @@ data/raw/IATI
 # !data/intermediate/crs02.rds
 # !data/intermediate/crs03.rds
 
+# some additional lines added during the review process
+code/YTnewcodes
+data/data_sub
+data/intermediate/crs_filter_results.csv
