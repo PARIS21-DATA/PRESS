@@ -33,14 +33,14 @@ df_crs <- df_crs %>%
   filter(!duplicated(title_id)) 
 
 # beep(4)
-list_keywords <- readLines("data/statistics_reduced_en.txt")  %>%
+list_keywords_stat <- readLines("data/statistics_reduced_en.txt")  %>%
   trimws()
 
 list_keywords_gender <- readLines("data/gender_en.txt")  %>%
   trimws()
 
 
-list_keywords_stem <- stem_and_concatenate(list_keywords)
+list_keywords_stat_stem <- stem_and_concatenate(list_keywords_stat)
 list_keywords_gender_stem <- stem_and_concatenate(list_keywords_gender)
 
 
@@ -48,8 +48,8 @@ df_crs <- df_crs %>%
   # select(db_ref, projecttitle, scb) %>%
   # mutate(projecttitle = tolower(projecttitle)) %>%
   mutate(projecttitle_stem = stem_and_concatenate(projecttitle_lower)) %>%
-  mutate(text_detection = str_detect(projecttitle_lower, paste(list_keywords_stem, collapse = "|")))  %>%
-  mutate(text_detection_gender =str_detect(projecttitle_lower, paste(list_keywords_gender_stem, collapse = "|")) )
+  mutate(text_detection_stat = str_detect(projecttitle_stem, paste(list_keywords_stat_stem, collapse = "|")))  %>%
+  mutate(text_detection_gender =str_detect(projecttitle_stem, paste(list_keywords_gender_stem, collapse = "|")) )
 # 
 # tagged.results <- treetag(list_keywords, 
 #                           treetagger="manual", format="obj",
@@ -66,15 +66,14 @@ list_acronyms <- readLines("data/statistics_reduced_acronyms_en.txt")  %>%
   trimws()
 
 df_crs <- df_crs %>%
-  mutate(text_detection = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | text_detection)
+  mutate(text_detection_stat = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | text_detection_stat)
 
-
+#!!! Review until here
 
 
 
 df_crs <- df_crs %>%
-  mutate(text_detection_wo_mining = text_detection & !mining
-         ) %>%
+  mutate(text_detection_wo_mining = text_detection_stat & !mining) %>%
   select(-projecttitle_lower, -projecttitle_stem)
 
 df_crs <- left_join(df_crs_backup, df_crs)
@@ -92,8 +91,9 @@ table(df_crs$text_detection_wo_mining) %>% print
 table(df_crs$text_detection_wo_mining_w_scb) %>% print
 which(is.na(df_crs$text_detection_wo_mining_w_scb))
 
-df_crs <- df_crs %>%
-  mutate(text_filter_gender = gen_donor|gen_ppcode|gen_marker|text_detection_gender)
+#??? BUG: no gen_donor and gen_marker found 
+#df_crs <- df_crs %>%
+#  mutate(text_filter_gender = gen_donor|gen_ppcode|gen_marker|text_detection_gender)
 
 a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, text_detection_gender) %>% unique %>% nrow
 b = df_crs %>% select(text_id) %>% unique %>% nrow
@@ -107,3 +107,33 @@ names(df_crs)
 saveRDS(df_crs,file = crs_path_new)
 
 write.csv(df_crs, file = "data/intermediate/crs_filter_results.csv", row.names = F)
+
+
+
+####################################
+#!!! Lemmatization test
+
+library(text2vec)
+
+# Define function to create corpus
+create_df_corpus <- function (data){
+  source <- VectorSource(data$projecttitle)
+  corpus <- VCorpus(source) 
+  corpus <- tm_map(corpus, content_transformer(tolower)) # lower case
+  corpus <- tm_map(corpus, removeNumbers)# remove numbers
+  corpus <- tm_map(corpus, removePunctuation, preserve_intra_word_dashes = TRUE) # remove punctuation. We want to keep dashes inside words such as in high-level
+  corpus <- tm_map(corpus, stripWhitespace) # remove remaining white space
+  corpus <- tm_map(corpus, removeWords, c(stopwords('english'))) # remove stopwords for English
+  corpus <- tm_map(corpus, removeWords, c(stopwords(source = "smart"))) # remove some extra stopwords not captured by the previous list
+  corpus <- tm_map(corpus, removeWords, c("iii")) # remove roman number 3 that is very common
+  corpus <- tm_map(corpus, removeWords, c(stopwords("fr"))) # remove french stopwords
+  #corpus <- tm_map(corpus, replace_contraction) # extra step to catch exceptions such as "aren't" - might not be necessary
+  corpus <- tm_map(corpus, lemmatize_strings) # lemmatize words - this might not be the best choice in particular with a English-French language mix
+  corpus <- tm_map(corpus, PlainTextDocument) # transform into a format that can be used more easily later on
+  text_df <- t(data.frame(text = sapply(corpus, as.character), stringsAsFactors = FALSE))
+  rownames(text_df) <- NULL
+  return(text_df)
+}
+
+crs_corpus <- create_df_corpus(df_crs)
+df_crs$projettitle_cleaned <- crs_corpus[,1]

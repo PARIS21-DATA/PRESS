@@ -2,7 +2,8 @@ women
 female
 girl
 pregnant
-registr
 marriage
 birth
+gender
+sex
 social protection
