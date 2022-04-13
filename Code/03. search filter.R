@@ -35,13 +35,21 @@ df_crs <- df_crs %>%
 # beep(4)
 list_keywords <- readLines("data/statistics_reduced_en.txt")  %>%
   trimws()
+
+list_keywords_gender <- readLines("data/gender_en.txt")  %>%
+  trimws()
+
+
 list_keywords_stem <- stem_and_concatenate(list_keywords)
+list_keywords_gender_stem <- stem_and_concatenate(list_keywords_gender)
+
 
 df_crs <- df_crs %>%
   # select(db_ref, projecttitle, scb) %>%
   # mutate(projecttitle = tolower(projecttitle)) %>%
   mutate(projecttitle_stem = stem_and_concatenate(projecttitle_lower)) %>%
-  mutate(text_detection = str_detect(projecttitle_lower, paste(list_keywords_stem, collapse = "|"))) 
+  mutate(text_detection = str_detect(projecttitle_lower, paste(list_keywords_stem, collapse = "|")))  %>%
+  mutate(text_detection_gender =str_detect(projecttitle_lower, paste(list_keywords_gender_stem, collapse = "|")) )
 # 
 # tagged.results <- treetag(list_keywords, 
 #                           treetagger="manual", format="obj",
@@ -54,11 +62,14 @@ df_crs <- df_crs %>%
 df_crs$mining = grepl("land mine|small arm|demining|demine|landmine", df_crs$projecttitle_lower, ignore.case = T)
 
 
-list_acronyms <- readLines("data/statistics_reduced_acronyms.txt")  %>%
+list_acronyms <- readLines("data/statistics_reduced_acronyms_en.txt")  %>%
   trimws()
 
 df_crs <- df_crs %>%
   mutate(text_detection = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | text_detection)
+
+
+
 
 
 df_crs <- df_crs %>%
@@ -81,10 +92,18 @@ table(df_crs$text_detection_wo_mining) %>% print
 table(df_crs$text_detection_wo_mining_w_scb) %>% print
 which(is.na(df_crs$text_detection_wo_mining_w_scb))
 
+df_crs <- df_crs %>%
+  mutate(text_filter_gender = gen_donor|gen_ppcode|gen_marker|text_detection_gender)
 
-a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb) %>% unique %>% nrow
+a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, text_detection_gender) %>% unique %>% nrow
 b = df_crs %>% select(text_id) %>% unique %>% nrow
+
+
 
 print(paste0("There are ", a-b, " projects with same names but different purpose code"))
 
+names(df_crs)
+
 saveRDS(df_crs,file = crs_path_new)
+
+write.csv(df_crs, file = "data/intermediate/crs_filter_results.csv", row.names = F)
