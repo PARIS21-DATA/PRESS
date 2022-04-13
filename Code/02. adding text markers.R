@@ -7,17 +7,19 @@ crs_path <- "./Data/intermediate/crs01_1.rds"
 crs_path_new <- "./Data/intermediate/crs02.rds"
 df_crs_raw <- readRDS(crs_path)
 rm(crs_path)
-
+names(df_crs_raw)
 cols_needed <- c("process_id", 
                  "projecttitle", 
                  "shortdescription", 
                  "longdescription", 
-                 "purposecode")
+                 "purposecode", 
+                 "donorname", 
+                 "gender")
 
 
 # every step, we try to use a subset of the data to make the process quicker
 df_crs_raw <- df_crs_raw %>%
-  select(cols_needed) 
+  select(all_of(cols_needed)) 
 
 df_crs <- df_crs_raw %>%
   mutate(description_comb = paste(projecttitle, 
@@ -30,7 +32,9 @@ df_crs <- df_crs_raw %>%
   ## add SCB identifier
   mutate(scb = ifelse(purposecode==16062,1,0), 
          pop = ifelse(purposecode==13010,1,0),
-         gen_ppcode = ifelse(purposecode %in% c(15170:15180), 1, 0)
+         gen_ppcode = (purposecode %in% c(15170:15180)), 
+         gen_donor = (donorname == "UN Women"), 
+         gen_marker = (gender %in% c(1, 2) & (!is.na(gender)))
          ) %>%
   select(-cols_needed[which(!cols_needed %in% c("process_id", "longdescription"))])
 
@@ -56,7 +60,7 @@ rm(df_crs_raw)
 which(is.na(df_crs$description_comb)) %>% print 
 which(df_crs$description_comb == "") %>% print
 table(df_crs$language) %>% print 
-
+names(df_crs)
 #Output::
 saveRDS(df_crs, file=crs_path_new)
 
