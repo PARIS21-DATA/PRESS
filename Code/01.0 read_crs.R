@@ -5,15 +5,19 @@
 rm(list = ls())
 gc()
 
+# Paths to raw data
 crs_zip_folder <-  "./Data/Raw/CRS/zip"
 crs_txt_folder <-  "./Data/Raw/CRS/txt"
 
+# Extract .zip files that were prviously downloaded into txt folder
 crs_zip_files <- paste(crs_zip_folder, list.files(crs_zip_folder), sep = "/")
-lapply(crs_zip_files, unzip,overwrite = T, exdir = crs_txt_folder)
+lapply(crs_zip_files, unzip, overwrite = T, exdir = crs_txt_folder)
 rm(crs_zip_folder, crs_zip_files)
 
+# Add directory names to .txt files
 crs_txt_files <- paste(crs_txt_folder, list.files(crs_txt_folder), sep = "/")
 
+# Read crs data from .txt files and store each as an entry of list_crs
 list_crs <- lapply( crs_txt_files, read.csv , sep = "|", header = T, stringsAsFactors = F, encoding = "utf-8" )
 beep()
 
@@ -31,6 +35,7 @@ beep()
 # rm(df_crs, df)
 # gc()
 
+# Merge all crs from different years into one data frame
 start <- Sys.time()
 df_crs <-  rbind(list_crs[[1]], 
                list_crs[[2]], 
@@ -60,6 +65,8 @@ df_crs$process_id <- row.names(df_crs)
 
 saveRDS(df_crs, file  = "./Data/Raw/CRS/crs_full.rds")
 beep(2)
+
+# Take a sample of the entire data frame for further testing 
 df_crs_sample <- df_crs[sample(nrow(df_crs),nrow(df_crs)/40 ), ]
 rm(df_crs)
 df_crs <- df_crs_sample

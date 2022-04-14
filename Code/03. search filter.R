@@ -68,8 +68,6 @@ list_acronyms <- readLines("data/statistics_reduced_acronyms_en.txt")  %>%
 df_crs <- df_crs %>%
   mutate(text_detection_stat = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | text_detection_stat)
 
-#!!! Review until here
-
 
 
 df_crs <- df_crs %>%
