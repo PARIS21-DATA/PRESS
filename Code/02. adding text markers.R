@@ -106,7 +106,8 @@ tab_tmp <- tab %>%
 # Fraction of projects in de and nl (two most detected after en/fr/es)
 sum(tab_tmp %>% filter(language == "de" | language == "nl") %>% pull(frac_deepl), na.rm = TRUE)
 
-# Approximate costs of deepL full translation/detection (including english and french) - question: does quota apply to language detection?
-nchar(paste(df_crs$longdescription, collapse = "")) * 0.00002 * 40
+# Approximate costs of deepL full translation/detection (excluding en/fr/es) from 
+# available languages - question: does quota apply to language detection?
+nchar(paste(df_crs %>% filter(language %in% lang_deepl$language & !(language %in% c("en", "fr", "es"))) %>% pull(longdescription) , collapse = "")) * 0.00002 * 40
 
 

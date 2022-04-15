@@ -38,6 +38,29 @@ list_keywords_stat <- readLines("data/statistics_reduced_en.txt")  %>%
 list_keywords_gender <- readLines("data/gender_en.txt")  %>%
   trimws()
 
+# Libraries for lemmatization
+library(text2vec)
+library(tm)
+library(textstem)
+library(textcat)
+library(textclean)
+library(lexicon)
+library(quanteda) 
+
+# Function to clean strings and lemmatize
+clean_and_lemmatize <- function (string){
+  string <- string %>% 
+    tolower %>% 
+    removeNumbers() %>%
+    removePunctuation(preserve_intra_word_dashes = TRUE) %>%
+    stripWhitespace %>%
+    removeWords(c(stopwords('english'))) %>% 
+    removeWords(c(stopwords(source = "smart"))) %>%
+    lemmatize_strings()
+  return(string)
+}
+
+# Lemmatize or stem keywords 
 list_keywords_stat_stem <- stem_and_concatenate(list_keywords_stat)
 list_keywords_gender_stem <- stem_and_concatenate(list_keywords_gender)
 list_keywords_stat <- clean_and_lemmatize(list_keywords_stat)
@@ -63,30 +86,27 @@ df_crs <- df_crs %>%
 #                           # ,
 #                           # TT.options=list(path="./TreeTagger", preset="en")
 #                           )
-beep(2)
 
-library(xlsx)
-write.xlsx2(df_crs, file = paste0(getwd(), "/Tmp/crs_text_detection_comp.xlsx"), row.names = FALSE)
-
-mutual_match <- df_crs %>% filter(match_stat_lemma == TRUE & match_stat_stem == FALSE)
+#library(openxlsx)
+#openxlsx::write.xlsx(df_crs, file = paste0(getwd(), "/Tmp/crs_text_detection_comp.xlsx"), rowNames = FALSE)
 
 df_crs$mining = grepl("land mine|small arm|demining|demine|landmine", df_crs$projecttitle_lower, ignore.case = T)
-
 
 list_acronyms <- readLines("data/statistics_reduced_acronyms_en.txt")  %>%
   trimws()
 
 df_crs <- df_crs %>%
-  mutate(text_detection_stat = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | text_detection_stat)
+  mutate(match_stat_stem = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | match_stat_stem)
 
+# Number of detected projects 
 sum(df_crs$match_stat_lemma)
 sum(df_crs$match_stat_lemma_long)
-sum(df_crs$match_stat_stem)
-sum(df_crs$match_stat_stem)
+sum(df_crs$match_gender_lemma)
+sum(df_crs$match_gender_stem)
 
 
 df_crs <- df_crs %>%
-  mutate(text_detection_wo_mining = text_detection_stat & !mining) %>%
+  mutate(text_detection_wo_mining = match_stat_stem & !mining) %>%
   select(-projecttitle_lower, -projecttitle_stem)
 
 df_crs <- left_join(df_crs_backup, df_crs)
@@ -104,13 +124,12 @@ table(df_crs$text_detection_wo_mining) %>% print
 table(df_crs$text_detection_wo_mining_w_scb) %>% print
 which(is.na(df_crs$text_detection_wo_mining_w_scb))
 
-#??? BUG: no gen_donor and gen_marker found 
+#??? PROBLEM: no gen_donor and gen_marker found 
 #df_crs <- df_crs %>%
 #  mutate(text_filter_gender = gen_donor|gen_ppcode|gen_marker|text_detection_gender)
 
-a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, text_detection_gender) %>% unique %>% nrow
+a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, match_gender_stem) %>% unique %>% nrow
 b = df_crs %>% select(text_id) %>% unique %>% nrow
-
 
 
 print(paste0("There are ", a-b, " projects with same names but different purpose code"))
@@ -134,7 +153,8 @@ library(textclean)
 library(lexicon)
 library(quanteda) # for stopwords(source = "smart")
 
-# Define function to create corpus
+# Define function to create corpus, employs way through corpus whereas clean_and_lemmatize()
+# does not create a corpus first
 create_df_corpus <- function (data){
   source <- VectorSource(data$projecttitle_lower)
   corpus <- VCorpus(source) 
@@ -154,31 +174,6 @@ create_df_corpus <- function (data){
   return(text_df)
 }
 
-sample_df <- data.frame(projecttitle = c("dsdsds is day 222", "on wone in capacity"),
-                        id = c(1, 2))
-my_corpus <- create_df_corpus(df_crs)
-beep(2)
-
-clean_and_lemmatize <- function (string){
-  string <- string %>% 
-    tolower %>% 
-    removeNumbers() %>%
-    removePunctuation(preserve_intra_word_dashes = TRUE) %>%
-    stripWhitespace %>%
-    removeWords(c(stopwords('english'))) %>% 
-    removeWords(c(stopwords(source = "smart"))) %>%
-    lemmatize_strings()
-  return(string)
-}
-
-clean_descriptions("dsdsds is day 222 on wone in capacity")
-
-clean_descriptions(df_crs$projecttitle_lower[9])
-
-df_crs_tmp <- df_crs %>%
-  mutate(projecttitle_lemma = clean_descriptions(projecttitle_lower))
-
-is.atomic(c("dsdsds is day 222", "on wone in capacity"))
 
 crs_corpus <- create_df_corpus(df_crs)
 beep(2)
