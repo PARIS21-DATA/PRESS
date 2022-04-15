@@ -58,15 +58,21 @@ df_crs <- df_crs %>%
 #                           # TT.options=list(path="./TreeTagger", preset="en")
 #                           )
 
+list_blacklist <- readLines("data/blacklist_en.txt")  %>%
+  trimws()
 
-df_crs$mining = grepl("land mine|small arm|demining|demine|landmine", df_crs$projecttitle_lower, ignore.case = T)
+list_blacklist <- paste0(" ", list_blacklist, " ")
 
 
 list_acronyms <- readLines("data/statistics_reduced_acronyms_en.txt")  %>%
   trimws()
+list_acronyms <- paste0(" ", list_acronyms, " ")
 
 df_crs <- df_crs %>%
-  mutate(text_detection = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | text_detection)
+  mutate(projecttitle_lower = paste0(" ", projecttitle_lower, " ")) %>%
+  mutate(mining = str_detect(projecttitle_lower, paste(list_blacklist, collapse = "|")) ) %>%
+  mutate(text_detection = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | text_detection) 
+
 
 
 df_crs <- df_crs %>%
