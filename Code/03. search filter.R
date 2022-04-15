@@ -48,8 +48,8 @@ df_crs <- df_crs %>%
   # select(db_ref, projecttitle, scb) %>%
   # mutate(projecttitle = tolower(projecttitle)) %>%
   mutate(projecttitle_stem = stem_and_concatenate(projecttitle_lower)) %>%
-  mutate(text_detection = str_detect(projecttitle_lower, paste(list_keywords_stem, collapse = "|")))  %>%
-  mutate(text_detection_gender =str_detect(projecttitle_lower, paste(list_keywords_gender_stem, collapse = "|")) )
+  mutate(text_detection = str_detect(projecttitle_stem, paste(list_keywords_stem, collapse = "|")))  %>%
+  mutate(text_detection_gender =str_detect(projecttitle_stem, paste(list_keywords_gender_stem, collapse = "|")) )
 # 
 # tagged.results <- treetag(list_keywords, 
 #                           treetagger="manual", format="obj",
@@ -69,9 +69,6 @@ df_crs <- df_crs %>%
   mutate(text_detection = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | text_detection)
 
 
-
-
-
 df_crs <- df_crs %>%
   mutate(text_detection_wo_mining = text_detection & !mining
          ) %>%
@@ -84,7 +81,7 @@ rm(df_crs_backup)
 langues <- c("en","fr","es")
 df_crs <- df_crs %>%
   select(-projecttitle_lower) %>%
-  mutate(language = ifelse(language %in% langues, language, "other"))
+  mutate(language = ifelse(language %in% langues, language, "other") )
 
 df_crs <- df_crs %>%
   mutate( text_detection_wo_mining_w_scb = text_detection_wo_mining | scb)
