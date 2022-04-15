@@ -12,9 +12,9 @@ stem_and_concatenate <- function(x_string){
     group_by(ref) %>%
     summarise(text_stem = paste(stem, collapse = " ")) %>%
     right_join(df_string) %>%
-    mutate(text_stem = ifelse(is.na(text_stem), text, text_stem)) %>% # there are some empty titles
+    mutate(text_stem = ifelse(is.na(text_stem), text, text_stem),
+           text_stem = paste0(" ", text_stem, " ")) %>% # there are some empty titles
     arrange(ref) %>%
     .$text_stem
-  
   return(x_string_stem)  
 }
