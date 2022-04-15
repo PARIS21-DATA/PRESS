@@ -22,10 +22,6 @@ cols_needed <- c("process_id",
 df_crs_CAN <- df_crs_raw %>%
   select(cols_needed) %>%
   filter(donorname == "Canada") %>%
-  separate(projecttitle, into = c("projecttitle", "projecttitle_fr"), sep = " / ", fill = "right", extra = "drop") %>%
-  separate(shortdescription, into = c("shortdescription", "shortdescription_fr"), sep = " / ", fill = "right", extra = "drop") %>%
-  separate(longdescription, into = c("longdescription", "longdescription_fr"), sep = " / ", fill = "right", extra = "drop") %>%
-  mutate(longdescription_fr = NULL, shortdescription_fr = NULL, projecttitle_fr = NULL) %>%
   separate(projecttitle, into = c("projecttitle", "projecttitle_fr"), sep = "/", fill = "right", extra = "drop") %>%
   separate(shortdescription, into = c("shortdescription", "shortdescription_fr"), sep = "/", fill = "right", extra = "drop") %>%
   separate(longdescription, into = c("longdescription", "longdescription_fr"), sep = "/", fill = "right", extra = "drop") %>%

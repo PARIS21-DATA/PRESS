@@ -28,28 +28,34 @@ df_crs <- df_crs %>%
 df_crs_backup <- df_crs
 
 
-df_crs <- df_crs %>%
-  select(title_id, projecttitle_lower) %>%
+df_crs <- df_crs_backup %>%
+  select(title_id, projecttitle_lower, longdescription) %>%
   filter(!duplicated(title_id)) 
 
 # beep(4)
 list_keywords_stat <- readLines("data/statistics_reduced_en.txt")  %>%
   trimws()
-
 list_keywords_gender <- readLines("data/gender_en.txt")  %>%
   trimws()
 
-
 list_keywords_stat_stem <- stem_and_concatenate(list_keywords_stat)
 list_keywords_gender_stem <- stem_and_concatenate(list_keywords_gender)
+list_keywords_stat <- clean_and_lemmatize(list_keywords_stat)
+list_keywords_gender <- clean_and_lemmatize(list_keywords_gender)
 
 
 df_crs <- df_crs %>%
   # select(db_ref, projecttitle, scb) %>%
   # mutate(projecttitle = tolower(projecttitle)) %>%
+  mutate(projecttitle_clean = clean_and_lemmatize(projecttitle_lower),
+         longdescription_clean = clean_and_lemmatize(longdescription)) %>%
+  mutate(match_stat_lemma = str_detect(projecttitle_clean, paste(list_keywords_stat, collapse = "|")),
+         match_gender_lemma = str_detect(projecttitle_clean, paste(list_keywords_gender, collapse = "|"))) %>%
+  mutate(match_stat_lemma_long = str_detect(longdescription_clean, paste(list_keywords_stat, collapse = "|")),
+         match_gender_lemma_long = str_detect(longdescription_clean, paste(list_keywords_gender, collapse = "|"))) %>%
   mutate(projecttitle_stem = stem_and_concatenate(projecttitle_lower)) %>%
-  mutate(text_detection_stat = str_detect(projecttitle_stem, paste(list_keywords_stat_stem, collapse = "|")))  %>%
-  mutate(text_detection_gender =str_detect(projecttitle_stem, paste(list_keywords_gender_stem, collapse = "|")) )
+  mutate(match_stat_stem = str_detect(projecttitle_stem, paste(list_keywords_stat_stem, collapse = "|")))  %>%
+  mutate(match_gender_stem =str_detect(projecttitle_stem, paste(list_keywords_gender_stem, collapse = "|")) )
 # 
 # tagged.results <- treetag(list_keywords, 
 #                           treetagger="manual", format="obj",
@@ -57,7 +63,12 @@ df_crs <- df_crs %>%
 #                           # ,
 #                           # TT.options=list(path="./TreeTagger", preset="en")
 #                           )
+beep(2)
 
+library(xlsx)
+write.xlsx2(df_crs, file = paste0(getwd(), "/Tmp/crs_text_detection_comp.xlsx"), row.names = FALSE)
+
+mutual_match <- df_crs %>% filter(match_stat_lemma == TRUE & match_stat_stem == FALSE)
 
 df_crs$mining = grepl("land mine|small arm|demining|demine|landmine", df_crs$projecttitle_lower, ignore.case = T)
 
@@ -68,6 +79,10 @@ list_acronyms <- readLines("data/statistics_reduced_acronyms_en.txt")  %>%
 df_crs <- df_crs %>%
   mutate(text_detection_stat = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | text_detection_stat)
 
+sum(df_crs$match_stat_lemma)
+sum(df_crs$match_stat_lemma_long)
+sum(df_crs$match_stat_stem)
+sum(df_crs$match_stat_stem)
 
 
 df_crs <- df_crs %>%
@@ -112,10 +127,16 @@ write.csv(df_crs, file = "data/intermediate/crs_filter_results.csv", row.names =
 #!!! Lemmatization test
 
 library(text2vec)
+library(tm)
+library(textstem)
+library(textcat)
+library(textclean)
+library(lexicon)
+library(quanteda) # for stopwords(source = "smart")
 
 # Define function to create corpus
 create_df_corpus <- function (data){
-  source <- VectorSource(data$projecttitle)
+  source <- VectorSource(data$projecttitle_lower)
   corpus <- VCorpus(source) 
   corpus <- tm_map(corpus, content_transformer(tolower)) # lower case
   corpus <- tm_map(corpus, removeNumbers)# remove numbers
@@ -123,8 +144,8 @@ create_df_corpus <- function (data){
   corpus <- tm_map(corpus, stripWhitespace) # remove remaining white space
   corpus <- tm_map(corpus, removeWords, c(stopwords('english'))) # remove stopwords for English
   corpus <- tm_map(corpus, removeWords, c(stopwords(source = "smart"))) # remove some extra stopwords not captured by the previous list
-  corpus <- tm_map(corpus, removeWords, c("iii")) # remove roman number 3 that is very common
-  corpus <- tm_map(corpus, removeWords, c(stopwords("fr"))) # remove french stopwords
+  #corpus <- tm_map(corpus, removeWords, c("iii")) # remove roman number 3 that is very common
+  #corpus <- tm_map(corpus, removeWords, c(stopwords("fr"))) # remove french stopwords
   #corpus <- tm_map(corpus, replace_contraction) # extra step to catch exceptions such as "aren't" - might not be necessary
   corpus <- tm_map(corpus, lemmatize_strings) # lemmatize words - this might not be the best choice in particular with a English-French language mix
   corpus <- tm_map(corpus, PlainTextDocument) # transform into a format that can be used more easily later on
@@ -133,5 +154,36 @@ create_df_corpus <- function (data){
   return(text_df)
 }
 
+sample_df <- data.frame(projecttitle = c("dsdsds is day 222", "on wone in capacity"),
+                        id = c(1, 2))
+my_corpus <- create_df_corpus(df_crs)
+beep(2)
+
+clean_and_lemmatize <- function (string){
+  string <- string %>% 
+    tolower %>% 
+    removeNumbers() %>%
+    removePunctuation(preserve_intra_word_dashes = TRUE) %>%
+    stripWhitespace %>%
+    removeWords(c(stopwords('english'))) %>% 
+    removeWords(c(stopwords(source = "smart"))) %>%
+    lemmatize_strings()
+  return(string)
+}
+
+clean_descriptions("dsdsds is day 222 on wone in capacity")
+
+clean_descriptions(df_crs$projecttitle_lower[9])
+
+df_crs_tmp <- df_crs %>%
+  mutate(projecttitle_lemma = clean_descriptions(projecttitle_lower))
+
+is.atomic(c("dsdsds is day 222", "on wone in capacity"))
+
 crs_corpus <- create_df_corpus(df_crs)
-df_crs$projettitle_cleaned <- crs_corpus[,1]
+beep(2)
+
+df_crs_tmp <- df_crs %>%
+  select(title_id, projecttitle_lower, projecttitle_clean, projecttitle_stem)
+
+df_crs_tmp$projettitle_corpus <- crs_corpus[,1]
