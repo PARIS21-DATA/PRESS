@@ -51,11 +51,12 @@ library(quanteda)
 clean_and_lemmatize <- function (string){
   string <- string %>% 
     tolower %>% 
+    removeWords("'s") %>% # remove possesive s so that plural nouns get lemmatized correctly, e.g. "women's"
     removeNumbers() %>%
     removePunctuation(preserve_intra_word_dashes = TRUE) %>%
     stripWhitespace %>%
     removeWords(c(stopwords('english'))) %>% 
-    removeWords(c(stopwords(source = "smart"))) %>%
+    removeWords(c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) %>% # exclude "use" from smart stopwords 
     lemmatize_strings()
   return(string)
 }
@@ -65,6 +66,7 @@ list_keywords_stat_stem <- stem_and_concatenate(list_keywords_stat)
 list_keywords_gender_stem <- stem_and_concatenate(list_keywords_gender)
 list_keywords_stat <- clean_and_lemmatize(list_keywords_stat)
 list_keywords_gender <- clean_and_lemmatize(list_keywords_gender)
+list_keywords_gender <- list_keywords_gender %>% append("women") # due to many spelling mistakes like women_s, women?s...
 
 
 df_crs <- df_crs %>%
@@ -78,7 +80,7 @@ df_crs <- df_crs %>%
          match_gender_lemma_long = str_detect(longdescription_clean, paste(list_keywords_gender, collapse = "|"))) %>%
   mutate(projecttitle_stem = stem_and_concatenate(projecttitle_lower)) %>%
   mutate(match_stat_stem = str_detect(projecttitle_stem, paste(list_keywords_stat_stem, collapse = "|")))  %>%
-  mutate(match_gender_stem =str_detect(projecttitle_stem, paste(list_keywords_gender_stem, collapse = "|")) )
+  mutate(match_gender_stem = str_detect(projecttitle_stem, paste(list_keywords_gender_stem, collapse = "|")) )
 # 
 # tagged.results <- treetag(list_keywords, 
 #                           treetagger="manual", format="obj",
