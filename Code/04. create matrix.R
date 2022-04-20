@@ -30,6 +30,7 @@ df_crs_0 <- df_crs %>%
 # which(df_crs_0$text_id %in% df_crs_1$text_id)
 ## 3.b. merge back by projectID to reverse previous split of project by language
 
+#??? Why not remove all rows with empty "text" first?
 df_crs_1 <- df_crs_1 %>% 
   group_by(text_id) %>% 
   summarise(description = paste(text, collapse=". ")) %>%
@@ -82,21 +83,26 @@ list_high_freq_words_0 <- DTM(corpus_crs_0 , Min=Min.1, Max=1)$dimnames$Terms %>
 myDict = myDict[!(myDict %in% list_high_freq_words_0)]
 myDict = unique(c(myDict, dict_lang))
 
+# Frequency how often words present in myDict appear in each document, count = total appearances
 freq = DTM(corpus_crs_1, dict =myDict) %>%
   tidy %>%
   group_by(document) %>%
   summarise(count = sum(count))
 
+# Count all words in corpus 1 
+#??? PROBLEM: "\\S+" counts all sequences of at leat 1 none whitespaces, are all punctuation marks removed, abbreviations (e.g. ex ...)?
 nwords1 = tidy(corpus_crs_1) %>%
   select(text, document = id) %>%
-  mutate(total = str_count(string = text, pattern = "\\S+") ) %>%
+  mutate(total = str_count(string = text, pattern = "\\S+") ) %>% # count all words 
   select(-text)
 
+# Add fraction of stat words of total amount of words 
 nwords1 = nwords1 %>%
   left_join(freq) %>%
   mutate(count = ifelse(is.na(count), 0, count)) %>%
   mutate(percentage = count/total) 
 
+# Determine freshhold as mean fraction of statistical words in stat corpus 
 threshold = nwords1 %>%
   filter(count > 0) %>%
   .$percentage %>%
@@ -122,8 +128,8 @@ dtm_crs_0 <- DTM(corpus_crs_0, dict=myDict)
 
 list_identified = tidy(dtm_crs_0) %>%
   group_by(document) %>%
-  summarise(count = sum(count)) %>%
-  inner_join(nwords0) %>%
+  summarise(count = sum(count)) %>% # summ all occurances of stat words in each document
+  inner_join(nwords0) %>% # nwords0 contains total number of words in description for each document
   mutate(percentage  = count/total) %>%
   filter(percentage > threshold) %>%
   .$document %>%
@@ -133,7 +139,22 @@ positive_text_id = df_crs_0 %>%
   mutate(document = 1:nrow(df_crs_0)) %>%
   filter(document %in% list_identified) %>%
   .$text_id 
+  
+#!!! ADDED: comparison project descriptions, stat word count
+list_identified_df = tidy(dtm_crs_0) %>%
+  group_by(document) %>%
+  summarise(count = sum(count)) %>% # summ all occurances of stat words in each document
+  inner_join(nwords0) %>% # nwords0 contains total number of words in description for each document
+  mutate(percentage  = count/total) %>%
+  filter(percentage > threshold) %>%
+  mutate(document = as.integer(document))
 
+positive_text_id_comp = df_crs_0 %>%
+  mutate(document = 1:nrow(df_crs_0)) %>%
+  filter(document %in% list_identified) %>%
+  select(text_id, document, description) %>%
+  left_join(list_identified_df, by = "document")
+  
 
 saveRDS(positive_text_id, file = crs_path_new)
 
