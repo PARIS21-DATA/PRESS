@@ -20,7 +20,7 @@ cols_needed <- c("process_id",
 # Dop french part of the canadian project titles/descriptions since they are in 
 # the format "Englisch / French", double filtering since format "English/French" is also present
 df_crs_CAN <- df_crs_raw %>%
-  select(cols_needed) %>%
+  select(all_of(cols_needed)) %>%
   filter(donorname == "Canada") %>%
   separate(projecttitle, into = c("projecttitle", "projecttitle_fr"), sep = "/", fill = "right", extra = "drop") %>%
   separate(shortdescription, into = c("shortdescription", "shortdescription_fr"), sep = "/", fill = "right", extra = "drop") %>%
