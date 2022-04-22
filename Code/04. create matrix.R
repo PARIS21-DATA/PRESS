@@ -155,6 +155,13 @@ positive_text_id_comp = df_crs_0 %>%
   select(text_id, document, description) %>%
   left_join(list_identified_df, by = "document")
   
+df_corpus_crs_0 <- tidy(corpus_crs_0) %>%
+  select(document = id, text) %>% 
+  mutate(document = as.integer(document)) %>%
+  left_join(positive_text_id_comp, by = "document") %>%
+  mutate(dtm_match = ifelse(is.na(text_id), FALSE, TRUE)) #%>%
+  # mutate(discription = ifelse(is.na(description), unlist(preprocessingV(text, language = "en"))[[1]], description))
+
 
 saveRDS(positive_text_id, file = crs_path_new)
 
