@@ -162,6 +162,9 @@ df_corpus_crs_0 <- tidy(corpus_crs_0) %>%
   mutate(dtm_match = ifelse(is.na(text_id), FALSE, TRUE)) #%>%
   # mutate(discription = ifelse(is.na(description), unlist(preprocessingV(text, language = "en"))[[1]], description))
 
+library(openxlsx)
+openxlsx::write.xlsx(df_corpus_crs_0, file = paste0(getwd(), "/Tmp/dtm_results_comp.xlsx"), rowNames = FALSE)
+
 
 saveRDS(positive_text_id, file = crs_path_new)
 
