@@ -1,4 +1,3 @@
-
 rm(list = ls())
 source("code/00.1 functions.R")
 crs_path_new <- "./Data/intermediate/crs03.rds"
@@ -103,6 +102,7 @@ df_crs <- df_crs %>%
 
 # Number of detected projects 
 sum(df_crs$match_stat_lemma)
+sum(df_crs$match_stat_stem)
 sum(df_crs$match_stat_lemma_long)
 sum(df_crs$match_gender_lemma)
 sum(df_crs$match_gender_stem)

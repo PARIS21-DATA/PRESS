@@ -4,12 +4,12 @@ census
 database
 big data
 data for decisions
-civil registr
-land registr 
+civil regist
+land regist 
 cadaster
 sdg indicator
 information system 
-birth registr
+birth register
 national account
 price index 
 production index
@@ -29,7 +29,7 @@ data collection
 action through data
 data project
 open government data
-death regis
+death regist
 vital registration
 data portal
 data archive
