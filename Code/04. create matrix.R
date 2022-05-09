@@ -148,7 +148,8 @@ list_identified_df = tidy(dtm_crs_0) %>%
   mutate(percentage  = count/total) %>%
   mutate(dtm_match = ifelse(percentage > threshold, TRUE, FALSE)) %>%
   #filter(percentage > threshold) %>%
-  mutate(document = as.integer(document))
+  mutate(document = as.integer(document)) %>%
+  select(document, count)
 
 positive_text_id_comp = df_crs_0 %>%
   mutate(document = 1:nrow(df_crs_0)) %>%
@@ -162,29 +163,36 @@ df_corpus_crs_0 <- tidy(corpus_crs_0) %>%
   left_join(positive_text_id_comp, by = "document") %>%
   mutate(dtm_match = ifelse(is.na(text_id), FALSE, TRUE))
 
+df_crs_0_hist <- df_crs_0 %>%
+  mutate(document = 1:nrow(df_crs_0)) %>%
+  inner_join(nwords0 %>% mutate(document = as.integer(document)), by = "document") %>%
+  left_join(list_identified_df, by = "document") %>%
+  mutate(count = ifelse(is.na(count), 0, count)) %>%
+  mutate(percentage  = count/total) %>%
+  mutate(dtm_match = ifelse(percentage > threshold, TRUE, FALSE)) 
 
-hist_word_count_distr <- ggplot(list_identified_df, aes(x = total, fill = dtm_match)) + 
+# Histograms of word distributions
+hist_word_count_distr <- ggplot(df_crs_0_hist, aes(x = total, fill = dtm_match)) + 
   geom_histogram(binwidth = 2) + 
   xlab("Number of words in description combination") +
   ylab("Number of documents") + 
   ggtitle("Word distribution with binwidth 2 for all documents with at least one stat keyword in description combination")
-ggsave("./Tmp/word_distribution.pdf")
-hist_word_count_zoom <- ggplot(list_identified_df, aes(x = total, fill = dtm_match)) + 
+ggsave("./Tmp/word_distribution_all_docs.pdf", width = 9, height = 7)
+hist_word_count_zoom <- ggplot(df_crs_0_hist, aes(x = total, fill = dtm_match)) + 
   geom_histogram(binwidth = 1) + 
   xlim(0,50) + 
   xlab("Number of words in description combination") +
   ylab("Number of documents") + 
   ggtitle("Word distribution with binwidth 1 for all documents with at least one stat keyword in description combination")
-ggsave("./Tmp/word_distribution_zoom_x.pdf", width = 7, height = 7)
-hist_word_count_zoom_y <- ggplot(list_identified_df, aes(x = total, fill = dtm_match)) + 
-  geom_histogram(binwidth = 2) + 
+ggsave("./Tmp/word_distribution_zoom_x_all_docs.pdf", width = 7, height = 7)
+hist_word_count_zoom_y <- ggplot(df_crs_0_hist, aes(x = total, fill = dtm_match)) + 
+  geom_histogram(binwidth = 1) + 
   coord_cartesian(
-    xlim = NULL,
-    ylim = c(0, 50)) +
+    ylim = c(0, 20)) +
   xlab("Number of words in description combination") +
   ylab("Number of documents") + 
   ggtitle("Word distribution with binwidth 1 for all documents with at least one stat keyword in description combination")
-ggsave("./Tmp/word_distribution_zoom_y.pdf", width = 7, height = 7)
+ggsave("./Tmp/word_distribution_zoom_y_all_docs.pdf", width = 10, height = 5)
 
 #library(openxlsx)
 #openxlsx::write.xlsx(df_corpus_crs_0, file = paste0(getwd(), "/Tmp/dtm_results_comp.xlsx"), rowNames = FALSE)

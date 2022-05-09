@@ -38,11 +38,9 @@ df_crs_raw <- df_crs_raw %>%
   rbind(df_crs_CAN)
 rm(df_crs_CAN)
 
-install.packages("stringdist")
+#install.packages("stringdist")
 library(stringdist)
 library(tm)
-
-stringdist(df_crs$projecttitle[33], df_crs$longdescription[33])
 
 clean_titles <- function(title){
   title <- title %>% 
@@ -54,7 +52,7 @@ clean_titles <- function(title){
 
 # Create a unique text_id that is made from the combination of the project title, 
 # short description and the long description
-max_string_dist <- 5
+max_string_dist <- 10
 df_crs <- df_crs_raw %>%
   mutate(projecttitle = clean_titles(projecttitle),
          shortdescription = clean_titles(shortdescription),
@@ -65,8 +63,8 @@ df_crs <- df_crs_raw %>%
   mutate(description_comb = ifelse(stringdist(description_comb, longdescription) < max_string_dist, 
                                    description_comb, 
                                    paste(description_comb, longdescription, sep = ". "))) %>%
-  mutate(string_dist = stringdist(tolower(projecttitle), tolower(shortdescription)))
-  mutate(text_id = as.numeric(as.factor(description_comb))) #%>%
+  mutate(string_dist_title_short = stringdist(tolower(projecttitle), tolower(shortdescription))) %>%
+  mutate(text_id = as.numeric(as.factor(description_comb))) %>%
   ## add SCB identifier
   mutate(scb = ifelse(purposecode==16062,1,0), 
          pop = ifelse(purposecode==13010,1,0),
