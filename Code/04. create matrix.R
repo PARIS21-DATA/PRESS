@@ -58,6 +58,15 @@ Min.0 <- 0.1
 
 corpus_crs_1 <- preprocessingV(df_crs_1$description, language=language)
 dtm_crs_1 <- DTM(corpus_crs_1, Min=Min.1, Max=1)
+
+freq_all1 <- DTM(corpus_crs_1) %>% 
+  tidy(dtm_crs_1_all) %>%
+  group_by(term) %>%
+  summarise(cnt = sum(count)) %>%
+  ungroup() %>%
+  mutate(total = sum(cnt)) %>%
+  mutate(freq = cnt / total)
+
 myDict <- dtm_crs_1$dimnames$Terms 
 
 # myDict = unique(c(myDict, dict_lang))
@@ -66,11 +75,46 @@ myDict <- dtm_crs_1$dimnames$Terms
 # save(dtm_crs_1, file = "dtm_crs_1_en_2021.Rds")
 
 corpus_crs_0 <- preprocessingV(df_crs_0$description, language=language)
+freq_all0 <- DTM(corpus_crs_0) %>% 
+  tidy() %>%
+  group_by(term) %>%
+  summarise(cnt = sum(count)) %>%
+  ungroup() %>%
+  mutate(total = sum(cnt)) %>%
+  mutate(freq = cnt / total)
+beepr::beep(2)
+
+
+freq_all_1_0 = right_join(freq_all0, freq_all1, by = "term") %>%
+  mutate(odds = freq.x/freq.y) %>%
+  arrange(desc(odds), desc(freq.y))
+
+### filter standards
+# freq_1 cut off
+cutoff_freq1 = 0.001
+cutoff_odds = 0.1
+  
+
+dict_it_idf= freq_all_1_0 %>% 
+  filter(freq.y > cutoff_freq1, 
+         odds < cutoff_odds) %>%
+  # slice(1:100) %>% 
+  .$term
+
+dict_it_idf %in% myDict
+
+freq0 = DTM(corpus_crs_0, dict =myDict) %>%
+  tidy %>%
+  group_by(document) %>%
+  summarise(count = sum(count))
+
 # inspect(corpus_crs_0)
 nwords0 = tidy(corpus_crs_0) %>%
   select(text, document = id) %>%
   mutate(total = str_count(string = text, pattern = "\\S+") ) %>%
   select(-text)
+
+
 # nwords[which(nwords != nwords0 )] 
 # nwords0[which(nwords != nwords0 )]
 dtm_crs_0 <- DTM(corpus_crs_0, dict = myDict)
@@ -78,8 +122,13 @@ dtm_crs_0 <- DTM(corpus_crs_0, dict = myDict)
 # a <- tidy(list_high_freq_words_0)
 # a <- list_high_freq_words_0$dimnames$Docs
 
-list_high_freq_words_0 <- DTM(corpus_crs_0 , Min=Min.1, Max=1)$dimnames$Terms %>% unique
+list_high_freq_words_0 <- DTM(corpus_crs_0 , Min=Min.0, Max=1)$dimnames$Terms %>% unique
+
+freq_all_1_0 %>%  
+  filter(term %in% list_high_freq_words_0) 
+
 myDict = myDict[!(myDict %in% list_high_freq_words_0)]
+myDict <- unique(c(myDict, dict_it_idf))
 myDict = unique(c(myDict, dict_lang))
 
 freq = DTM(corpus_crs_1, dict =myDict) %>%
