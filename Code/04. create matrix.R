@@ -146,7 +146,8 @@ list_identified_df = tidy(dtm_crs_0) %>%
   summarise(count = sum(count)) %>% # summ all occurances of stat words in each document
   inner_join(nwords0) %>% # nwords0 contains total number of words in description for each document
   mutate(percentage  = count/total) %>%
-  filter(percentage > threshold) %>%
+  mutate(dtm_match = ifelse(percentage > threshold, TRUE, FALSE)) %>%
+  #filter(percentage > threshold) %>%
   mutate(document = as.integer(document))
 
 positive_text_id_comp = df_crs_0 %>%
@@ -160,6 +161,30 @@ df_corpus_crs_0 <- tidy(corpus_crs_0) %>%
   mutate(document = as.integer(document)) %>%
   left_join(positive_text_id_comp, by = "document") %>%
   mutate(dtm_match = ifelse(is.na(text_id), FALSE, TRUE))
+
+
+hist_word_count_distr <- ggplot(list_identified_df, aes(x = total, fill = dtm_match)) + 
+  geom_histogram(binwidth = 2) + 
+  xlab("Number of words in description combination") +
+  ylab("Number of documents") + 
+  ggtitle("Word distribution with binwidth 2 for all documents with at least one stat keyword in description combination")
+ggsave("./Tmp/word_distribution.pdf")
+hist_word_count_zoom <- ggplot(list_identified_df, aes(x = total, fill = dtm_match)) + 
+  geom_histogram(binwidth = 1) + 
+  xlim(0,50) + 
+  xlab("Number of words in description combination") +
+  ylab("Number of documents") + 
+  ggtitle("Word distribution with binwidth 1 for all documents with at least one stat keyword in description combination")
+ggsave("./Tmp/word_distribution_zoom_x.pdf", width = 7, height = 7)
+hist_word_count_zoom_y <- ggplot(list_identified_df, aes(x = total, fill = dtm_match)) + 
+  geom_histogram(binwidth = 2) + 
+  coord_cartesian(
+    xlim = NULL,
+    ylim = c(0, 50)) +
+  xlab("Number of words in description combination") +
+  ylab("Number of documents") + 
+  ggtitle("Word distribution with binwidth 1 for all documents with at least one stat keyword in description combination")
+ggsave("./Tmp/word_distribution_zoom_y.pdf", width = 7, height = 7)
 
 #library(openxlsx)
 #openxlsx::write.xlsx(df_corpus_crs_0, file = paste0(getwd(), "/Tmp/dtm_results_comp.xlsx"), rowNames = FALSE)
