@@ -17,6 +17,9 @@ source("code/00.3 functions_yu.R")
 dict_lang <- wlistV(lang) %>% as.character()
 
 # Split into to two groups
+# 
+# df_crs <- df_crs %>%
+#   mutate(description = gsub("[.]", "", ))
 
 df_crs_1 <- df_crs %>%
   filter( stats_filter 
@@ -59,15 +62,26 @@ Min.0 <- 0.1
 corpus_crs_1 <- preprocessingV(df_crs_1$description, language=language)
 dtm_crs_1 <- DTM(corpus_crs_1, Min=Min.1, Max=1)
 
-freq_all1 <- DTM(corpus_crs_1) %>% 
-  tidy(dtm_crs_1_all) %>%
+
+corpus_crs_1_simpleDTM <- DTM(corpus_crs_1)
+
+freq_all1 <- corpus_crs_1_simpleDTM %>% 
+  tidy() %>%
   group_by(term) %>%
   summarise(cnt = sum(count)) %>%
   ungroup() %>%
   mutate(total = sum(cnt)) %>%
   mutate(freq = cnt / total)
 
-myDict <- dtm_crs_1$dimnames$Terms 
+eligible_words_in_doc_1 <- corpus_crs_1_simpleDTM %>% 
+  tidy() %>%
+  select(document, term) %>%
+  # mutate(count = 1) %>% 
+  group_by(term) %>% 
+  summarise(cnt = n()) %>%
+  arrange(desc(cnt)) %>%
+  filter(cnt > (length(corpus_crs_1)/100)) %>%
+  .$term
 
 # myDict = unique(c(myDict, dict_lang))
 
@@ -75,15 +89,18 @@ myDict <- dtm_crs_1$dimnames$Terms
 # save(dtm_crs_1, file = "dtm_crs_1_en_2021.Rds")
 
 corpus_crs_0 <- preprocessingV(df_crs_0$description, language=language)
-freq_all0 <- DTM(corpus_crs_0) %>% 
+
+
+corpus_crs_0_simpleDTM <- DTM(corpus_crs_0)
+
+freq_all0 <- corpus_crs_0_simpleDTM %>% 
   tidy() %>%
   group_by(term) %>%
   summarise(cnt = sum(count)) %>%
   ungroup() %>%
   mutate(total = sum(cnt)) %>%
   mutate(freq = cnt / total)
-beepr::beep(2)
-
+# beepr::beep(2)
 
 freq_all_1_0 = right_join(freq_all0, freq_all1, by = "term") %>%
   mutate(odds = freq.x/freq.y) %>%
@@ -91,60 +108,92 @@ freq_all_1_0 = right_join(freq_all0, freq_all1, by = "term") %>%
 
 ### filter standards
 # freq_1 cut off
-cutoff_freq1 = 0.001
+cutoff_freq1 = 0.0005 # is there a median we can take?
 cutoff_odds = 0.1
   
-
-dict_it_idf= freq_all_1_0 %>% 
-  filter(freq.y > cutoff_freq1, 
+dict_tf_idf= freq_all_1_0 %>% 
+  filter(term %in% eligible_words_in_doc_1) %>% 
+  filter(#freq.y > cutoff_freq1, # the tf-idf keywords will be limited by the frequencies
          odds < cutoff_odds) %>%
   # slice(1:100) %>% 
   .$term
 
-dict_it_idf %in% myDict
+# find a cut-off rate
+# freq_all_1_0 %>% 
+#   filter(freq.y > cutoff_freq1) %>%
+#   mutate(log_odds = log10(odds)) %>%
+#   .$log_odds %>% 
+#   hist()
 
-freq0 = DTM(corpus_crs_0, dict =myDict) %>%
-  tidy %>%
-  group_by(document) %>%
-  summarise(count = sum(count))
+common_words <- freq_all_1_0 %>% 
+  # filter(freq.y > cutoff_freq1) %>% 
+  filter(odds > 0.25, odds < 5) %>%
+  .$term
 
-# inspect(corpus_crs_0)
-nwords0 = tidy(corpus_crs_0) %>%
-  select(text, document = id) %>%
-  mutate(total = str_count(string = text, pattern = "\\S+") ) %>%
-  select(-text)
+myDict <- dtm_crs_1$dimnames$Terms 
+dict_tf_idf %in% myDict
+dict_tf_idf %in% common_words
+myDict <- unique(c(myDict, dict_tf_idf))
+myDict <- myDict[!(myDict %in% common_words)]
+
+
+freq_all_1_0 %>% 
+  filter(term %in% myDict) %>%
+  print
+
+# freq0 = DTM(corpus_crs_0, dict =myDict) %>%
+#   tidy %>%
+#   group_by(document) %>%
+#   summarise(count = sum(count))
+# 
+# # inspect(corpus_crs_0)
+# nwords0 = tidy(corpus_crs_0) %>%
+#   select(text, document = id) %>%
+#   mutate(total = str_count(string = text, pattern = "\\S+") ) %>%
+#   select(-text)
 
 
 # nwords[which(nwords != nwords0 )] 
 # nwords0[which(nwords != nwords0 )]
-dtm_crs_0 <- DTM(corpus_crs_0, dict = myDict)
+# dtm_crs_0 <- DTM(corpus_crs_0, dict = myDict)
 # list_high_freq_words_0 <- DTM(corpus_crs_0 , dict = dict_lang)
 # a <- tidy(list_high_freq_words_0)
 # a <- list_high_freq_words_0$dimnames$Docs
 
 list_high_freq_words_0 <- DTM(corpus_crs_0 , Min=Min.0, Max=1)$dimnames$Terms %>% unique
 
-freq_all_1_0 %>%  
-  filter(term %in% list_high_freq_words_0) 
+# freq_all_1_0 %>%  
+#   filter(term %in% list_high_freq_words_0) 
 
 myDict = myDict[!(myDict %in% list_high_freq_words_0)]
-myDict <- unique(c(myDict, dict_it_idf))
-myDict = unique(c(myDict, dict_lang))
+# myDict = unique(c(myDict, dict_lang))
+
+source("Code/00.4 refining keywords.R")
 
 freq = DTM(corpus_crs_1, dict =myDict) %>%
   tidy %>%
   group_by(document) %>%
   summarise(count = sum(count))
+# 
+# freq = DTM(corpus_crs_1, dict =keywords) %>%
+#   tidy %>%
+#   group_by(document) %>%
+#   summarise(count = sum(count))
 
 nwords1 = tidy(corpus_crs_1) %>%
   select(text, document = id) %>%
   mutate(total = str_count(string = text, pattern = "\\S+") ) %>%
   select(-text)
 
+# gsub("[.]", "", "household budget survey. household budget survey. to assist the design and implementation of the albania household budget survey. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ") %>% trimws
+# 
+# str_count("household budget survey. household budget survey. to assist the design and implementation of the albania household budget survey. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ", patter = "\\S+")
+
 nwords1 = nwords1 %>%
   left_join(freq) %>%
   mutate(count = ifelse(is.na(count), 0, count)) %>%
   mutate(percentage = count/total) 
+
 
 threshold = nwords1 %>%
   filter(count > 0) %>%
@@ -168,6 +217,17 @@ median(nwords1$percentage) %>% print()
 
 
 dtm_crs_0 <- DTM(corpus_crs_0, dict=myDict)
+# dtm_crs_0 <- DTM(corpus_crs_0, dict=keywords)
+
+# a = tidy(dtm_crs_0) %>%
+#   group_by(term) %>%
+#   summarise(cnt = sum(count))
+#   
+#   
+#   inner_join(nwords0) %>%
+#   group_by(document) %>%
+#   summarise(count = sum(count)) %>%
+#   mutate(percentage  = count/total)
 
 list_identified = tidy(dtm_crs_0) %>%
   group_by(document) %>%
@@ -183,6 +243,17 @@ positive_text_id = df_crs_0 %>%
   filter(document %in% list_identified) %>%
   .$text_id 
 
+# a = df_crs_0 %>% 
+#   select(text_id, description) %>% 
+#   filter(text_id %in% positive_text_id)
+# 
+# b = df_crs_0 %>% 
+#   select(text_id, description) %>% 
+#   filter(text_id %in% positive_text_id1)
+# 
+# c = full_join(a, b, by = "text_id") %>%
+#   filter(is.na(description.x)|is.na(description.y))
+# c$description.x
 
 saveRDS(positive_text_id, file = crs_path_new)
 
