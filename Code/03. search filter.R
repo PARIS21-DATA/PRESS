@@ -11,9 +11,9 @@ df_crs <- readRDS(crs_path)
 
 ## 1.c. split projects by language delimiters "." and " / "
 
-# df_crs$description_comb = iconv(df_crs$description_comb,"WINDOWS-1252","UTF-8")
+# df_crs$desc_2mine = iconv(df_crs$desc_2mine,"WINDOWS-1252","UTF-8")
 
-# crs$description_comb = NULL
+# crs$desc_2mine = NULL
 # names(crs)
 # crs <- cSplit(crs, "toDetect", ".", "long")
 # crs <- cSplit(crs, "toDetect", " / ", "long")

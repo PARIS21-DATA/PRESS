@@ -5,7 +5,7 @@ df_crs <- readRDS(crs_path)
 df_crs_original <- df_crs
 
 df_crs <- df_crs_original %>%
-  select(text_id, description_comb, stats_filter = text_detection_wo_mining_w_scb)
+  select(text_id, desc_2mine, stats_filter = text_detection_wo_mining_w_scb)
 
 
 df_crs_descs = df_crs  %>%
@@ -16,7 +16,7 @@ df_crs_descs = df_crs_descs %>%
   mutate(ref = 1:nrow(df_crs_descs))
 
 desc_splited =  df_crs_descs %>%
-  .$description_comb %>%
+  .$desc_2mine %>%
   str_split( pattern = "/|[.]", simplify = T) %>%
   as.data.frame() %>%
   mutate(ref = 1:nrow(df_crs_descs))
@@ -29,7 +29,7 @@ desc_splited = desc_splited %>%
   filter(!is.na(text))
 
 df_crs_descs <- df_crs_descs %>%
-  select(-description_comb) %>%
+  select(-desc_2mine) %>%
   left_join(desc_splited) %>%
   select(-ref)
 
