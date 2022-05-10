@@ -36,6 +36,11 @@ df_crs <- df_crs %>%
 list_keywords <- readLines("data/statistics_reduced_en.txt")  %>%
   trimws()
 
+list_keywords_simon <- readLines("data/statistics_simon.txt") %>%
+  trimws()
+
+list_keywords <- c(list_keywords, list_keywords_simon) %>% unique
+
 list_keywords_gender <- readLines("data/gender_en.txt")  %>%
   trimws()
 
