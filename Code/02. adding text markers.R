@@ -27,22 +27,48 @@ df_crs_raw = df_crs_raw %>%
          shortdescription = iconv(shortdescription, "WINDOWS-1252", "UTF-8"),
          longdescription= iconv(longdescription, "WINDOWS-1252", "UTF-8"))
 
+# adopting JA's function
+clean_titles <- function(title){
+  title <- title %>% 
+    removeNumbers %>%
+    removePunctuation(preserve_intra_word_dashes = TRUE) %>%
+    tolower
+  return(title)
+}
+
 df_crs <- df_crs_raw %>%
-  mutate(description_comb = paste(projecttitle, 
+  mutate(desc_2mine = paste(projecttitle, 
                                   shortdescription, 
                                   longdescription, 
                                   sep=". "), 
-         description_comb = tolower(description_comb)
+         desc_2mine = tolower(desc_2mine)
          ) 
 
-# df_crs$description_comb[140:150]
+max_string_dist <- 10
+df_crs <- df_crs_raw %>%
+  mutate(projecttitle = clean_titles(projecttitle),
+         shortdescription = clean_titles(shortdescription),
+         longdescription = clean_titles(longdescription)) %>%
+  mutate(desc_2mine = ifelse(stringdist(projecttitle, longdescription)< max_string_dist, NA, longdescription)) %>%
+  mutate(text_id = as.numeric(as.factor(desc_2mine)))
+  # mutate(desc_2mine = ifelse(stringdist(projecttitle, shortdescription) < max_string_dist, 
+  #                                  projecttitle, 
+  #                                  paste(projecttitle, shortdescription, sep = ". "))) %>%
+  # mutate(desc_2mine = ifelse(stringdist(desc_2mine, longdescription) < max_string_dist, 
+  #                                  desc_2mine, 
+  #                                  paste(desc_2mine, longdescription, sep = ". "))) %>%
+  # mutate(string_dist_title_short = stringdist(tolower(projecttitle), tolower(shortdescription))) %>%
+  # mutate(text_id = as.numeric(as.factor(desc_2mine))) 
+
+
+# df_crs$desc_2mine[140:150]
 # df_crs_raw$longdescription[145]
 # a$longdescription[145]
 # df_crs_raw$longdescription[145]
 
 
 df_crs <- df_crs %>%
-  mutate(text_id = as.numeric(as.factor(description_comb))) %>%
+  # mutate(text_id = as.numeric(as.factor(desc_2mine))) %>%
   ## add SCB identifier
   mutate(scb = ifelse(purposecode==16062,1,0), 
          pop = ifelse(purposecode==13010,1,0),
@@ -74,8 +100,8 @@ rm(df_crs_lang)
 rm(df_crs_raw)
 
 
-which(is.na(df_crs$description_comb)) %>% print 
-which(df_crs$description_comb == "") %>% print
+which(is.na(df_crs$desc_2mine)) %>% print 
+which(df_crs$desc_2mine == "") %>% print
 table(df_crs$language) %>% print 
 names(df_crs)
 #Output::

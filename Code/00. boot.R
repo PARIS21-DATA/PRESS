@@ -21,7 +21,8 @@ packages <-
     "cld2", 
     "koRpus", 
     "SnowballC", 
-    "tidytext"
+    "tidytext", 
+    "stringdist"
   )
 # Install uninstalled packages
 lapply(packages[!(packages %in% installed.packages())], install.packages)
