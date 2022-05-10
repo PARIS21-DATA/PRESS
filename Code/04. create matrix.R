@@ -109,7 +109,7 @@ freq_all_1_0 = right_join(freq_all0, freq_all1, by = "term") %>%
 ### filter standards
 # freq_1 cut off
 cutoff_freq1 = 0.0005 # is there a median we can take?
-cutoff_odds = 0.1
+cutoff_odds = 10^(-1.5)
   
 dict_tf_idf= freq_all_1_0 %>% 
   filter(term %in% eligible_words_in_doc_1) %>% 
@@ -123,25 +123,25 @@ freq_all_1_0 %>%
   filter(terml==1) %>%
   data.frame() 
 
-single_keywords_2rm = freq_all_1_0 %>%
-  filter(term %in% dict_tf_idf) %>%
-  mutate(terml =str_count(string = term, pattern = "\\S+") ) %>% 
-  filter(terml==1) %>%
-  data.frame() %>%
-  .$term
-
-dict_tf_idf_reduced <- dict_tf_idf[!dict_tf_idf%in% single_keywords_2rm] 
+# single_keywords_2rm = freq_all_1_0 %>%
+#   filter(term %in% dict_tf_idf) %>%
+#   mutate(terml =str_count(string = term, pattern = "\\S+") ) %>% 
+#   filter(terml==1) %>%
+#   data.frame() %>%
+#   .$term
+# 
+# dict_tf_idf_reduced <- dict_tf_idf[!dict_tf_idf%in% single_keywords_2rm] 
 # saveRDS(dict_tf_idf, file = "Data/Intermediate/tf_idf_keywords.rds")
 # find a cut-off rate
-# freq_all_1_0 %>% 
-#   filter(freq.y > cutoff_freq1) %>%
-#   mutate(log_odds = log10(odds)) %>%
-#   .$log_odds %>% 
-#   hist()
+freq_all_1_0 %>%
+  filter(freq.y > cutoff_freq1) %>%
+  mutate(log_odds = log10(odds)) %>%
+  .$log_odds %>%
+  hist()
 
 common_words <- freq_all_1_0 %>% 
   # filter(freq.y > cutoff_freq1) %>% 
-  filter(odds > 0.25, odds < 5) %>%
+  filter(odds > 10, odds < 5) %>%
   .$term
 
 myDict <- dtm_crs_1$dimnames$Terms 
@@ -149,7 +149,8 @@ dict_tf_idf %in% myDict
 dict_tf_idf %in% common_words
 myDict <- unique(c(myDict, dict_tf_idf))
 myDict <- myDict[!(myDict %in% common_words)]
-myDict <- unique(dict_tf_idf_reduced)
+myDict <- unique(dict_tf_idf)
+# myDict <- unique(dict_tf_idf_reduced)
 
 freq_all_1_0 %>% 
   filter(term %in% myDict) %>%
@@ -259,7 +260,9 @@ positive_text_id = df_crs_0 %>%
   mutate(document = 1:nrow(df_crs_0)) %>%
   filter(document %in% list_identified) %>%
   .$text_id 
+beep()
 
+df_crs_0 %>% filter(text_id %in% positive_text_id) %>% .$description %>% print
 # a = df_crs_0 %>% 
 #   select(text_id, description) %>% 
 #   filter(text_id %in% positive_text_id)
@@ -272,7 +275,7 @@ positive_text_id = df_crs_0 %>%
 #   filter(is.na(description.x)|is.na(description.y))
 # c$description.x
 
-saveRDS(positive_text_id, file = crs_path_new)
+# saveRDS(positive_text_id, file = crs_path_new)
 
 print(Sys.time() - start_time)
-# time spent for 1/40 of projects: almost 2 minutes
+# time spent for 1/40 of projects: 1.416996 mins
