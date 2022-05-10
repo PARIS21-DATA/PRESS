@@ -182,7 +182,7 @@ df_crs_0_hist <- df_crs_0 %>%
   mutate(percentage  = count/total) %>%
   mutate(dtm_match = ifelse(percentage > threshold, TRUE, FALSE)) 
 
-df_detected_high_freq_words <- df_crs_0_hist
+df_detected_tf_keywords <- df_crs_0_hist
 
 
 # Save data frame of protected projects temporarily
