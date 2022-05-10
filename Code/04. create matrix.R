@@ -117,7 +117,21 @@ dict_tf_idf= freq_all_1_0 %>%
          odds < cutoff_odds) %>%
   # slice(1:100) %>% 
   .$term
+freq_all_1_0 %>%
+  filter(term %in% dict_tf_idf) %>%
+  mutate(terml =str_count(string = term, pattern = "\\S+") ) %>% 
+  filter(terml==1) %>%
+  data.frame() 
 
+single_keywords_2rm = freq_all_1_0 %>%
+  filter(term %in% dict_tf_idf) %>%
+  mutate(terml =str_count(string = term, pattern = "\\S+") ) %>% 
+  filter(terml==1) %>%
+  data.frame() %>%
+  .$term
+
+dict_tf_idf_reduced <- dict_tf_idf[!dict_tf_idf%in% single_keywords_2rm] 
+# saveRDS(dict_tf_idf, file = "Data/Intermediate/tf_idf_keywords.rds")
 # find a cut-off rate
 # freq_all_1_0 %>% 
 #   filter(freq.y > cutoff_freq1) %>%
