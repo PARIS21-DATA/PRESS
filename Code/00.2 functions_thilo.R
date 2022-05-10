@@ -59,8 +59,9 @@ DTM <- function(x, Min=NULL, Max=NULL, dict=NULL){
   }
   
   if(is.null(dict)){
-    dtm <- DocumentTermMatrix(x, control=list(wordLengths=c(3, 12), tokenize=BigramTokenizer,
-                                              bounds=list(global=c(Min,Max))))
+    dtm <- DocumentTermMatrix(x, control=list(wordLengths=c(3, 30), tokenize=BigramTokenizer,
+                                              bounds=list(global=c(Min,Max)))) 
+    # the original word length control here is 3:12, not sure why 
   } else{
     dtm <- DocumentTermMatrix(x, control=list(dictionary=dict, tokenize=BigramTokenizer))
   }

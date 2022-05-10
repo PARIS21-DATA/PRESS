@@ -149,7 +149,7 @@ dict_tf_idf %in% myDict
 dict_tf_idf %in% common_words
 myDict <- unique(c(myDict, dict_tf_idf))
 myDict <- myDict[!(myDict %in% common_words)]
-
+myDict <- unique(dict_tf_idf_reduced)
 
 freq_all_1_0 %>% 
   filter(term %in% myDict) %>%
@@ -161,10 +161,10 @@ freq_all_1_0 %>%
 #   summarise(count = sum(count))
 # 
 # # inspect(corpus_crs_0)
-# nwords0 = tidy(corpus_crs_0) %>%
-#   select(text, document = id) %>%
-#   mutate(total = str_count(string = text, pattern = "\\S+") ) %>%
-#   select(-text)
+nwords0 = tidy(corpus_crs_0) %>%
+  select(text, document = id) %>%
+  mutate(total = str_count(string = text, pattern = "\\S+") ) %>%
+  select(-text)
 
 
 # nwords[which(nwords != nwords0 )] 
@@ -174,12 +174,14 @@ freq_all_1_0 %>%
 # a <- tidy(list_high_freq_words_0)
 # a <- list_high_freq_words_0$dimnames$Docs
 
-list_high_freq_words_0 <- DTM(corpus_crs_0 , Min=Min.0, Max=1)$dimnames$Terms %>% unique
+
+# no longer filtering for high frequency words
+# list_high_freq_words_0 <- DTM(corpus_crs_0 , Min=Min.0, Max=1)$dimnames$Terms %>% unique
+# myDict = myDict[!(myDict %in% list_high_freq_words_0)]
 
 # freq_all_1_0 %>%  
 #   filter(term %in% list_high_freq_words_0) 
 
-myDict = myDict[!(myDict %in% list_high_freq_words_0)]
 # myDict = unique(c(myDict, dict_lang))
 
 source("Code/00.4 refining keywords.R")
@@ -214,6 +216,7 @@ threshold = nwords1 %>%
   .$percentage %>%
   mean
 
+print(paste("Threshold:", threshold))
 print("mean:")
 mean(nwords1$percentage) %>% print()
 print("median:")
