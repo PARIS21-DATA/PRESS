@@ -1,9 +1,12 @@
 rm(list = ls())
-crs_path <- "./Data/intermediate/crs03_1.rds"
+crs_path <- "./Data/intermediate/crs03.rds"
 crs_path_new <- "./Data/intermediate/positive_text_id.rds"
 lang <-  "en"
 language <- "english"
 df_crs <- readRDS(crs_path)
+df_crs <- df_crs %>%
+  filter(is.na(description_comb) == FALSE) %>%
+  select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb)
 df_crs_original <- df_crs
 
 start_time = Sys.time()
@@ -21,25 +24,28 @@ dict_lang <- wlistV(lang) %>% as.character()
 df_crs_1 <- df_crs %>%
   filter( stats_filter 
           # , language==lang
-          )
+          ) %>%
+  distinct
 
 df_crs_0 <- df_crs %>%
   filter( !stats_filter 
           # , language==lang
-          )
+          )%>%
+  distinct()
+
 # which(df_crs_0$text_id %in% df_crs_1$text_id)
 ## 3.b. merge back by projectID to reverse previous split of project by language
-
-#??? Why not remove all rows with empty "text" first?
-df_crs_1 <- df_crs_1 %>% 
-  group_by(text_id) %>% 
-  summarise(description = paste(text, collapse=". ")) %>%
-  data.frame
-df_crs_0 <- df_crs_0 %>% 
-  group_by(text_id) %>% 
-  summarise(description = paste(text, collapse=". ")) %>%
-  data.frame
 # 
+# #??? Why not remove all rows with empty "text" first?
+# df_crs_1 <- df_crs_1 %>%
+#   group_by(text_id) %>%
+#   summarise(description = paste(text, collapse=". ")) %>%
+#   data.frame
+# df_crs_0 <- df_crs_0 %>%
+#   group_by(text_id) %>%
+#   summarise(description = paste(text, collapse=". ")) %>%
+#   data.frame
+
 # Warning messages:
 #   1: In get(object, envir = currentEnv, inherits = TRUE) :
 #   restarting interrupted promise evaluation
@@ -57,9 +63,12 @@ df_crs_0 <- df_crs_0 %>%
 Min.1 <- 0.1 ## only consider words that are in more than 10% of statistical projects
 Min.0 <- 0.1
 
+tf_idf_keywords <- readRDS("./Tmp/tf_idf_keywords_updated.rds")
+
 corpus_crs_1 <- preprocessingV(df_crs_1$description, language=language)
 dtm_crs_1 <- DTM(corpus_crs_1, Min=Min.1, Max=1)
-myDict <- dtm_crs_1$dimnames$Terms 
+#myDict <- dtm_crs_1$dimnames$Terms 
+myDict <- tf_idf_keywords
 
 # myDict = unique(c(myDict, dict_lang))
 
@@ -78,10 +87,12 @@ dtm_crs_0 <- DTM(corpus_crs_0, dict = myDict)
 # list_high_freq_words_0 <- DTM(corpus_crs_0 , dict = dict_lang)
 # a <- tidy(list_high_freq_words_0)
 # a <- list_high_freq_words_0$dimnames$Docs
-
 list_high_freq_words_0 <- DTM(corpus_crs_0 , Min=Min.1, Max=1)$dimnames$Terms %>% unique
 myDict = myDict[!(myDict %in% list_high_freq_words_0)]
-myDict = unique(c(myDict, dict_lang))
+
+# Use idf keywords
+# tf_idf_keywords <- readRDS("./Data/tf_idf_keywords.rds")
+myDict = unique(c(tf_idf_keywords, dict_lang))
 
 # Frequency how often words present in myDict appear in each document, count = total appearances
 freq = DTM(corpus_crs_1, dict =myDict) %>%
@@ -171,28 +182,39 @@ df_crs_0_hist <- df_crs_0 %>%
   mutate(percentage  = count/total) %>%
   mutate(dtm_match = ifelse(percentage > threshold, TRUE, FALSE)) 
 
+df_detected_high_freq_words <- df_crs_0_hist
+
+
+# Save data frame of protected projects temporarily
+#saveRDS(df_detected_tf_keywords, file = "./Tmp/detected_tf_keywords.rds")
+#saveRDS(df_detected_high_freq_words, file = "./Tmp/detected_high_frequency_words.rds")
+
+
+
+#-------------------------- Histograms -----------------------------------------
+
 # Histograms of word distributions
 hist_word_count_distr <- ggplot(df_crs_0_hist, aes(x = total, fill = dtm_match)) + 
   geom_histogram(binwidth = 2) + 
   xlab("Number of words in description combination") +
   ylab("Number of documents") + 
-  ggtitle("Word distribution with binwidth 2 for all documents with at least one stat keyword in description combination")
-ggsave("./Tmp/word_distribution_all_docs.pdf", width = 9, height = 7)
+  ggtitle("Word distribution with binwidth 2 for all documents")
+ggsave("./Tmp/word_distribution_all_docs_only_long_idf_keywords.pdf", width = 9, height = 7)
 hist_word_count_zoom <- ggplot(df_crs_0_hist, aes(x = total, fill = dtm_match)) + 
   geom_histogram(binwidth = 1) + 
   xlim(0,50) + 
   xlab("Number of words in description combination") +
   ylab("Number of documents") + 
-  ggtitle("Word distribution with binwidth 1 for all documents with at least one stat keyword in description combination")
-ggsave("./Tmp/word_distribution_zoom_x_all_docs.pdf", width = 7, height = 7)
+  ggtitle("Word distribution with binwidth 1 for all documents")
+ggsave("./Tmp/word_distribution_zoom_x_all_docs_only_long_idf_keywords.pdf", width = 7, height = 7)
 hist_word_count_zoom_y <- ggplot(df_crs_0_hist, aes(x = total, fill = dtm_match)) + 
   geom_histogram(binwidth = 1) + 
   coord_cartesian(
     ylim = c(0, 20)) +
   xlab("Number of words in description combination") +
   ylab("Number of documents") + 
-  ggtitle("Word distribution with binwidth 1 for all documents with at least one stat keyword in description combination")
-ggsave("./Tmp/word_distribution_zoom_y_all_docs.pdf", width = 10, height = 5)
+  ggtitle("Word distribution with binwidth 1 for all documents")
+ggsave("./Tmp/word_distribution_zoom_y_all_docs_only_long_idf_keywords.pdf", width = 10, height = 5)
 
 #library(openxlsx)
 #openxlsx::write.xlsx(df_corpus_crs_0, file = paste0(getwd(), "/Tmp/dtm_results_comp.xlsx"), rowNames = FALSE)

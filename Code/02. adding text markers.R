@@ -63,14 +63,25 @@ df_crs <- df_crs_raw %>%
   mutate(description_comb = ifelse(stringdist(description_comb, longdescription) < max_string_dist, 
                                    description_comb, 
                                    paste(description_comb, longdescription, sep = ". "))) %>%
-  mutate(string_dist_title_short = stringdist(tolower(projecttitle), tolower(shortdescription))) %>%
+  mutate(string_dist_title_long = stringdist(tolower(projecttitle), tolower(longdescription))) %>%
   mutate(text_id = as.numeric(as.factor(description_comb))) %>%
+  mutate(description_comb = ifelse(stringdist(projecttitle, longdescription) < max_string_dist | str_count(longdescription) < 3, 
+                                   NA, 
+                                   longdescription)) %>% # try only long description for DTM process that are distinct from title
   ## add SCB identifier
   mutate(scb = ifelse(purposecode==16062,1,0), 
          pop = ifelse(purposecode==13010,1,0),
          gen_ppcode = ifelse(purposecode %in% c(15170:15180), 1, 0)
          ) %>%
   select(-cols_needed[which(!cols_needed %in% c("process_id", "longdescription"))])
+
+# Frequency table of string dist long title
+freq_string_dist_title_long <- as.data.frame(table(df_crs$string_dist_title_long))
+freq_string_dist_title_long <- freq_string_dist_title_long %>% 
+  mutate(total = sum(Freq)) %>%
+  mutate(fraq = Freq/total)
+sum(freq_string_dist_title_long$fraq[1:10])
+
 
 # Detect language of the projects
 df_crs_lang <- df_crs %>% 
