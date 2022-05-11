@@ -1,0 +1,239 @@
+#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
+#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
+# 2021-07-21
+# Script classify PRESS projects into CSA domains from 2012 onwards
+# Guglielmo Zappala
+
+# Input files: - projects_to_classify_for_csa.csv
+#              - new_PRESS.csv
+
+# Output files: - classified_PRESS_2012.csv
+#               - classified_crs_csa.csv
+
+#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
+#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
+
+#%#%#%#%#%#%#%#%#%#%
+# Objective
+# The purpose of this script is to take the PRESS 2020 data, clean the project title and description
+# and a build an algorithms using XGBoost classifier to predict CSA domains from descriptions
+# dropping all years before 2012
+#%#%#%#%#%#%#%#%#%#%
+
+#%#%#%#%#%#%#%#%#%#%
+# Loading packages
+#%#%#%#%#%#%#%#%#%#%
+
+# Clear environment
+remove(list = ls())
+
+# Load required libraries
+packages <-
+  c(
+    "tidyverse",
+    "e1071",
+    "caTools",
+    "caret",
+    "tm",
+    "textstem",
+    "tidytext",
+    "mgsub",
+    "textclean",
+    "lexicon",
+    "wordcloud",
+    "quanteda",
+    "textcat",
+    "text2vec",
+    "xgboost",
+    "rlist",
+    "remotes",
+    "ParBayesianOptimization",
+    "mlr",
+    "DiagrammeR",
+    "cld2"
+  )
+# Install uninstalled packages
+lapply(packages[!(packages %in% installed.packages())], install.packages)
+lapply(packages, library, character.only = TRUE)
+rm(packages)
+
+
+#%#%#%#%#%#%#%#%#%#%
+# Loading data
+#%#%#%#%#%#%#%#%#%#%
+
+# setting working directory for experimenting - in the future loading data from github might be the easier solution
+setwd(getwd())
+
+crs_path <- "./Data/intermediate/crs03.rds"
+crs_path_new <- "./Data/intermediate/positive_text_id.rds"
+lang <-  "en"
+language <- "english"
+df_crs <- readRDS(crs_path)
+df_crs <- df_crs %>%
+  filter(is.na(description_comb) == FALSE) %>%
+  select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb)
+df_crs_original <- df_crs
+
+#%#%#%#%#%#%#%#%#%#%
+# Preparing the target variable Y: Statistical Activity
+#%#%#%#%#%#%#%#%#%#%
+
+# We assign projects that were classified as statistical projects by title pattern matching to df
+df <- df_crs %>%
+  filter(stats_filter == TRUE)
+
+# We assign projects that were not classified as statistical projects by title pattern matching to the prediction data frame pred
+pred <- df_crs %>%
+  filter(stats_filter == FALSE)
+
+
+#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
+#### Text cleaning and corpus creation #
+#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
+
+# IMPORTANT: 1. Stemming vs. lemmatization vs. original words
+
+# Define function to create corpus
+create_corpus <- function (data){
+  source <- VectorSource(data$description)
+  corpus <- VCorpus(source) 
+  corpus <- tm_map(corpus, content_transformer(tolower)) # lower case
+  corpus <- tm_map(corpus, removeNumbers)# remove numbers
+  corpus <- tm_map(corpus, removePunctuation, preserve_intra_word_dashes = TRUE) # remove punctuation. We want to keep dashes inside words such as in high-level
+  corpus <- tm_map(corpus, stripWhitespace) # remove remaining white space
+  corpus <- tm_map(corpus, removeWords, c(stopwords('english'))) # remove stopwords for English
+  corpus <- tm_map(corpus, removeWords, c(stopwords(source = "smart"))) # remove some extra stopwords not captured by the previous list
+  corpus <- tm_map(corpus, removeWords, c("iii")) # remove roman number 3 that is very common
+  corpus <- tm_map(corpus, removeWords, c(stopwords("fr"))) # remove french stopwords
+  #corpus <- tm_map(corpus, replace_contraction) # extra step to catch exceptions such as "aren't" - might not be necessary
+  corpus <- tm_map(corpus, lemmatize_strings) # lemmatize words - this might not be the best choice in particular with a English-French language mix
+  corpus <- tm_map(corpus, PlainTextDocument) # transform into a format that can be used more easily later on
+  return(corpus)
+}
+
+# If we can it would be great to remove roman numbers but we might be able to catch them by removing very rare words later on
+## Create corpus for df, pred 
+corpus_df <- create_corpus(df)
+corpus_df_pred <- create_corpus(pred)
+
+
+#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#
+#### Data Exploration/Testing ###
+#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#
+
+# look at lemma results - they look good
+corpus_df[[500]]
+
+# to inspect the corpus use:
+inspect(corpus_df[[8]])
+
+#### Data exploration with wordcloud ####
+
+# This is a great way to get a quick impression of the result of the preprocessing (for example compare stemming vs. lemmatization)
+
+# less words
+wordcloud(corpus_df, 
+          min.freq = 250,
+          max.words = 100,
+          random.order = FALSE,
+          random.color = FALSE,
+          colors = brewer.pal(8, "Dark2"))
+
+wordcloud(corpus_df_pred, 
+          min.freq = 250,
+          max.words = 100,
+          random.order = FALSE,
+          random.color = FALSE,
+          colors = brewer.pal(8, "Dark2"))
+
+wordcloud(corpus_df_csa, 
+          min.freq = 250,
+          max.words = 100,
+          random.order = FALSE,
+          random.color = FALSE,
+          colors = brewer.pal(8, "Dark2"))
+
+# More words
+wordcloud(corpus_df, 
+          min.freq = 10,
+          max.words = 250,
+          random.order = FALSE,
+          random.color = FALSE,
+          colors = brewer.pal(8, "Dark2"))
+
+######## Integrate into the original dataframe that contains the domain labels
+
+# convert corpus to dataframe
+text_df <- t(data.frame(text = sapply(corpus_df, as.character), stringsAsFactors = FALSE))
+rownames(text_df) <- NULL
+
+text_df_pred <- t(data.frame(text = sapply(corpus_df_pred, as.character), stringsAsFactors = FALSE))
+rownames(text_df_pred) <- NULL
+
+# change original description with cleaned description
+df$text_cleaned <- text_df[,1]
+pred$text_cleaned <- text_df_pred[,1]
+
+#%#%#%#%#%#%#%#%#%#%%#%#%%#%#
+# Training the Model: XGBoost
+#%#%#%#%#%#%#%#%#%#%%#%#%%#%#
+
+###########################################
+### Test run for ONE category: domain 1 ###
+###########################################
+
+# Splitting in training and test - here you use as training all 
+dt <- sort(sample(nrow(df), nrow(df)*0.8))
+train_data <- df[dt,]
+test_data <- df[-dt,]
+
+# Creating document-feature-matrix for training data and for total data
+total_data_dtm <- df$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = list(weighting = weightTf))
+train_data_dtm <- train_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = list(weighting = weightTf))
+
+# Creating document-feature-matrix for test data. Here we have to keep two things in mind:
+# 1. We have to exclude words that do not appear in the training data. The model does not know these and breaks.
+# 2. We have to include words (although with a 0) that appear in the training data but not in the test data. Otherwise the model gets confused as well.
+# See here for a detailed discussion: https://stackoverflow.com/questions/16630627/how-to-recreate-same-documenttermmatrix-with-new-test-data 
+test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = list(weighting = weightTf, dictionary=Terms(train_data_dtm)))
+prediction_data_dtm <- pred$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = list(weighting = weightTf, dictionary=Terms(train_data_dtm)))
+
+# Train the model for one statistical domain - parameters taken from SDG lab code. These might benefit from tuning
+eta_par <- 0.1
+nrounds_par <- 5 / eta_par
+
+# set the labels for stats_filter
+label.train <- as.numeric(train_data$stats_filter)
+label.test <- as.numeric(test_data$stats_filter)
+label.prediction <- as.numeric(pred$stats_filter)
+
+# Training the model
+fit.xgb <- xgboost(data = as.matrix(train_data_dtm), label = label.train, max.depth = 17, eta = eta_par, nthread = 2, 
+                   nrounds = nrounds_par, objective = "binary:logistic", verbose = 1)
+
+# Check which words have a high importance for the prediction
+importance.matrix <- xgb.importance(model = fit.xgb)
+xgb.plot.importance(importance.matrix, top_n = 25, rel_to_first = TRUE, xlab = "Relative importance")
+
+# Predict stats_filter based on the text in the test set and in the prediction set
+pred.xgb <- predict(fit.xgb, as.matrix(test_data_dtm))
+pred1.xgb <- predict(fit.xgb, as.matrix(prediction_data_dtm))
+
+# add predictions to test and prediction data
+test_data$predictions_raw <- pred.xgb
+pred$predictions_raw <- pred1.xgb
+
+# Crucial to decide the cut-off value or threshold - i.e., from what probability do we say an observation is stats_filter? 
+# The SDG lab uses a list of thresholds with a different threshold for each SDG. It remains unclear how they arrived at the threshold.
+# I will start with a simple 0.5. But this should be tested and optimized. 
+
+test_data <- mutate(test_data, predictions = ifelse(predictions_raw > 0.5, 1, 0))
+pred <- mutate(pred, predictions = ifelse(predictions_raw > 0.5, 1, 0))
+
+# Check performance - confusion matrix - looks quite good!
+table(factor(test_data$predictions, levels=min(test_data$stats_filter):max(test_data$stats_filter)), 
+      factor(test_data$stats_filter, levels=min(test_data$stats_filter):max(test_data$stats_filter)))
+
+# Prediction accuracy: 88 % 
+mean(test_data$predictions == test_data$stats_filter)
