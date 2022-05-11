@@ -36,10 +36,11 @@ df_crs <- df_crs %>%
 list_keywords <- readLines("data/statistics_reduced_en.txt")  %>%
   trimws()
 
-list_keywords_simon <- readLines("data/statistics_simon.txt") %>%
-  trimws()
-
-list_keywords <- c(list_keywords, list_keywords_simon) %>% unique
+# list_keywords_simon <- readLines("data/statistics_simon.txt") %>%
+#   trimws()
+# list_keywords <- c(list_keywords, list_keywords_simon) %>% unique
+# 
+# list_keywords <- list_keywords_simon
 
 list_keywords_gender <- readLines("data/gender_en.txt")  %>%
   trimws()
@@ -106,7 +107,11 @@ df_crs <- df_crs %>%
 a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, text_detection_gender) %>% unique %>% nrow
 b = df_crs %>% select(text_id) %>% unique %>% nrow
 
-
+# list = df_crs %>% 
+#   filter(text_detection_wo_mining_w_scb) %>%
+#   select(text_id, projecttitle) %>%
+#   unique
+# saveRDS(list, file = "data/list_by_P21.rds")
 
 print(paste0("There are ", a-b, " projects with same names but different purpose code"))
 
