@@ -7,18 +7,11 @@ df_crs <- readRDS(crs_path)
 # we used to make the project with same description as 1 as long as one of the same description is marked as 1
 # it is wrong because some projects with the same name will have different purpose codes
 
+# Switch to switch from lemmatization to stemming 
+stemming <- FALSE
 
 
 ## 1.c. split projects by language delimiters "." and " / "
-
-# df_crs$description_comb = iconv(df_crs$description_comb,"WINDOWS-1252","UTF-8")
-
-# crs$description_comb = NULL
-# names(crs)
-# crs <- cSplit(crs, "toDetect", ".", "long")
-# crs <- cSplit(crs, "toDetect", " / ", "long")
-# save(crs, file = "crs_2020_clean1_splitToDetect.RData")
-
 
 df_crs <- df_crs %>%
   filter(language == "en") %>% ##??? to solve later
@@ -62,55 +55,46 @@ clean_and_lemmatize <- function (string){
 }
 
 # Lemmatize or stem keywords 
-list_keywords_stat_stem <- stem_and_concatenate(list_keywords_stat)
-list_keywords_gender_stem <- stem_and_concatenate(list_keywords_gender)
-list_keywords_stat <- clean_and_lemmatize(list_keywords_stat)
-list_keywords_gender <- clean_and_lemmatize(list_keywords_gender)
-list_keywords_gender <- list_keywords_gender %>% append("women") # due to many spelling mistakes like women_s, women?s...
+if (stemming) {
+  list_keywords_stat <- stem_and_concatenate(list_keywords_stat)
+  list_keywords_gender <- stem_and_concatenate(list_keywords_gender)
+} else {
+  list_keywords_stat <- clean_and_lemmatize(list_keywords_stat)
+  list_keywords_gender <- clean_and_lemmatize(list_keywords_gender)
+  list_keywords_gender <- list_keywords_gender %>% append("women") # due to many spelling mistakes like women_s, women?s..
+}
 
+if (stemming) {
+  df_crs <- df_crs %>%
+    mutate(projecttitle_clean = stem_and_concatenate(projecttitle_lower),
+           longdescription_clean = stem_and_concatenate(longdescription)) %>%
+    mutate(match_stat = str_detect(projecttitle_clean, paste(list_keywords_stat, collapse = "|")),
+           match_gender = str_detect(projecttitle_clean, paste(list_keywords_gender, collapse = "|")))
+} else {
+  df_crs <- df_crs %>%
+    mutate(projecttitle_clean = clean_and_lemmatize(projecttitle_lower),
+           longdescription_clean = clean_and_lemmatize(longdescription)) %>%
+    mutate(match_stat = str_detect(projecttitle_clean, paste(list_keywords_stat, collapse = "|")),
+           match_gender = str_detect(projecttitle_clean, paste(list_keywords_gender, collapse = "|")))
+}
 
-df_crs <- df_crs %>%
-  # select(db_ref, projecttitle, scb) %>%
-  # mutate(projecttitle = tolower(projecttitle)) %>%
-  mutate(projecttitle_clean = clean_and_lemmatize(projecttitle_lower),
-         longdescription_clean = clean_and_lemmatize(longdescription)) %>%
-  mutate(match_stat_lemma = str_detect(projecttitle_clean, paste(list_keywords_stat, collapse = "|")),
-         match_gender_lemma = str_detect(projecttitle_clean, paste(list_keywords_gender, collapse = "|"))) %>%
-  mutate(match_stat_lemma_long = str_detect(longdescription_clean, paste(list_keywords_stat, collapse = "|")),
-         match_gender_lemma_long = str_detect(longdescription_clean, paste(list_keywords_gender, collapse = "|"))) %>%
-  mutate(projecttitle_stem = stem_and_concatenate(projecttitle_lower)) %>%
-  mutate(match_stat_stem = str_detect(projecttitle_stem, paste(list_keywords_stat_stem, collapse = "|")))  %>%
-  mutate(match_gender_stem = str_detect(projecttitle_stem, paste(list_keywords_gender_stem, collapse = "|")) )
-# 
-# tagged.results <- treetag(list_keywords, 
-#                           treetagger="manual", format="obj",
-#                           TT.tknz=FALSE , lang="en"
-#                           # ,
-#                           # TT.options=list(path="./TreeTagger", preset="en")
-#                           )
-
-#library(openxlsx)
-#openxlsx::write.xlsx(df_crs, file = paste0(getwd(), "/Tmp/crs_text_detection_comp.xlsx"), rowNames = FALSE)
-
+# Exclude mining projects, since they contain survey -> not statistical project
 df_crs$mining = grepl("land mine|small arm|demining|demine|landmine", df_crs$projecttitle_lower, ignore.case = T)
 
 list_acronyms <- readLines("data/statistics_reduced_acronyms_en.txt")  %>%
   trimws()
 
 df_crs <- df_crs %>%
-  mutate(match_stat_stem = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | match_stat_stem)
+  mutate(match_stat = str_detect(projecttitle_clean, paste(list_acronyms, collapse = "|"))  | match_stat)
 
 # Number of detected projects 
-sum(df_crs$match_stat_lemma)
-sum(df_crs$match_stat_stem)
-sum(df_crs$match_stat_lemma_long)
-sum(df_crs$match_gender_lemma)
-sum(df_crs$match_gender_stem)
+sum(df_crs$match_stat)
+sum(df_crs$match_gender)
 
 
 df_crs <- df_crs %>%
-  mutate(text_detection_wo_mining = match_stat_stem & !mining) %>%
-  select(-projecttitle_lower, -projecttitle_stem)
+  mutate(text_detection_wo_mining = match_stat & !mining) %>%
+  select(-projecttitle_lower)
 
 df_crs <- left_join(df_crs_backup, df_crs)
 
@@ -131,7 +115,7 @@ which(is.na(df_crs$text_detection_wo_mining_w_scb))
 #df_crs <- df_crs %>%
 #  mutate(text_filter_gender = gen_donor|gen_ppcode|gen_marker|text_detection_gender)
 
-a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, match_gender_stem) %>% unique %>% nrow
+a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, match_gender) %>% unique %>% nrow
 b = df_crs %>% select(text_id) %>% unique %>% nrow
 
 

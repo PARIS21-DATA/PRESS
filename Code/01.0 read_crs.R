@@ -56,6 +56,7 @@ difftime(Sys.time(),start, units = "sec")
 # Time difference of 86.15631 secs
 beep(2)
 
+
 # making basic changes
 df_crs <- df_crs %>%
   mutate(source = "crs")
@@ -66,8 +67,11 @@ df_crs$process_id <- row.names(df_crs)
 saveRDS(df_crs, file  = "./Data/Raw/CRS/crs_full.rds")
 beep(2)
 
+# If full data available in Data/Raw/, uncomment to load 
+# df_crs <- readRDS("./Data/Raw/CRS/crs_full.rds")
+
 # Take a sample of the entire data frame for further testing 
-df_crs_sample <- df_crs[sample(nrow(df_crs),nrow(df_crs)/40 ), ]
+df_crs_sample <- df_crs[sample(nrow(df_crs),nrow(df_crs)/20 ), ]
 rm(df_crs)
 df_crs <- df_crs_sample
 saveRDS(df_crs, file  = "./Data/Raw/CRS/crs_sample.rds") 

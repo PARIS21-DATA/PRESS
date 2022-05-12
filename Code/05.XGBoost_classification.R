@@ -72,21 +72,30 @@ language <- "english"
 df_crs <- readRDS(crs_path)
 df_crs <- df_crs %>%
   filter(is.na(description_comb) == FALSE) %>%
-  select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb)
-df_crs_original <- df_crs
+  select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb) %>% 
+  distinct()
 
 #%#%#%#%#%#%#%#%#%#%
 # Preparing the target variable Y: Statistical Activity
 #%#%#%#%#%#%#%#%#%#%
 
-# We assign projects that were classified as statistical projects by title pattern matching to df
-df <- df_crs %>%
-  filter(stats_filter == TRUE)
 
 # We assign projects that were not classified as statistical projects by title pattern matching to the prediction data frame pred
 pred <- df_crs %>%
-  filter(stats_filter == FALSE)
+  filter(stats_filter == FALSE | is.na(stats_filter)) %>%
+  sample_n(size = 0.2*n()) #use only 20% to speed up for testing
 
+  # We assign projects that were classified as statistical projects by title pattern matching to df
+df <- df_crs %>%
+  filter(stats_filter == TRUE) %>%
+  rbind(pred_negative) %>%
+  filter(!is.na(stats_filter))
+  rbind(pred %>% sample_n(0.4 * df_crs %>% filter(stats_filter == TRUE) %>% nrow())) %>%
+
+pred_negative <- pred %>% 
+  arrange(predictions_raw) %>% 
+  filter(row_number() <= 0.4 * nrow(df)) %>% 
+  select(text_id, description, stats_filter) 
 
 #%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
 #### Text cleaning and corpus creation #
@@ -122,46 +131,6 @@ corpus_df_pred <- create_corpus(pred)
 #### Data Exploration/Testing ###
 #%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#
 
-# look at lemma results - they look good
-corpus_df[[500]]
-
-# to inspect the corpus use:
-inspect(corpus_df[[8]])
-
-#### Data exploration with wordcloud ####
-
-# This is a great way to get a quick impression of the result of the preprocessing (for example compare stemming vs. lemmatization)
-
-# less words
-wordcloud(corpus_df, 
-          min.freq = 250,
-          max.words = 100,
-          random.order = FALSE,
-          random.color = FALSE,
-          colors = brewer.pal(8, "Dark2"))
-
-wordcloud(corpus_df_pred, 
-          min.freq = 250,
-          max.words = 100,
-          random.order = FALSE,
-          random.color = FALSE,
-          colors = brewer.pal(8, "Dark2"))
-
-wordcloud(corpus_df_csa, 
-          min.freq = 250,
-          max.words = 100,
-          random.order = FALSE,
-          random.color = FALSE,
-          colors = brewer.pal(8, "Dark2"))
-
-# More words
-wordcloud(corpus_df, 
-          min.freq = 10,
-          max.words = 250,
-          random.order = FALSE,
-          random.color = FALSE,
-          colors = brewer.pal(8, "Dark2"))
-
 ######## Integrate into the original dataframe that contains the domain labels
 
 # convert corpus to dataframe
@@ -188,16 +157,33 @@ dt <- sort(sample(nrow(df), nrow(df)*0.8))
 train_data <- df[dt,]
 test_data <- df[-dt,]
 
+# Try ngram 
+NLP_tokenizer <- function(x) {
+  unlist(lapply(ngrams(words(x), 1:2), paste, collapse = " "), use.names = FALSE)
+}
+control_list_ngram = list(tokenize = NLP_tokenizer,
+                          removePunctuation = TRUE,
+                          removeNumbers = TRUE, 
+                          stopwords = stopwords("english"), 
+                          tolower = T, 
+                          lemmatization = T, 
+                          weighting = function(x) { weightTf(x) },
+                          dictionary=Terms(train_data_dtm) # only for test and prediction data 
+                          )
+
+control_list_ngram <- list(weighting = weightTf)
+control_list_ngram_dict <- list(weighting = weightTf, dictionary=Terms(train_data_dtm))
+
 # Creating document-feature-matrix for training data and for total data
-total_data_dtm <- df$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = list(weighting = weightTf))
-train_data_dtm <- train_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = list(weighting = weightTf))
+total_data_dtm <- df$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
+train_data_dtm <- train_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
 
 # Creating document-feature-matrix for test data. Here we have to keep two things in mind:
 # 1. We have to exclude words that do not appear in the training data. The model does not know these and breaks.
 # 2. We have to include words (although with a 0) that appear in the training data but not in the test data. Otherwise the model gets confused as well.
 # See here for a detailed discussion: https://stackoverflow.com/questions/16630627/how-to-recreate-same-documenttermmatrix-with-new-test-data 
-test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = list(weighting = weightTf, dictionary=Terms(train_data_dtm)))
-prediction_data_dtm <- pred$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = list(weighting = weightTf, dictionary=Terms(train_data_dtm)))
+test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram_dict)
+prediction_data_dtm <- pred$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram_dict)
 
 # Train the model for one statistical domain - parameters taken from SDG lab code. These might benefit from tuning
 eta_par <- 0.1
@@ -214,7 +200,9 @@ fit.xgb <- xgboost(data = as.matrix(train_data_dtm), label = label.train, max.de
 
 # Check which words have a high importance for the prediction
 importance.matrix <- xgb.importance(model = fit.xgb)
-xgb.plot.importance(importance.matrix, top_n = 25, rel_to_first = TRUE, xlab = "Relative importance")
+pdf("importance_matrix_ngram1_new_sample_it2.pdf")
+xgb.plot.importance(importance.matrix, top_n = 30, rel_to_first = TRUE, xlab = "Relative importance")
+dev.off()
 
 # Predict stats_filter based on the text in the test set and in the prediction set
 pred.xgb <- predict(fit.xgb, as.matrix(test_data_dtm))
@@ -227,9 +215,9 @@ pred$predictions_raw <- pred1.xgb
 # Crucial to decide the cut-off value or threshold - i.e., from what probability do we say an observation is stats_filter? 
 # The SDG lab uses a list of thresholds with a different threshold for each SDG. It remains unclear how they arrived at the threshold.
 # I will start with a simple 0.5. But this should be tested and optimized. 
-
-test_data <- mutate(test_data, predictions = ifelse(predictions_raw > 0.5, 1, 0))
-pred <- mutate(pred, predictions = ifelse(predictions_raw > 0.5, 1, 0))
+threshold <- 0.8
+test_data <- mutate(test_data, predictions = ifelse(predictions_raw > threshold, 1, 0))
+pred <- mutate(pred, predictions = ifelse(predictions_raw > threshold, 1, 0))
 
 # Check performance - confusion matrix - looks quite good!
 table(factor(test_data$predictions, levels=min(test_data$stats_filter):max(test_data$stats_filter)), 
@@ -237,3 +225,32 @@ table(factor(test_data$predictions, levels=min(test_data$stats_filter):max(test_
 
 # Prediction accuracy: 88 % 
 mean(test_data$predictions == test_data$stats_filter)
+
+
+#-------------------------- Histograms -----------------------------------------
+
+pred <- pred %>% mutate(total = str_count(string = text_cleaned, pattern = "\\S+")) %>%
+  mutate(predictions = as.factor(predictions))
+
+# Histograms of word distributions
+hist_word_count_distr <- ggplot(pred, aes(x = total, fill = predictions)) + 
+  geom_histogram(binwidth = 2) + 
+  xlab("Number of words in description combination") +
+  ylab("Number of documents") + 
+  ggtitle("Word distribution with binwidth 2 for threshold of 0.3 with ngram 2")
+ggsave("./Tmp/XGBoost/word_distribution_ngram2_new_sample.pdf", width = 9, height = 7)
+hist_word_count_zoom <- ggplot(df_crs_0_hist, aes(x = total, fill = dtm_match)) + 
+  geom_histogram(binwidth = 1) + 
+  xlim(0,50) + 
+  xlab("Number of words in description combination") +
+  ylab("Number of documents") + 
+  ggtitle("Word distribution with binwidth 1 for all documents")
+ggsave("./Tmp/word_distribution_zoom_x_all_docs_only_long_idf_keywords.pdf", width = 7, height = 7)
+hist_word_count_zoom_y <- ggplot(df_crs_0_hist, aes(x = total, fill = dtm_match)) + 
+  geom_histogram(binwidth = 1) + 
+  coord_cartesian(
+    ylim = c(0, 20)) +
+  xlab("Number of words in description combination") +
+  ylab("Number of documents") + 
+  ggtitle("Word distribution with binwidth 1 for all documents")
+ggsave("./Tmp/word_distribution_zoom_y_all_docs_only_long_idf_keywords.pdf", width = 10, height = 5)
