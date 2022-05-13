@@ -81,21 +81,36 @@ df_crs <- df_crs %>%
 
 
 # We assign projects that were not classified as statistical projects by title pattern matching to the prediction data frame pred
-pred <- df_crs %>%
-  filter(stats_filter == FALSE | is.na(stats_filter)) %>%
-  sample_n(size = 0.2*n()) #use only 20% to speed up for testing
 
-  # We assign projects that were classified as statistical projects by title pattern matching to df
-df <- df_crs %>%
-  filter(stats_filter == TRUE) %>%
-  rbind(pred_negative) %>%
-  filter(!is.na(stats_filter))
-  rbind(pred %>% sample_n(0.4 * df_crs %>% filter(stats_filter == TRUE) %>% nrow())) %>%
+# We assign projects that were classified as statistical projects by title pattern matching to df
+iteration <- TRUE
+neg_sample_fraction <- 1.5
+if (iteration) { 
+  pred_negative <- pred %>% 
+    filter(predictions_raw <= 0.3) %>%
+    sample_n(size = neg_sample_fraction * nrow(df))  %>% 
+    select(text_id, description, stats_filter) 
+  
+  df <- df_crs %>%
+    filter(stats_filter == TRUE) %>%
+    rbind(pred_negative) %>%
+    filter(!is.na(stats_filter))
+  
+  pred <- df_crs %>%
+    filter((stats_filter == FALSE | is.na(stats_filter)) & !(text_id %in% pred_negative$text_id)) %>%
+    sample_n(size = 0.05*n()) #use only 5% to speed up for testing
+} else {
+  df <- df_crs %>%
+    filter(stats_filter == TRUE) %>%
+    rbind(pred %>% sample_n(size = neg_sample_fraction * df_crs %>% filter(stats_filter == TRUE) %>% nrow())) %>%
+    filter(!is.na(stats_filter))
 
-pred_negative <- pred %>% 
-  arrange(predictions_raw) %>% 
-  filter(row_number() <= 0.4 * nrow(df)) %>% 
-  select(text_id, description, stats_filter) 
+  pred <- df_crs %>%
+    filter(stats_filter == FALSE | is.na(stats_filter)) %>%
+    sample_n(size = 0.05*n()) #use only 20% to speed up for testing
+}
+ 
+
 
 #%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
 #### Text cleaning and corpus creation #
@@ -172,7 +187,6 @@ control_list_ngram = list(tokenize = NLP_tokenizer,
                           )
 
 control_list_ngram <- list(weighting = weightTf)
-control_list_ngram_dict <- list(weighting = weightTf, dictionary=Terms(train_data_dtm))
 
 # Creating document-feature-matrix for training data and for total data
 total_data_dtm <- df$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
@@ -182,6 +196,7 @@ train_data_dtm <- train_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% D
 # 1. We have to exclude words that do not appear in the training data. The model does not know these and breaks.
 # 2. We have to include words (although with a 0) that appear in the training data but not in the test data. Otherwise the model gets confused as well.
 # See here for a detailed discussion: https://stackoverflow.com/questions/16630627/how-to-recreate-same-documenttermmatrix-with-new-test-data 
+control_list_ngram_dict <- list(weighting = weightTf, dictionary=Terms(train_data_dtm))
 test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram_dict)
 prediction_data_dtm <- pred$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram_dict)
 
@@ -200,7 +215,7 @@ fit.xgb <- xgboost(data = as.matrix(train_data_dtm), label = label.train, max.de
 
 # Check which words have a high importance for the prediction
 importance.matrix <- xgb.importance(model = fit.xgb)
-pdf("importance_matrix_ngram1_new_sample_it2.pdf")
+pdf("./Tmp/XGBoost/importance_matrix_it2_1.5_sample.pdf")
 xgb.plot.importance(importance.matrix, top_n = 30, rel_to_first = TRUE, xlab = "Relative importance")
 dev.off()
 
@@ -232,13 +247,13 @@ mean(test_data$predictions == test_data$stats_filter)
 pred <- pred %>% mutate(total = str_count(string = text_cleaned, pattern = "\\S+")) %>%
   mutate(predictions = as.factor(predictions))
 
-# Histograms of word distributions
+# Histograms of word distributions  
 hist_word_count_distr <- ggplot(pred, aes(x = total, fill = predictions)) + 
   geom_histogram(binwidth = 2) + 
   xlab("Number of words in description combination") +
   ylab("Number of documents") + 
-  ggtitle("Word distribution with binwidth 2 for threshold of 0.3 with ngram 2")
-ggsave("./Tmp/XGBoost/word_distribution_ngram2_new_sample.pdf", width = 9, height = 7)
+  ggtitle(paste0("Word distribution with binwidth 2 for threshold of ", threshold," with ngram 1"))
+ggsave("./Tmp/XGBoost/word_distribution_it2_1.5_sample.pdf", width = 9, height = 7)
 hist_word_count_zoom <- ggplot(df_crs_0_hist, aes(x = total, fill = dtm_match)) + 
   geom_histogram(binwidth = 1) + 
   xlim(0,50) + 
