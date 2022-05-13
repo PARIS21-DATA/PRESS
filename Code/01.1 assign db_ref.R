@@ -20,7 +20,9 @@ df_crs <- df_crs_raw %>%
     purposecode, 
     usd_disbursement, 
     recipientcode , 
-    usd_received
+    usd_received, 
+    sectorname,
+    sectorcode
   )
 
 # Create unique idetifier db_ref for each project transforming a joined sting of 

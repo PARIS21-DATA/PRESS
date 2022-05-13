@@ -70,9 +70,10 @@ crs_path_new <- "./Data/intermediate/positive_text_id.rds"
 lang <-  "en"
 language <- "english"
 df_crs <- readRDS(crs_path)
-df_crs <- df_crs %>%
+df_crs_original <- df_crs 
+df_crs <- df_crs_original %>%
   filter(is.na(description_comb) == FALSE) %>%
-  select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb) %>% 
+  select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb, donorname, sectorname) %>%
   distinct()
 
 #%#%#%#%#%#%#%#%#%#%
@@ -89,7 +90,7 @@ if (iteration) {
   pred_negative <- pred %>% 
     filter(predictions_raw <= 0.3) %>%
     sample_n(size = neg_sample_fraction * nrow(df))  %>% 
-    select(text_id, description, stats_filter) 
+    select(text_id, description, stats_filter, donorname, sectorname) 
   
   df <- df_crs %>%
     filter(stats_filter == TRUE) %>%
@@ -98,7 +99,7 @@ if (iteration) {
   
   pred <- df_crs %>%
     filter((stats_filter == FALSE | is.na(stats_filter)) & !(text_id %in% pred_negative$text_id)) %>%
-    sample_n(size = 0.05*n()) #use only 5% to speed up for testing
+    sample_n(size = floor(0.05 * n())) #use only 5% to speed up for testing
 } else {
   df <- df_crs %>%
     filter(stats_filter == TRUE) %>%
@@ -107,7 +108,7 @@ if (iteration) {
 
   pred <- df_crs %>%
     filter(stats_filter == FALSE | is.na(stats_filter)) %>%
-    sample_n(size = 0.05*n()) #use only 20% to speed up for testing
+    sample_n(size = floor(0.05 * n())) #use only 5% to speed up for testing
 }
  
 
@@ -213,9 +214,12 @@ label.prediction <- as.numeric(pred$stats_filter)
 fit.xgb <- xgboost(data = as.matrix(train_data_dtm), label = label.train, max.depth = 17, eta = eta_par, nthread = 2, 
                    nrounds = nrounds_par, objective = "binary:logistic", verbose = 1)
 
+# Change importance matrix
+#xgb.importance(model = fit.xgb, )
+
 # Check which words have a high importance for the prediction
 importance.matrix <- xgb.importance(model = fit.xgb)
-pdf("./Tmp/XGBoost/importance_matrix_it2_1.5_sample.pdf")
+pdf(paste0("./Tmp/XGBoost/importance_matrix_it2_1.5_", nrow(df_crs), "sample.pdf"))
 xgb.plot.importance(importance.matrix, top_n = 30, rel_to_first = TRUE, xlab = "Relative importance")
 dev.off()
 
@@ -242,7 +246,11 @@ table(factor(test_data$predictions, levels=min(test_data$stats_filter):max(test_
 mean(test_data$predictions == test_data$stats_filter)
 
 
-#-------------------------- Histograms -----------------------------------------
+
+#---------------------------- Visualization  -----------------------------------------
+
+# Plot accuracy and precision trajectories
+source("./Code/05.1 plot_threshold_precision.R")
 
 pred <- pred %>% mutate(total = str_count(string = text_cleaned, pattern = "\\S+")) %>%
   mutate(predictions = as.factor(predictions))
@@ -254,18 +262,37 @@ hist_word_count_distr <- ggplot(pred, aes(x = total, fill = predictions)) +
   ylab("Number of documents") + 
   ggtitle(paste0("Word distribution with binwidth 2 for threshold of ", threshold," with ngram 1"))
 ggsave("./Tmp/XGBoost/word_distribution_it2_1.5_sample.pdf", width = 9, height = 7)
-hist_word_count_zoom <- ggplot(df_crs_0_hist, aes(x = total, fill = dtm_match)) + 
-  geom_histogram(binwidth = 1) + 
-  xlim(0,50) + 
-  xlab("Number of words in description combination") +
-  ylab("Number of documents") + 
-  ggtitle("Word distribution with binwidth 1 for all documents")
-ggsave("./Tmp/word_distribution_zoom_x_all_docs_only_long_idf_keywords.pdf", width = 7, height = 7)
-hist_word_count_zoom_y <- ggplot(df_crs_0_hist, aes(x = total, fill = dtm_match)) + 
-  geom_histogram(binwidth = 1) + 
-  coord_cartesian(
-    ylim = c(0, 20)) +
-  xlab("Number of words in description combination") +
-  ylab("Number of documents") + 
-  ggtitle("Word distribution with binwidth 1 for all documents")
-ggsave("./Tmp/word_distribution_zoom_y_all_docs_only_long_idf_keywords.pdf", width = 10, height = 5)
+
+# Histogram of donor/sector frequency
+df <- df %>%
+  left_join(df_crs %>% select(donorname, sectorname, text_id), by = "text_id") %>% 
+  mutate(donorname = as.factor(donorname),
+         sectorname = as.factor(sectorname))
+
+# Test data
+ggplot(df, aes(x = donorname, fill = stats_filter)) + 
+  geom_bar() + 
+  xlab("Donorname") +
+  ylab("Count") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  ggtitle(paste0("Donor distribution in train + test data (n=", nrow(df), ")"))
+ggsave("./Tmp/XGBoost/hist_donorname_train+test_data.pdf", width = 11, height = 7)
+
+# Pred data
+ggplot(pred, aes(x = donorname)) + 
+  geom_bar() + 
+  xlab("Donorname") +
+  ylab("Count") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  ggtitle(paste0("Donor distribution in test data (pred data n=", nrow(pred), ")"))
+ggsave("./Tmp/XGBoost/hist_donorname_pred_data.pdf", width = 11, height = 7)
+
+# Sector test data
+ggplot(df, aes(x = sectorname, fill = stats_filter)) + 
+  geom_bar() + 
+  xlab("Sector") +
+  ylab("Count") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  ggtitle(paste0("Sector distribution in test + test data (n=", nrow(df), ")"))
+ggsave("./Tmp/XGBoost/hist_sector_train+test_data.pdf", width = 11, height = 7)
+  

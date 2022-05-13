@@ -13,7 +13,9 @@ cols_needed <- c("process_id",
                  "shortdescription", 
                  "longdescription", 
                  "purposecode",
-                 "donorname")
+                 "donorname", 
+                 "sectorname",
+                 "sectorcode")
 
 # every step, we try to use a subset of the data to make the process quicker
 
