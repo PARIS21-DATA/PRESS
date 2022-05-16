@@ -66,7 +66,7 @@ df_crs <- df_crs_raw %>%
                                    description_comb, 
                                    paste(description_comb, longdescription, sep = ". "))) %>%
   mutate(string_dist_title_long = stringdist(tolower(projecttitle), tolower(longdescription))) %>%
-  mutate(text_id = as.numeric(as.factor(description_comb))) %>%
+  mutate(text_id = as.numeric(as.factor(longdescription))) %>%
   mutate(description_comb = ifelse(stringdist(projecttitle, longdescription) < max_string_dist | str_count(longdescription) < 3, 
                                    NA, 
                                    longdescription)) %>% # try only long description for DTM process that are distinct from title

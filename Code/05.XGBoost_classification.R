@@ -76,6 +76,12 @@ df_crs <- df_crs_original %>%
   select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb, donorname, sectorname) %>%
   distinct()
 
+# Test duplicated long descriptions 
+freq_long <- as.data.frame(table(df_crs_original %>% pull(description_comb)))
+freq_long_stat <- as.data.frame(table(df_crs_original %>%
+                                   filter(text_detection_wo_mining_w_scb == TRUE) %>% 
+                                   pull(description_comb)))
+
 #%#%#%#%#%#%#%#%#%#%
 # Preparing the target variable Y: Statistical Activity
 #%#%#%#%#%#%#%#%#%#%
@@ -84,12 +90,13 @@ df_crs <- df_crs_original %>%
 # We assign projects that were not classified as statistical projects by title pattern matching to the prediction data frame pred
 
 # We assign projects that were classified as statistical projects by title pattern matching to df
-iteration <- TRUE
-neg_sample_fraction <- 1.5
+iteration <- FALSE
+print_importance_matrix <- TRUE
+neg_sample_fraction <- 1
 if (iteration) { 
   pred_negative <- pred %>% 
     filter(predictions_raw <= 0.3) %>%
-    sample_n(size = neg_sample_fraction * nrow(df))  %>% 
+    sample_n(size = neg_sample_fraction * df_crs %>% filter(stats_filter == TRUE) %>% nrow)  %>% 
     select(text_id, description, stats_filter, donorname, sectorname) 
   
   df <- df_crs %>%
@@ -101,14 +108,14 @@ if (iteration) {
     filter((stats_filter == FALSE | is.na(stats_filter)) & !(text_id %in% pred_negative$text_id)) %>%
     sample_n(size = floor(0.05 * n())) #use only 5% to speed up for testing
 } else {
-  df <- df_crs %>%
-    filter(stats_filter == TRUE) %>%
-    rbind(pred %>% sample_n(size = neg_sample_fraction * df_crs %>% filter(stats_filter == TRUE) %>% nrow())) %>%
-    filter(!is.na(stats_filter))
-
   pred <- df_crs %>%
     filter(stats_filter == FALSE | is.na(stats_filter)) %>%
     sample_n(size = floor(0.05 * n())) #use only 5% to speed up for testing
+  
+  df <- df_crs %>%
+    filter(stats_filter == TRUE) %>%
+    rbind(pred %>% sample_n(size = neg_sample_fraction * df_crs %>% filter(stats_filter == TRUE) %>% nrow)) %>%
+    filter(!is.na(stats_filter))
 }
  
 
@@ -218,10 +225,14 @@ fit.xgb <- xgboost(data = as.matrix(train_data_dtm), label = label.train, max.de
 #xgb.importance(model = fit.xgb, )
 
 # Check which words have a high importance for the prediction
-importance.matrix <- xgb.importance(model = fit.xgb)
-pdf(paste0("./Tmp/XGBoost/importance_matrix_it2_1.5_", nrow(df_crs), "sample.pdf"))
-xgb.plot.importance(importance.matrix, top_n = 30, rel_to_first = TRUE, xlab = "Relative importance")
-dev.off()
+if (print_importance_matrix) {
+  importance.matrix <- xgb.importance(model = fit.xgb)
+  it_add <- "it0"
+  if (iteration) it_add <- "it1"
+  pdf(paste0("./Tmp/XGBoost/importance_matrix_", it_add,"_", neg_sample_fraction, "_n", nrow(df), "test+train.pdf"))
+  xgb.plot.importance(importance.matrix, top_n = 30, rel_to_first = TRUE, xlab = "Relative importance")
+  dev.off()
+}
 
 # Predict stats_filter based on the text in the test set and in the prediction set
 pred.xgb <- predict(fit.xgb, as.matrix(test_data_dtm))
@@ -234,7 +245,7 @@ pred$predictions_raw <- pred1.xgb
 # Crucial to decide the cut-off value or threshold - i.e., from what probability do we say an observation is stats_filter? 
 # The SDG lab uses a list of thresholds with a different threshold for each SDG. It remains unclear how they arrived at the threshold.
 # I will start with a simple 0.5. But this should be tested and optimized. 
-threshold <- 0.8
+threshold <- 0.95
 test_data <- mutate(test_data, predictions = ifelse(predictions_raw > threshold, 1, 0))
 pred <- mutate(pred, predictions = ifelse(predictions_raw > threshold, 1, 0))
 
@@ -243,7 +254,11 @@ table(factor(test_data$predictions, levels=min(test_data$stats_filter):max(test_
       factor(test_data$stats_filter, levels=min(test_data$stats_filter):max(test_data$stats_filter)))
 
 # Prediction accuracy: 88 % 
-mean(test_data$predictions == test_data$stats_filter)
+precision <- test_data %>% filter(predictions == 1 & stats_filter == TRUE) %>% nrow
+precision <- precision / (precision + test_data %>% filter(predictions == 1 & stats_filter == FALSE) %>% nrow)
+print(paste0("Accuracy: ", mean(test_data$predictions == test_data$stats_filter)))
+print(paste0("Precision: ", precision))
+print(paste0("Fraction of detected projects: ", mean(pred$predictions)))
 
 
 
@@ -260,8 +275,8 @@ hist_word_count_distr <- ggplot(pred, aes(x = total, fill = predictions)) +
   geom_histogram(binwidth = 2) + 
   xlab("Number of words in description combination") +
   ylab("Number of documents") + 
-  ggtitle(paste0("Word distribution with binwidth 2 for threshold of ", threshold," with ngram 1"))
-ggsave("./Tmp/XGBoost/word_distribution_it2_1.5_sample.pdf", width = 9, height = 7)
+  ggtitle(paste0("Word distribution with binwidth 2 for threshold of ", threshold))
+ggsave(paste0("./Tmp/XGBoost/word_distr_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"test+train.pdf"), width = 9, height = 7)
 
 # Histogram of donor/sector frequency
 df <- df %>%
@@ -296,3 +311,4 @@ ggplot(df, aes(x = sectorname, fill = stats_filter)) +
   ggtitle(paste0("Sector distribution in test + test data (n=", nrow(df), ")"))
 ggsave("./Tmp/XGBoost/hist_sector_train+test_data.pdf", width = 11, height = 7)
   
+

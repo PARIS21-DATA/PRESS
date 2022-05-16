@@ -1,4 +1,4 @@
-threshold_step <- data.frame(threshold = as.numeric(), accuracy = as.numeric(), precision = as.numeric())
+threshold_step <- data.frame(threshold = as.numeric(), accuracy = as.numeric(), precision = as.numeric(), recall = as.numeric())
 intervall <- 0.01
 for (i in seq(0, 1, by = intervall)) {
   # Crucial to decide the cut-off value or threshold - i.e., from what probability do we say an observation is stats_filter? 
@@ -14,21 +14,29 @@ for (i in seq(0, 1, by = intervall)) {
   
   # Prediction accuracy: 88 % 
   accuracy <- mean(test_data$predictions == test_data$stats_filter)
-  precision <- test_data %>% filter(predictions == 1 & stats_filter == TRUE) %>% nrow
-  precision <- precision / (precision + test_data %>% filter(predictions == 1 & stats_filter == FALSE) %>% nrow)
+  true_pos <- test_data %>% filter(stats_filter == TRUE & predictions == 1) %>% nrow
+  precision <- true_pos / (true_pos + test_data %>% filter(stats_filter == FALSE & predictions == 1) %>% nrow)
+  recall <- true_pos / (true_pos + test_data %>% filter(stats_filter == TRUE & predictions == 0) %>% nrow)
   
   threshold_step <- threshold_step %>%
-    rbind(c(i, accuracy, precision))
+    rbind(c(i, accuracy, precision, recall))
 }
-names(threshold_step) <- c("threshold", "accuracy", "precision")
+names(threshold_step) <- c("threshold", "accuracy", "precision", "recall")
+
+# Add F1 metric: F1 = 2*precision*recall/(precision + recall)
+threshold_step <- threshold_step %>%
+  mutate(F1 = 2*precision*recall/(precision + recall))
+max_F1 <- threshold_step[threshold_step$F1 == max(threshold_step$F1, na.rm = T),]$threshold %>% na.omit
 
 ggplot(threshold_step, aes(x = threshold)) +
   geom_line(aes(y = precision, colour = "precision")) + 
   geom_line(aes(y = accuracy, colour = "accuracy")) + 
-  ylab("value")+
-  #geom_point() +
-  ggtitle(paste0("Precision trajectory after it 2 in intervalls ", intervall))
-ggsave(paste0("./Tmp/XGBoost/threshold_precision_accuracy_n", nrow(df_crs),"sample.pdf"), width = 9, height = 7)
+  geom_line(aes(y = recall, colour = "recall")) +
+  geom_line(aes(y = F1, colour = "F1")) +
+  geom_vline(xintercept = max_F1, linetype = "dotted" ) +
+  ylab("value") +
+  ggtitle(paste0("Precision trajectory after ", it_add, " in intervalls ", intervall, " for a negative marked ration of ", neg_sample_fraction))
+ggsave(paste0("./Tmp/XGBoost/threshold_precision_accuracy_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"test+train.pdf"), width = 9, height = 7)
 
 library(xlsx)
 write.xlsx(test_data, file = "./Tmp/XGBoost/test_data.xlsx", row.names = FALSE)
