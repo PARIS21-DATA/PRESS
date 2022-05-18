@@ -73,14 +73,20 @@ df_crs <- readRDS(crs_path)
 df_crs_original <- df_crs 
 df_crs <- df_crs_original %>%
   filter(is.na(description_comb) == FALSE) %>%
-  select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb, donorname, sectorname) %>%
+  select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb) %>%
   distinct()
+
+library(xlsx)
+write.xlsx(df_crs_original, file = "./Tmp/XGBoost/full_unclassified_crs.xlsx", row.names = FALSE)
 
 # Test duplicated long descriptions 
 freq_long <- as.data.frame(table(df_crs_original %>% pull(description_comb)))
 freq_long_stat <- as.data.frame(table(df_crs_original %>%
                                    filter(text_detection_wo_mining_w_scb == TRUE) %>% 
                                    pull(description_comb)))
+freq_df <- as.data.frame(table(df %>%
+                      filter(stats_filter == TRUE) %>% 
+                      pull(description)))
 
 #%#%#%#%#%#%#%#%#%#%
 # Preparing the target variable Y: Statistical Activity
@@ -90,14 +96,14 @@ freq_long_stat <- as.data.frame(table(df_crs_original %>%
 # We assign projects that were not classified as statistical projects by title pattern matching to the prediction data frame pred
 
 # We assign projects that were classified as statistical projects by title pattern matching to df
-iteration <- FALSE
+iteration <- TRUE
 print_importance_matrix <- TRUE
 neg_sample_fraction <- 1
 if (iteration) { 
   pred_negative <- pred %>% 
     filter(predictions_raw <= 0.3) %>%
     sample_n(size = neg_sample_fraction * df_crs %>% filter(stats_filter == TRUE) %>% nrow)  %>% 
-    select(text_id, description, stats_filter, donorname, sectorname) 
+    select(text_id, description, stats_filter) 
   
   df <- df_crs %>%
     filter(stats_filter == TRUE) %>%

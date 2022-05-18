@@ -1,7 +1,7 @@
 threshold_step <- data.frame(threshold = as.numeric(), accuracy = as.numeric(), precision = as.numeric(), recall = as.numeric())
 intervall <- 0.01
 for (i in seq(0, 1, by = intervall)) {
-  # Crucial to decide the cut-off value or threshold - i.e., from what probability do we say an observation is stats_filter? 
+  # Crucial to decide the cut-off value or threshold - i.e., from what probability do we say an observation is gender_filter? 
   # The SDG lab uses a list of thresholds with a different threshold for each SDG. It remains unclear how they arrived at the threshold.
   # I will start with a simple 0.5. But this should be tested and optimized. 
   threshold <- i
@@ -9,14 +9,14 @@ for (i in seq(0, 1, by = intervall)) {
   pred <- mutate(pred, predictions = ifelse(predictions_raw > threshold, 1, 0))
   
   # Check performance - confusion matrix - looks quite good!
-  table(factor(test_data$predictions, levels=min(test_data$stats_filter):max(test_data$stats_filter)), 
-        factor(test_data$stats_filter, levels=min(test_data$stats_filter):max(test_data$stats_filter)))
+  table(factor(test_data$predictions, levels=min(test_data$gender_filter):max(test_data$gender_filter)), 
+        factor(test_data$gender_filter, levels=min(test_data$gender_filter):max(test_data$gender_filter)))
   
   # Prediction accuracy: 88 % 
-  accuracy <- mean(test_data$predictions == test_data$stats_filter)
-  true_pos <- test_data %>% filter(stats_filter == TRUE & predictions == 1) %>% nrow
-  precision <- true_pos / (true_pos + test_data %>% filter(stats_filter == FALSE & predictions == 1) %>% nrow)
-  recall <- true_pos / (true_pos + test_data %>% filter(stats_filter == TRUE & predictions == 0) %>% nrow)
+  accuracy <- mean(test_data$predictions == test_data$gender_filter)
+  true_pos <- test_data %>% filter(gender_filter == TRUE & predictions == 1) %>% nrow
+  precision <- true_pos / (true_pos + test_data %>% filter(gender_filter == FALSE & predictions == 1) %>% nrow)
+  recall <- true_pos / (true_pos + test_data %>% filter(gender_filter == TRUE & predictions == 0) %>% nrow)
   
   threshold_step <- threshold_step %>%
     rbind(c(i, accuracy, precision, recall))
