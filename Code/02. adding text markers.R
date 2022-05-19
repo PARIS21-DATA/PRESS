@@ -140,4 +140,19 @@ sum(tab_tmp %>% filter(language == "de" | language == "nl") %>% pull(frac_deepl)
 # available languages - question: does quota apply to language detection?
 nchar(paste(df_crs %>% filter(language %in% lang_deepl$language & !(language %in% c("en", "fr", "es"))) %>% pull(longdescription) , collapse = "")) * 0.00002 * 40
 
+# Translate keyword lists
+list_keywords_stat_en <- read_lines("data/statistics_reduced_en.txt")  %>% trimws()
+list_keywords_stat_de <- deeplr::toGerman2(list_keywords_stat_en, auth_key = deepl_auth_key) # German
+list_keywords_stat_es <- deeplr::toSpanish2(list_keywords_stat_en, auth_key = deepl_auth_key) # Spanish
+list_keywords_stat_fr <- deeplr::toFrench2(list_keywords_stat_en, auth_key = deepl_auth_key) # French
+write.table(list_keywords_stat_de, file = "./data/statistics_reduced_de.txt", row.names = F, col.names = F, quote = FALSE)
+write.table(list_keywords_stat_es, file = "./data/statistics_reduced_es.txt", row.names = F, col.names = F, quote = FALSE)
+write.table(list_keywords_stat_fr, file = "./data/statistics_reduced_fr.txt", row.names = F, col.names = F, quote = FALSE)
 
+list_keywords_gender_en <- readLines("data/gender_en.txt")  %>% trimws()
+list_keywords_gender_de <- deeplr::toGerman2(list_keywords_gender_en, auth_key = deepl_auth_key) # German
+list_keywords_gender_es <- deeplr::toSpanish2(list_keywords_gender_en, auth_key = deepl_auth_key)
+list_keywords_gender_fr <- deeplr::toFrench2(list_keywords_gender_en, auth_key = deepl_auth_key)
+write.table(list_keywords_gender_de, file = "./data/gender_de.txt", row.names = F, col.names = F, quote = FALSE)
+write.table(list_keywords_gender_es, file = "./data/gender_es.txt", row.names = F, col.names = F, quote = FALSE)
+write.table(list_keywords_gender_fr, file = "./data/gender_fr.txt", row.names = F, col.names = F, quote = FALSE)

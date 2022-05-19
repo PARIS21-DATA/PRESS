@@ -4,13 +4,13 @@
 # Author: Johannes Abele
 # Date: 05/04/2022
 #
-# Objective: 
-#            
+# Objective: Send emails with data sets to be classified manually to a list of 
+#            recipients     
 #            
 # 
-# input files: - 
-#              - 
-#              - 
+# input files: - recipients.txt (email list)
+#              - email_body.txt
+#              - /Tmp/XGBoost/Manual verification/*.xlsx
 #              - 
 #              
 #
@@ -53,38 +53,26 @@ devtools::install_github("BSchamberger/RDCOMClient", ref = "master", force = TRU
 
 library(RDCOMClient)
 
-Outlook <- COMCreate("Outlook.Application")
-
+# Load recipients and files
 list_recipients <- read_lines("./Emails/recipients.txt", skip_empty_rows = TRUE)
-email_body <- readLines("./Emails/email_body.txt")
-email_body <- paste(email_body, collapse = "\n")
 excel_files <- list.files(path = "./Tmp/XGBoost/Manual verification/")
+
+# Establish connection to Outlook
+Outlook <- COMCreate("Outlook.Application")
 
 for (i in 1:length(list_recipients)) {
   path_to_attachment <- paste0(getwd(), "/Tmp/XGBoost/Manual verification/", excel_files[i])
   Email = Outlook$CreateItem(0)
   Email[["to"]] = list_recipients[i]
   Email[["subject"]] = "[We need your help!] Making the PRESS methodology even smarter"
-  Email[["body"]] = email_body
+  Email[["cc"]] = "Yu.TIAN@oecd.org"
+  email_body <- readLines("./Emails/email_body.txt")
+  email_body <- paste(email_body, collapse = "<br>")
+  email_body <- paste0("Dear ", str_extract(list_recipients[i], "[^.]+"), ",<br><br>", email_body)
+  Email[["HTMLbody"]] = email_body
   Email[["attachments"]]$Add(path_to_attachment)
   Email$send()
 }
 
-#Email[["cc"]] = "giorgi.sharvadze@oecd.org"
 
 
-#--------------------------- Via SMTP server -----------------------------------
-# Does not work for Outlook so far 
-
-install.packages("mailR")
-library(mailR)
-
-send.mail(from = "johannes.abele@oecd.org",
-          to = "johannes.abele@ensae.fr",
-          subject = "Hurensohn bist du",
-          body = "Test emails body",
-          smtp = list(host.name = "smtp.office365.com", port = 587,
-                      user.name = "johannes.abele@ensae.fr",
-                      passwd = "Azerty123456", tls = TRUE),
-          authenticate = TRUE,
-          send = TRUE)

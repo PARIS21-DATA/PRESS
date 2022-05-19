@@ -89,13 +89,13 @@ freq_df <- as.data.frame(table(df %>%
 # Preparing the target variable Y: Statistical Activity
 #%#%#%#%#%#%#%#%#%#%
 
-
-# We assign projects that were not classified as statistical projects by title pattern matching to the prediction data frame pred
+# Set parameters
+iteration <- FALSE
+print_importance_matrix <- TRUE
+n_gram <- 1
+neg_sample_fraction <- 1
 
 # We assign projects that were classified as statistical projects by title pattern matching to df
-iteration <- TRUE
-print_importance_matrix <- TRUE
-neg_sample_fraction <- 1
 if (iteration) { 
   pred_negative <- pred %>% 
     filter(predictions_raw <= 0.3) %>%
@@ -134,13 +134,13 @@ create_corpus <- function (data){
   source <- VectorSource(data$description)
   corpus <- VCorpus(source) 
   corpus <- tm_map(corpus, content_transformer(tolower)) # lower case
+  corpus <- tm_map(corpus, removeWords, c("'s")) # remove possesive s so that plural nouns get lemmatized correctly, e.g. "women's"
   corpus <- tm_map(corpus, removeNumbers)# remove numbers
   corpus <- tm_map(corpus, removePunctuation, preserve_intra_word_dashes = TRUE) # remove punctuation. We want to keep dashes inside words such as in high-level
   corpus <- tm_map(corpus, stripWhitespace) # remove remaining white space
   corpus <- tm_map(corpus, removeWords, c(stopwords('english'))) # remove stopwords for English
-  corpus <- tm_map(corpus, removeWords, c(stopwords(source = "smart"))) # remove some extra stopwords not captured by the previous list
+  corpus <- tm_map(corpus, removeWords, c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) # remove some extra stopwords not captured by the previous list
   corpus <- tm_map(corpus, removeWords, c("iii")) # remove roman number 3 that is very common
-  corpus <- tm_map(corpus, removeWords, c(stopwords("fr"))) # remove french stopwords
   #corpus <- tm_map(corpus, replace_contraction) # extra step to catch exceptions such as "aren't" - might not be necessary
   corpus <- tm_map(corpus, lemmatize_strings) # lemmatize words - this might not be the best choice in particular with a English-French language mix
   corpus <- tm_map(corpus, PlainTextDocument) # transform into a format that can be used more easily later on
@@ -184,21 +184,20 @@ train_data <- df[dt,]
 test_data <- df[-dt,]
 
 # Try ngram 
-NLP_tokenizer <- function(x) {
-  unlist(lapply(ngrams(words(x), 1:2), paste, collapse = " "), use.names = FALSE)
+if (n_gram == 1) {
+  control_list_ngram <- list(weighting = weightTf)
+} else {
+  NLP_tokenizer <- function(x) {
+    unlist(lapply(ngrams(words(x), 1:n_gram), paste, collapse = " "), use.names = FALSE)
+  }
+  control_list_ngram = list(tokenize = NLP_tokenizer,
+                            removePunctuation = TRUE,
+                            removeNumbers = TRUE, 
+                            stopwords = stopwords("english"), 
+                            tolower = T, 
+                            lemmatization = T, 
+                            weighting = function(x) { weightTf(x) })
 }
-control_list_ngram = list(tokenize = NLP_tokenizer,
-                          removePunctuation = TRUE,
-                          removeNumbers = TRUE, 
-                          stopwords = stopwords("english"), 
-                          tolower = T, 
-                          lemmatization = T, 
-                          weighting = function(x) { weightTf(x) },
-                          dictionary=Terms(train_data_dtm) # only for test and prediction data 
-                          )
-
-control_list_ngram <- list(weighting = weightTf)
-
 # Creating document-feature-matrix for training data and for total data
 total_data_dtm <- df$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
 train_data_dtm <- train_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
@@ -207,9 +206,20 @@ train_data_dtm <- train_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% D
 # 1. We have to exclude words that do not appear in the training data. The model does not know these and breaks.
 # 2. We have to include words (although with a 0) that appear in the training data but not in the test data. Otherwise the model gets confused as well.
 # See here for a detailed discussion: https://stackoverflow.com/questions/16630627/how-to-recreate-same-documenttermmatrix-with-new-test-data 
-control_list_ngram_dict <- list(weighting = weightTf, dictionary=Terms(train_data_dtm))
-test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram_dict)
-prediction_data_dtm <- pred$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram_dict)
+if (n_gram == 1) {
+  control_list_ngram <- list(weighting = weightTf, dictionary=Terms(train_data_dtm))
+} else {
+  control_list_ngram = list(tokenize = NLP_tokenizer,
+                            removePunctuation = TRUE,
+                            removeNumbers = TRUE, 
+                            stopwords = stopwords("english"), 
+                            tolower = T, 
+                            lemmatization = T, 
+                            weighting = function(x) { weightTf(x) },
+                            dictionary=Terms(train_data_dtm))
+}
+test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
+prediction_data_dtm <- pred$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
 
 # Train the model for one statistical domain - parameters taken from SDG lab code. These might benefit from tuning
 eta_par <- 0.1

@@ -8,13 +8,13 @@ df_crs <- readRDS(crs_path)
 # it is wrong because some projects with the same name will have different purpose codes
 
 # Switch to switch from lemmatization to stemming 
-stemming <- FALSE
-
+stemming <- FALSE 
+lang <- "de"
 
 ## 1.c. split projects by language delimiters "." and " / "
 
 df_crs <- df_crs %>%
-  filter(language == "en") %>% ##??? to solve later
+  filter(language == lang) %>% ##??? to solve later
   mutate(projecttitle_lower = tolower(projecttitle)) %>%
   mutate(title_id = as.numeric(as.factor(projecttitle_lower))) 
 
@@ -40,28 +40,53 @@ library(textclean)
 library(lexicon)
 library(quanteda) 
 
+# Try German 
+library(udpipe)
+ud_model <- udpipe_download_model("german")
+ud_model <- udpipe_load_model(ud_model)
+
+german_lemma <- df_crs %>%
+  mutate(longdescription_clean = clean_and_lemmatize(longdescription, language =  "de")) 
+
+clean_and_lemmatize(tolower(df_crs$longdescription[12]), language = "de")
+
 # Function to clean strings and lemmatize
-clean_and_lemmatize <- function (string){
+clean_and_lemmatize <- function (string, language = "en"){
   string <- string %>% 
     tolower %>% 
     removeWords("'s") %>% # remove possesive s so that plural nouns get lemmatized correctly, e.g. "women's"
     removeNumbers() %>%
     removePunctuation(preserve_intra_word_dashes = TRUE) %>%
-    stripWhitespace %>%
-    removeWords(c(stopwords('english'))) %>% 
-    removeWords(c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) %>% # exclude "use" from smart stopwords 
-    lemmatize_strings()
+    stripWhitespace 
+  
+  if(language == "en") {
+    string <- string %>%  
+      removeWords(c(stopwords('english'))) %>% 
+      removeWords(c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) %>% # exclude "use" from smart stopwords 
+      lemmatize_strings()
+  } else if (language == "de") {
+    string <- string %>%  
+      removeWords(c(stopwords('german'))) %>%
+      enc2utf8() %>%
+      udpipe_annotate(ud_model, .) %>%
+      as.data.frame() %>%
+      pull(lemma) %>% 
+      paste(collapse = " ")
+  }
+  
   return(string)
 }
+
+
 
 # Lemmatize or stem keywords 
 if (stemming) {
   list_keywords_stat <- stem_and_concatenate(list_keywords_stat)
   list_keywords_gender <- stem_and_concatenate(list_keywords_gender)
 } else {
-  list_keywords_stat <- clean_and_lemmatize(list_keywords_stat)
-  list_keywords_gender <- clean_and_lemmatize(list_keywords_gender)
-  list_keywords_gender <- list_keywords_gender %>% append("women") # due to many spelling mistakes like women_s, women?s..
+  list_keywords_stat <- clean_and_lemmatize(list_keywords_stat, language = lang)
+  list_keywords_gender <- clean_and_lemmatize(list_keywords_gender, language = lang)
+  if(lang == "en") list_keywords_gender <- list_keywords_gender %>% append("women") # due to many spelling mistakes like women_s, women?s..
 }
 
 if (stemming) {
@@ -72,8 +97,8 @@ if (stemming) {
            match_gender = str_detect(projecttitle_clean, paste(list_keywords_gender, collapse = "|")))
 } else {
   df_crs <- df_crs %>%
-    mutate(projecttitle_clean = clean_and_lemmatize(projecttitle_lower),
-           longdescription_clean = clean_and_lemmatize(longdescription)) %>%
+    mutate(projecttitle_clean = clean_and_lemmatize(projecttitle_lower, language = lang),
+           longdescription_clean = clean_and_lemmatize(longdescription, language = lang)) %>%
     mutate(match_stat = str_detect(projecttitle_clean, paste(list_keywords_stat, collapse = "|")),
            match_gender = str_detect(projecttitle_clean, paste(list_keywords_gender, collapse = "|")))
 }
