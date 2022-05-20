@@ -126,7 +126,7 @@ deepl_auth_key <- "fcec1af3-2663-3f39-7f16-dcd07b334f30:fx"
 
 
 # Fraction of projects in deepL-able languages 
-lang_deepl <- available_languages2(auth_key = deepl_auth_key) %>%
+lang_deepl <- deeplr::available_languages2(auth_key = deepl_auth_key) %>%
   mutate(language = tolower(language))
 tab <- table(df_crs$language) %>% as.data.frame
 tab_tmp <- tab %>%

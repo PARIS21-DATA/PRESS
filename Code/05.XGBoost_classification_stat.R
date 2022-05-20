@@ -65,7 +65,7 @@ rm(packages)
 # setting working directory for experimenting - in the future loading data from github might be the easier solution
 setwd(getwd())
 
-crs_path <- "./Data/intermediate/crs03.rds"
+crs_path <- "./Data/intermediate/crs03_original.rds"
 crs_path_new <- "./Data/intermediate/positive_text_id.rds"
 lang <-  "en"
 language <- "english"
@@ -73,7 +73,7 @@ df_crs <- readRDS(crs_path)
 df_crs_original <- df_crs 
 df_crs <- df_crs_original %>%
   filter(is.na(description_comb) == FALSE) %>%
-  select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb) %>%
+  select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb, gender_filter = match_gender) %>%
   distinct()
 
 #library(openxlsx)
@@ -116,13 +116,13 @@ if (iteration) {
     sample_n(size = floor(0.05 * n())) #use only 5% to speed up for testing
 } else {
   pred <- df_crs %>%
-    filter(stats_filter == FALSE | is.na(stats_filter)) %>%
+    filter((stats_filter == FALSE & gender_filter == FALSE) | (is.na(stats_filter) | is.na(stats_filter))) %>%
     sample_n(size = floor(0.05 * n())) #use only 5% to speed up for testing
   
   df <- df_crs %>%
-    filter(stats_filter == TRUE) # %>%
-    rbind(pred %>% sample_n(size = neg_sample_fraction * df_crs %>% filter(stats_filter == TRUE) %>% nrow)) %>%
-    filter(!is.na(stats_filter))
+    filter(stats_filter == TRUE & gender_filter == TRUE) %>%
+    rbind(pred %>% sample_n(size = neg_sample_fraction * df_crs %>% filter(stats_filter == TRUE & gender_filter == TRUE) %>% nrow)) %>%
+    filter(!is.na(stats_filter) | !is.na(gender_filter))
 }
  
 

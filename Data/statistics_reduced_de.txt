@@ -1,72 +1,73 @@
-"Statistik"
-"Umfrage"
-"Volkszählung"
-"Datenbank"
-"big Data"
-"Daten für Entscheidungen"
-"Melderegister"
-"Grundbucheintrag"
-"Kataster"
-"sdg-Indikator"
-"Informationssystem"
-"Geburtenregister"
-volkswirtschaftliche Gesamtrechnung
-"Preisindex"
-"Produktionsindex"
-"Data Science"
-Entwicklungsdaten
-"Datenjournalismus"
-"Daten für Bildung"
-"bildungsbezogene Daten"
-"Daten für die Gesundheit"
-"Daten zur Friedensförderung"
-"globale Daten"
-"globaler Puls"
-"Gesundheitsdaten"
-"Flüchtlingsdaten"
-"Migrationsdaten"
-"Datenerfassung"
-"Handeln durch Daten"
-"Datenprojekt"
-"offene Regierungsdaten"
-"Sterberegister"
-"wichtige Registrierung"
-"Datenportal"
-"Datenarchiv"
-"Archivdaten"
-"Datenverbreitung"
-"Verbreitung von Daten"
-"Mikrodaten"
-"Metadaten"
-"Datenverwaltung"
-Datenmanagement
-"Datendokumentation"
-"Qualitätsdaten"
-"Datenqualität"
-"Zugangsdaten"
-"offene Daten"
-"Daten verwenden"
-"Daten produzieren"
-"Produktionsdaten"
-"Datennutzer"
-"Datenproduzent"
-"Datenübermittlung"
-"Datenbewusstsein"
-"Datenerstellung"
-"Datenverarbeitung"
-"Datenzugriff"
-"Datenharmonisierung"
-"Harmonisierungsdaten"
-"mdg-Indikatoren"
-"Datenstandards"
-"Datenkuratierung"
-"Daten kuratieren"
-"demografische Daten"
-"mdg-Überwachung"
-"sdg-überwachung"
-"Überwachung von mdg"
-"Überwachung von sdg"
-"Freigabedaten"
-"Datenfreigabe"
-"prsp-Überwachung"
-"Datenrevolution"
+Statistik
+Umfrage
+Volkszählung
+Datenbank
+big Data
+Daten für Entscheidungen
+Melderegister
+Grundbucheintrag
+Kataster
+sdg-Indikator
+Informationssystem
+Geburtenregister
+Personenstandsregister
+Personenstandsregister
+nationales Konto
+Preisindex
+Produktionsindex
+Data Science
+Daten für die Entwicklung
+Datenjournalismus
+Daten für Bildung
+bildungsbezogene Daten
+Daten für das Gesundheitssystem
+Daten zur Friedensförderung
+globale Daten
+globaler Puls
+Gesundheitsdaten
+Flüchtlingsdaten
+Migrationsdaten
+Datenerfassung
+Handeln durch Daten
+Datenprojekt
+offene Regierungsdaten
+Sterberegister
+Bevölkerungsstatistik
+Datenportal
+Datenarchiv
+Archivdaten
+Datenverbreitung
+Daten verbreiten
+Mikrodaten
+Metadaten
+Datenverwaltung
+Datendokumentation
+Qualitätsdaten
+Datenqualität
+Zugangsdaten
+offene Daten
+Daten verwenden
+Daten produzieren
+Produktionsdaten
+Datenbenutzer
+Datenproduzent
+Datenübermittlung
+Datenbewusstsein
+Datenerstellung
+Datenverarbeitung
+Datenzugriff
+Datenharmonisierung
+Harmonisierungsdaten
+mdg-Indikatoren
+Datenstandards
+Datenkuratierung
+Daten kuratieren
+demografische Daten
+mdg-Überwachung
+sdg-überwachung
+Überwachung von mdg
+Überwachung von sdg
+Freigabedaten
+Datenfreigabe
+prsp-Überwachung
+Datenrevolution

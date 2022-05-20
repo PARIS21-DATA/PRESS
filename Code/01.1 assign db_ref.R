@@ -3,8 +3,9 @@
 ### 
 rm(list = ls())
 crs_path <- "./Data/Raw/CRS/crs_sample.rds"
+crs_path_lang <- "./Data/Raw/CRS/df_crs_de.rds"
 crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" , ".rds")
-df_crs_raw <- readRDS(crs_path)
+df_crs_raw <- readRDS(crs_path_lang)
 
 # Subset necessary information
 df_crs <- df_crs_raw %>%
@@ -49,7 +50,7 @@ df_crs$db_ref <- with(df_crs,
 # Test uniqueness of the project identifier db_ref
 source("code/01.2 check uniqueness of db_ref.r")
 
-# Transform identifiers in format "df_source_#####" 
+# Transform identifiers to format "df_source_#####" 
 df_crs$db_ref = paste0("df_", df_crs$source, df_crs$db_ref) %>% as.factor
 
 # Add project identifiers to raw data set

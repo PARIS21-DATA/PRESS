@@ -68,10 +68,54 @@ saveRDS(df_crs, file  = "./Data/Raw/CRS/crs_full.rds")
 beep(2)
 
 # If full data available in Data/Raw/, uncomment to load 
-#df_crs <- readRDS("./Data/Raw/CRS/crs_full.rds")
+df_crs <- readRDS("./Data/Raw/CRS/crs_full.rds")
+
+df_crs_lang <- df_crs %>%
+  select(projecttitle, longdescription) %>%
+  mutate(projecttitle_lower = tolower(projecttitle), longdescription_lower = tolower(longdescription)) %>%
+  mutate(description_comb = paste(projecttitle_lower, longdescription_lower, sep = ".")) %>%
+  mutate(title_id = as.numeric(as.factor(description_comb))) %>% 
+  filter(!duplicated(title_id)) %>%
+  mutate(title_language = cld2::detect_language(projecttitle)) %>%
+  mutate(long_language = cld2::detect_language(longdescription))
+
+df_crs_es <- df_crs_lang %>%
+  filter(title_language == "es" | long_language == "es")
+
+df_crs_de <- df_crs_lang %>%
+  filter(title_language == "de" | long_language == "de")
+
+df_crs_fr <- df_crs_lang %>%
+  filter(title_language == "fr" | long_language == "fr")
+
+
+languages_full_crs <- as.data.frame(table(df_crs_lang$title_language)) %>%
+  rename(language = Var1, title_language = Freq) %>% 
+  left_join(as.data.frame(table(df_crs_lang$long_language)) %>% 
+              rename(language = Var1, long_language = Freq), by = "language")
+saveRDS(languages_full_crs, file = "./data/languages_full_crs.rds")
+
+# Germany sample
+crs_germany_sample <- readRDS("./Data/Raw/Crs/crs_germany_sample.rds")
+crs_germany_sample <- crs_germany_sample %>%
+  select(projecttitle, longdescription) %>%
+  mutate(projecttitle_lower = tolower(projecttitle), longdescription_lower = tolower(longdescription)) %>%
+  mutate(title_id = as.numeric(as.factor(paste(projecttitle_lower, longdescription_lower, sep = ".")))) %>%
+  filter(!duplicated(title_id)) %>%
+  mutate(title_language = cld2::detect_language(projecttitle)) %>%
+  mutate(long_language = cld2::detect_language(longdescription))
+
+languages_germany_crs <- as.data.frame(table(crs_germany_sample$title_language)) %>%
+  rename(language = Var1, title_language = Freq) %>% 
+  left_join(as.data.frame(table(crs_germany_sample$long_language)) %>% 
+              rename(language = Var1, long_language = Freq), by = "language")
+
+library(xlsx)
+write.xlsx(languages_full_crs, file = "./Tmp/languages_full_crs.xlsx", row.names = F)
+write.xlsx(languages_germany_crs, file = "./Tmp/languages_germany_crs.xlsx", row.names = F)
 
 # Take a sample of the entire data frame for further testing 
-df_crs_sample <- df_crs[sample(nrow(df_crs),nrow(df_crs)/10 ), ]
+df_crs_sample <- df_crs[sample(nrow(df_crs),nrow(df_crs)/10), ]
 rm(df_crs)
 df_crs <- df_crs_sample
 saveRDS(df_crs, file  = "./Data/Raw/CRS/crs_sample.rds") 
