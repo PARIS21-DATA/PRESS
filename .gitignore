@@ -20,3 +20,6 @@ code/YTnewcodes
 data/data_sub
 data/intermediate/crs_filter_results.csv
 YTreviewtemp
+
+data/intermediate/crs01_1all.rds
+# data/intermediate/tf_idf_keywords.rds
