@@ -1,4 +1,4 @@
-stem_and_concatenate <- function(x_string){
+stem_and_concatenate <- function(x_string, language = "en"){
   # this function can be improved if we remove duplicates from the beginning
   # partially resolved by always remove duplicates at the beginning of each script
   df_string <- x_string %>%
@@ -7,8 +7,8 @@ stem_and_concatenate <- function(x_string){
   
   x_string_stem <- df_string %>%
     unnest_tokens(word, text) %>%
-    anti_join(get_stopwords(), by = "word") %>%
-    mutate(stem = wordStem(word)) %>%
+    anti_join(get_stopwords(language = language), by = "word") %>%
+    mutate(stem = wordStem(word, language = language)) %>%
     group_by(ref) %>%
     dplyr::summarise(text_stem = paste(stem, collapse = " ")) %>% # necessary to specify dplyr::, if plyr is loaded plyr's summarise() drops ref
     ungroup() %>%
