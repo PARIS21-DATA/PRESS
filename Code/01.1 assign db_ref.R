@@ -2,9 +2,9 @@
 # start data cleaning 
 ### 
 rm(list = ls())
-crs_path <- "./Data/Raw/CRS/crs_full.rds"
+# crs_path <- "./Data/Raw/CRS/crs_full.rds"
 crs_path <- "./Data/Raw/CRS/crs_sample.rds"
-crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" , "all.rds")
+# crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" , "all.rds")
 crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" , ".rds")
 
 df_crs_raw <- readRDS(crs_path)
