@@ -32,8 +32,8 @@ rm(packages)
 
 # Set wd
 setwd(getwd())
-
-
+# extremely important for mac os:
+Sys.setlocale("LC_ALL", "C")
 
 # source("data/functions.R")
 

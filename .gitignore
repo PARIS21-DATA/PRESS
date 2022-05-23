@@ -23,3 +23,7 @@ YTreviewtemp
 
 data/intermediate/crs01_1all.rds
 # data/intermediate/tf_idf_keywords.rds
+
+*_full.rds
+*full_win.rds
+

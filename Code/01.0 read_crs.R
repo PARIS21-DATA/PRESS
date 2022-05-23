@@ -5,6 +5,10 @@
 rm(list = ls())
 gc()
 
+print_time_diff <- function(start_time) {
+  difftime(Sys.time(),start_time, units = "sec") %>% print
+}
+
 crs_zip_folder <-  "./Data/Raw/CRS/zip"
 crs_txt_folder <-  "./Data/Raw/CRS/txt"
 
@@ -47,7 +51,7 @@ df_crs <-  rbind(list_crs[[1]],
                list_crs[[13]], 
                list_crs[[14]] 
 )
-difftime(Sys.time(),start, units = "sec")
+print_time_diff(start)
 # Time difference of 86.15631 secs
 beep(2)
 

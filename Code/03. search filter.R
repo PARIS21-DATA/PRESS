@@ -1,8 +1,15 @@
 rm(list = ls())
 source("code/00.1 functions.R")
-crs_path_new <- "./Data/intermediate/crs03de.rds"
-crs_path <- "./Data/intermediate/crs02de.rds"
+print_time_diff <- function(start_time) {
+  difftime(Sys.time(),start_time, units = "sec") %>% print
+}
+job_specific_suffix <- ""
+job_specific_suffix <- "_full"
+crs_path <- paste0("./Data/intermediate/crs02", job_specific_suffix, ".rds")
+crs_path_new <- paste0("./Data/intermediate/crs03", job_specific_suffix, ".rds")
+start <- Sys.time()
 df_crs <- readRDS(crs_path)
+print_time_diff(start)
 
 # we used to make the project with same description as 1 as long as one of the same description is marked as 1
 # it is wrong because some projects with the same name will have different purpose codes
@@ -48,7 +55,7 @@ list_keywords_gender <- readLines("data/gender_en.txt")  %>%
 
 list_keywords_stem <- stem_and_concatenate(list_keywords)
 list_keywords_gender_stem <- stem_and_concatenate(list_keywords_gender)
-
+print_time_diff(start)
 
 df_crs <- df_crs %>%
   # select(db_ref, projecttitle, scb) %>%
@@ -56,6 +63,9 @@ df_crs <- df_crs %>%
   mutate(projecttitle_stem = stem_and_concatenate(projecttitle_lower)) %>%
   mutate(text_detection = str_detect(projecttitle_stem, paste(list_keywords_stem, collapse = "|")))  %>%
   mutate(text_detection_gender =str_detect(projecttitle_stem, paste(list_keywords_gender_stem, collapse = "|")) )
+print_time_diff(start)
+
+
 # 
 # tagged.results <- treetag(list_keywords, 
 #                           treetagger="manual", format="obj",
@@ -100,13 +110,15 @@ df_crs <- df_crs %>%
 table(df_crs$text_detection_wo_mining) %>% print
 table(df_crs$text_detection_wo_mining_w_scb) %>% print
 which(is.na(df_crs$text_detection_wo_mining_w_scb))
+print_time_diff(start)
 
 df_crs <- df_crs %>%
-  mutate(text_filter_gender = gen_donor|gen_ppcode|gen_marker|text_detection_gender)
+  mutate(text_filter_gender = gen_donor|gen_ppcode|text_detection_gender# |gen_marker
+         )
 
 a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, text_detection_gender) %>% unique %>% nrow
 b = df_crs %>% select(text_id) %>% unique %>% nrow
-
+print_time_diff(start)
 # list = df_crs %>% 
 #   filter(text_detection_wo_mining_w_scb) %>%
 #   select(text_id, projecttitle) %>%
@@ -120,3 +132,8 @@ names(df_crs)
 saveRDS(df_crs,file = crs_path_new)
 
 write.csv(df_crs, file = "data/intermediate/crs_filter_results.csv", row.names = F)
+print_time_diff(start)
+df_crs %>%
+  filter(text_detection_wo_mining_w_scb, text_detection_gender) %>%
+  nrow
+
