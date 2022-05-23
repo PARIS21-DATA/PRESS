@@ -113,7 +113,7 @@ which(is.na(df_crs$text_detection_wo_mining_w_scb))
 print_time_diff(start)
 
 df_crs <- df_crs %>%
-  mutate(text_filter_gender = gen_donor|gen_ppcode|text_detection_gender# |gen_marker
+  mutate(text_filter_gender = gen_donor|gen_ppcode|text_detection_gender| gen_marker2# |gen_marker
          )
 
 a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, text_detection_gender) %>% unique %>% nrow
@@ -134,6 +134,7 @@ saveRDS(df_crs,file = crs_path_new)
 write.csv(df_crs, file = "data/intermediate/crs_filter_results.csv", row.names = F)
 print_time_diff(start)
 df_crs %>%
-  filter(text_detection_wo_mining_w_scb, text_detection_gender) %>%
+  filter(text_detection_wo_mining_w_scb, text_detection_gender # |gen_marker2
+         ) %>%
   nrow
 

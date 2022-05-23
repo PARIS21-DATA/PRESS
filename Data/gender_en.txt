@@ -7,3 +7,4 @@ birth
 gender
 sex
 social protection
+transgender
