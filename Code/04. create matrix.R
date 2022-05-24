@@ -1,6 +1,13 @@
 rm(list = ls())
-crs_path <- "./Data/intermediate/crs03_1.rds"
-crs_path_new <- "./Data/intermediate/positive_text_id.rds"
+print_time_diff <- function(start_time) {
+  difftime(Sys.time(),start_time, units = "sec") %>% print
+}
+job_specific_suffix <- ""
+job_specific_suffix <- "_de"
+crs_path <- paste0("./Data/intermediate/crs03_1", job_specific_suffix, ".rds")
+crs_path_new <- paste0("./Data/intermediate/positive_text_id", job_specific_suffix, ".rds")
+start <- Sys.time()
+
 lang <-  "en"
 language <- "english"
 df_crs <- readRDS(crs_path)
@@ -275,7 +282,7 @@ df_crs_0 %>% filter(text_id %in% positive_text_id) %>% .$description %>% print
 #   filter(is.na(description.x)|is.na(description.y))
 # c$description.x
 
-# saveRDS(positive_text_id, file = crs_path_new)
+saveRDS(positive_text_id, file = crs_path_new)
 
 print(Sys.time() - start_time)
 # time spent for 1/40 of projects: 1.416996 mins

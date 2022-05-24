@@ -1,6 +1,13 @@
 rm(list = ls())
-crs_path <- "./Data/intermediate/crs03.rds"
-crs_path_new <- "./Data/intermediate/crs03_1.rds"
+print_time_diff <- function(start_time) {
+  difftime(Sys.time(),start_time, units = "sec") %>% print
+}
+job_specific_suffix <- ""
+job_specific_suffix <- "_de"
+crs_path <- paste0("./Data/intermediate/crs03", job_specific_suffix, ".rds")
+crs_path_new <- paste0("./Data/intermediate/crs03_1", job_specific_suffix, ".rds")
+start <- Sys.time()
+
 df_crs <- readRDS(crs_path)
 df_crs_original <- df_crs
 
@@ -47,4 +54,4 @@ saveRDS(df_crs, file=crs_path_new)
 
 beepr::beep(3)
 
-rm(list = ls())
+# rm(list = ls())

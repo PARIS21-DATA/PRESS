@@ -12,7 +12,7 @@ print_time_diff <- function(start_time) {
 }
 
 job_specific_suffix <- ""
-job_specific_suffix <- "_full"
+# job_specific_suffix <- "_de"
 start <- Sys.time()
 crs_path <- paste0("./Data/Raw/CRS/crs", job_specific_suffix, ".rds")
 crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" ,job_specific_suffix,  ".rds")

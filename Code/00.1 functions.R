@@ -7,7 +7,7 @@ stem_and_concatenate <- function(x_string){
   
   x_string_stem <- df_string %>%
     unnest_tokens(word, text)%>%
-    anti_join(get_stopwords()) %>%
+    anti_join(get_stopwords(language = lang2analyse)) %>%
     mutate(stem = wordStem(word)) %>%
     group_by(ref) %>%
     summarise(text_stem = paste(stem, collapse = " ")) %>%

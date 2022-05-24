@@ -1,6 +1,7 @@
 ### ---------------
 # start data cleaning
 ###
+source("Code/00. boot.R")
 rm(list = ls())
 gc()
 print_time_diff <- function(start_time) {
@@ -9,12 +10,13 @@ print_time_diff <- function(start_time) {
 source <- "crs"
 skip_icov <- T
 job_specific_suffix <- ""
-job_specific_suffix <- "_full"
+job_specific_suffix <- "_de"
 crs_path <- paste0("./Data/intermediate/crs01_1", job_specific_suffix, ".rds")
 crs_path_new <- paste0("./Data/intermediate/crs02", job_specific_suffix, ".rds")
 start <- Sys.time()
 
 df_crs_raw <- readRDS(crs_path)
+print("Loading document:")
 print_time_diff(start)
 
 rm(crs_path)
@@ -50,31 +52,33 @@ clean_titles <- function(title){
   return(title)
 }
 
-df_crs <- df_crs_raw %>%
-  mutate(desc_2mine = paste(projecttitle,
-                            shortdescription,
-                            longdescription,
-                            sep=". "),
-         desc_2mine = tolower(desc_2mine)
-  )
-print_time_diff(start)
-
 
 
 df_crs_raw <- df_crs_raw %>% 
   mutate(longdescription = ifelse(is.na(longdescription), shortdescription, 
                                   ifelse(longdescription == "", shortdescription, 
                                          longdescription)))
-print_time_diff(start)
 
 max_string_dist <- 10
 df_crs <- df_crs_raw %>%
   mutate(projecttitle = clean_titles(projecttitle),
          shortdescription = clean_titles(shortdescription),
-         longdescription = clean_titles(longdescription)) %>%
+         longdescription = clean_titles(longdescription))
+print("Cleaning 3 text columns")
+
+saveRDS(df_crs, "./Data/intermediate/crs02_de_cleaned.rds")
+
+print_time_diff(start)
+gc()
+
+df_crs <- df_crs %>%
   mutate(desc_2mine = ifelse(stringdist(projecttitle, longdescription)< max_string_dist, NA, longdescription)) %>%
   mutate(text_id = as.numeric(as.factor(desc_2mine)))
 
+
+saveRDS(df_crs, "./Data/intermediate/crs02_de_desc.rds")
+gc()
+print("find the best text for desc_2mine")
 print_time_diff(start)
 
 
@@ -117,6 +121,16 @@ df_crs_lang <- df_crs %>%
   mutate(language = cld2::detect_language(desc_2mine)) %>%
   select(-desc_2mine)
 
+# 
+# df_crs_lang <- df_crs_lang %>% 
+#   mutate(language_title = cld2::detect_language(projecttiitle)) 
+# df_crs1 <- df_crs %>% 
+#   mutate(language_title = cld2::detect_language(projecttiitle)) 
+
+print("Detecting Lanugage")
+print_time_diff(start)
+
+
 names(df_crs_lang)
 df_crs <- df_crs %>%
   select(-longdescription) %>%
@@ -125,17 +139,27 @@ df_crs <- df_crs %>%
 df_crs <- df_crs %>%
   right_join(df_crs_raw)
 
+df_crs <- df_crs %>%
+  mutate(language_title = cld2::detect_language(projecttitle)) 
+
 rm(df_crs_lang)
 rm(df_crs_raw)
+print("rest of the analysis")
 print_time_diff(start)
 
-which(is.na(df_crs$desc_2mine)) %>% print
-which(df_crs$desc_2mine == "") %>% print
+
+print("NAs in desc_2mine")
+which(is.na(df_crs$desc_2mine)|df_crs$desc_2mine == "") %>% length %>% print()
+# which(df_crs$desc_2mine == "") %>% print
 table(df_crs$language) %>% print
 names(df_crs)
 
 
+
+
+
 #Output::
 saveRDS(df_crs, file=crs_path_new)
+print("Save file:")
 print_time_diff(start)
 beep()
