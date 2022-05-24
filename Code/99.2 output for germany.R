@@ -113,5 +113,5 @@ names(df_crs_og_positive_reduced) = d4d_names$original
 write.csv(df_crs_og_positive_reduced, file = "Data/Germany Projects.csv", row.names = F)
 saveRDS(df_crs_og_positive_reduced, file = "Data/Germany Projects.rds")
 
-df_crs_og_og %>% filter(donorname == "Germany") %>% .$agencyname %>% 
+df_crs_og_og %>% filter(donorname == "Germany") %>% .$agencyname 
   table()
