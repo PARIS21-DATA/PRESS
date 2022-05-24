@@ -29,3 +29,5 @@ data/intermediate/crs01_1all.rds
 *_full.rdata
 
 *de.rds
+
+data/raw/crs/archive/**
