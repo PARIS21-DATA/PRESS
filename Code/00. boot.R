@@ -7,7 +7,6 @@
 # library(cld3)
 # library(slam)
 
-
 # Load required libraries
 packages <-
   c(
@@ -21,10 +20,18 @@ packages <-
     "cld2", 
     "koRpus", 
     "SnowballC", 
-    "tidytext"
+    "tidytext",
+    "text2vec",
+    "tm",
+    "textstem",
+    "textcat",
+    "textclean",
+    "lexicon",
+    "quanteda",
+    "deeplr"
   )
 # Install uninstalled packages
-lapply(packages[!(packages %in% installed.packages())], install.packages)
+#lapply(packages[!(packages %in% installed.packages())], install.packages)
 lapply(packages, library, character.only = TRUE)
 rm(packages)
 

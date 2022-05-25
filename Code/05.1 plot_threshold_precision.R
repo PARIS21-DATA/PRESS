@@ -36,8 +36,8 @@ ggplot(threshold_step, aes(x = threshold)) +
   geom_vline(xintercept = max_F1, linetype = "dotted" ) +
   ylab("value") +
   ggtitle(paste0("Precision trajectory after ", it_add, " in intervalls ", intervall, " for a negative marked ration of ", neg_sample_fraction))
-ggsave(paste0("./Tmp/XGBoost/Gender/threshold_precision_accuracy_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"test+train.pdf"), width = 9, height = 7)
+ggsave(paste0("./Tmp/XGBoost/threshold_precision_accuracy_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"test+train.pdf"), width = 9, height = 7)
 
-library(xlsx)
-write.xlsx(test_data, file = "./Tmp/XGBoost/Gender/test_data.xlsx", row.names = FALSE)
-write.xlsx(pred, file = "./Tmp/XGBoost/Gender/pred_data.xlsx", row.names = FALSE)
+#library(xlsx)
+#write.xlsx(test_data, file = "./Tmp/XGBoost/test_data.xlsx", row.names = FALSE)
+#write.xlsx(pred, file = "./Tmp/XGBoost/pred_data.xlsx", row.names = FALSE)

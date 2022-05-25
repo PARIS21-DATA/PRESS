@@ -1,92 +1,91 @@
+################################################################################
+#
+# Title detection for CRS data 
+# Author: Yu Tian, Johannes Abele
+# Date: 05/10/2022
+#
+# Objective: 
+#            
+#            
+# 
+# input files: - Data/paradata.RData
+#              - 
+#              - 
+#              - 
+#              
+#
+# output file: - 
+#
+#
+################################################################################
+
+
+# ------------------------------- Preparation ----------------------------------
+
 rm(list = ls())
-source("code/00.1 functions.R")
+
+# Load packages
+source("./Code/00. boot.R")
+
+# Load stemming and lemmatization functions
+source("./Code/00.1 text_preparation_functions.R")
+
+# Set paths
 crs_path_new <- "./Data/intermediate/crs03.rds"
-crs_path <- "./Data/intermediate/crs02.rds"
+crs_path <- "./Data/intermediate/crs02_original.rds"
 df_crs <- readRDS(crs_path)
 
 # we used to make the project with same description as 1 as long as one of the same description is marked as 1
 # it is wrong because some projects with the same name will have different purpose codes
 
+
+#---------------------------- Set parameters -----------------------------------
+
 # Switch to switch from lemmatization to stemming 
 stemming <- TRUE
 lang <- "de"
 
-## 1.c. split projects by language delimiters "." and " / "
 
+#------------------------- Data frame preparation ------------------------------
+
+# Add unique title id and detect language of title
 df_crs <- df_crs %>%
   #filter(language == lang) %>% ##??? to solve later
   mutate(projecttitle_lower = tolower(projecttitle)) %>%
   mutate(title_id = as.numeric(as.factor(projecttitle_lower))) %>% 
   mutate(title_language = cld2::detect_language(projecttitle)) 
 
+# Save raw data for later
 df_crs_backup <- df_crs
 
+# Select necessary columns and drop projects with duplicated title ids, later merged 
+# with backup according to title id to avoid unecessary computation 
 df_crs <- df_crs_backup %>%
   select(title_id, projecttitle, projecttitle_lower, longdescription, title_language, long_language = language) %>%
   filter(!duplicated(title_id)) 
 
-# beep(4)
+# Inspect language distribution of long descriptions
+table(df_crs$long_language)
+
+# Translate German long descriptions 
+
+
+#------------------------ Translation of German --------------------------------
+
+# Auth key for free account 
+deepl_auth_key <- "fcec1af3-2663-3f39-7f16-dcd07b334f30:fx"
+
+
+
+
+
+#------------------------ Title detection --------------------------------------
+
+# Get keywords
 list_keywords_stat_en <- readLines(paste0("data/statistics_reduced_", "en", ".txt"))  %>% trimws()
 list_keywords_gender_en <- readLines(paste0("data/gender_", "en", ".txt"))  %>% trimws()
 list_keywords_stat_lang <- readLines(paste0("data/statistics_reduced_", lang, ".txt"))  %>% trimws()
 list_keywords_gender_lang <- readLines(paste0("data/gender_", lang, ".txt"))  %>% trimws()
-
-
-# # Try German
-# library(udpipe)
-# ud_model <- udpipe_download_model("german")
-# ud_model <- udpipe_load_model(ud_model)
-#
-# # Try spiCy
-# install.packages("spacyr")
-# library(spacyr)
-# # For using spacyr, version of miniconda necessary since the package is a wrapper
-# # around a python packge, download miniconda here: https://docs.conda.io/en/latest/miniconda.html
-# spacy_install()
-# # spacy_finalize() # for finalizing a session
-# spacy_initialize(model = "de_core_news_sm")
-
-# german_lemma <- df_crs %>%
-#   mutate(longdescription_clean = clean_and_lemmatize(longdescription, language =  "de"))
-#
-# clean_and_lemmatize(tolower(df_crs$longdescription[14]), language = "de")
-# stem_and_concatenate(df_crs$longdescription[14], language = "de")
-
-# Try translation
-# table(df_crs$title_language)
-# table(df_crs$long_language)
-
-df_crs <- df_crs %>%
-  filter(title_language != "en")
-
-
-# Function to clean strings and lemmatize
-clean_and_lemmatize <- function (string, language = "en"){
-  string <- string %>% 
-    tolower %>% 
-    removeWords("'s") %>% # remove possesive s so that plural nouns get lemmatized correctly, e.g. "women's"
-    removeNumbers() %>%
-    removePunctuation(preserve_intra_word_dashes = TRUE) %>%
-    stripWhitespace 
-  
-  if(language == "en") {
-    string <- string %>%  
-      removeWords(c(stopwords('english'))) %>% 
-      removeWords(c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) %>% # exclude "use" from smart stopwords 
-      lemmatize_strings()
-  } else if (language == "de") {
-    string <- string %>%  
-      removeWords(c(stopwords('german'))) %>%
-      enc2utf8() %>%
-      udpipe_annotate(ud_model, .) %>%
-      as.data.frame() %>%
-      pull(lemma) %>% 
-      paste(collapse = " ") %>%
-      tolower
-  }
-  
-  return(string)
-}
 
 #lang <- "en"
 df_crs <- df_crs %>% filter(title_language == lang)
@@ -117,14 +116,8 @@ if (stemming) {
            match_gender = str_detect(projecttitle_clean, paste(list_keywords_gender_en, collapse = "|")))
 }
 
-# Exclude mining projects, since they contain survey -> not statistical project
-if (lang == "en") {
-  df_crs$mining = grepl("land mine|small arm|demining|demine|landmine", df_crs$projecttitle_lower, ignore.case = T)
-} else if (lang == "de"){
-  df_crs$mining = grepl("Landmine|Handfeuerwaffe|Minenentschärfung|Minenräumung|entmienen", df_crs$projecttitle_lower, ignore.case = T)
-}
+# Detect acronyms in raw titles
 list_acronyms <- readLines(paste0("data/statistics_reduced_acronyms_", lang, ".txt"))  %>% trimws()
-
 df_crs <- df_crs %>%
   mutate(match_stat = str_detect(projecttitle, paste(list_acronyms, collapse = " | "))  | match_stat)
 
@@ -132,11 +125,21 @@ df_crs <- df_crs %>%
 sum(df_crs$match_stat)
 sum(df_crs$match_gender)
 
+# Exclude mining projects, since they contain survey -> not statistical project
+if (lang == "en") {
+  df_crs$mining = grepl("land mine|small arm|demining|demine|landmine", df_crs$projecttitle_lower, ignore.case = T)
+} else if (lang == "de"){
+  df_crs$mining = grepl("Landmine|Handfeuerwaffe|Minenentschärfung|Minenräumung|entmienen", df_crs$projecttitle_lower, ignore.case = T)
+}
 
 df_crs <- df_crs %>%
   mutate(text_detection_wo_mining = match_stat & !mining) %>%
   select(-projecttitle_lower)
 
+
+#--------------------------- Merge and check results ---------------------------
+
+# Merge with original data according to title id 
 df_crs <- left_join(df_crs_backup, df_crs)
 
 rm(df_crs_backup)
@@ -153,8 +156,8 @@ table(df_crs$text_detection_wo_mining_w_scb) %>% print
 which(is.na(df_crs$text_detection_wo_mining_w_scb))
 
 #??? PROBLEM: no gen_donor and gen_marker found 
-#df_crs <- df_crs %>%
-#  mutate(text_filter_gender = gen_donor|gen_ppcode|gen_marker|text_detection_gender)
+df_crs <- df_crs %>%
+  mutate(text_filter_gender = gen_donor|gen_ppcode|gen_marker|text_detection_gender)
 
 a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, match_gender) %>% unique %>% nrow
 b = df_crs %>% select(text_id) %>% unique %>% nrow

@@ -62,16 +62,20 @@ saveRDS(df_crs_de, file  = "./Data/Raw/CRS/df_crs_de.rds")
 saveRDS(df_crs_fr, file  = "./Data/Raw/CRS/df_crs_fr.rds")
 saveRDS(df_crs_es, file  = "./Data/Raw/CRS/df_crs_es.rds")
 
-# Count characters 
-lang <- "es"
+df_crs_de <- readRDS("./Data/Raw/CRS/df_crs_de.rds")
+df_crs_fr <- readRDS("./Data/Raw/CRS/df_crs_fr.rds")
+df_crs_es <- readRDS("./Data/Raw/CRS/df_crs_es.rds")
 
-n_char_title <- df_crs_lang %>% 
+# Count characters 
+lang <- "de"
+
+n_char_title <- df_crs_de %>% 
   filter(title_language != "en") %>%
   pull(projecttitle) %>%
   paste(collapse = "") %>%
   str_replace_all(fixed(" "), "") %>%
   str_count()
-n_char_long <- df_crs_lang %>% 
+n_char_long <- df_crs_de %>% 
   filter(long_language == lang) %>%
   pull(longdescription) %>%
   paste(collapse = "") %>%
