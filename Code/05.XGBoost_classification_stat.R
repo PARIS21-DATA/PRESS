@@ -94,10 +94,11 @@ freq_df <- as.data.frame(table(df %>%
 #%#%#%#%#%#%#%#%#%#%
 
 # Set parameters
-iteration <- TRUE
+iteration <- FALSE
 print_importance_matrix <- TRUE
 n_gram <- 1
 neg_sample_fraction <- 1
+frac_pred_set <- 0.05 # use only 5% of full prediction set to speed up for testing
 
 # We assign projects that were classified as statistical projects by title pattern matching to df
 if (iteration) { 
@@ -113,11 +114,11 @@ if (iteration) {
   
   pred <- df_crs %>%
     filter(text_id %in% positive_text_id & !(text_id %in% pred_negative$text_id)) #%>%
-    #sample_n(size = floor(0.005 * n())) #use only 5% to speed up for testing
+    #sample_n(size = floor(frac_pred_set * n())) #use only 5% to speed up for testing
 } else {
   pred <- df_crs %>%
     filter((stats_filter == FALSE | is.na(stats_filter))) %>%
-    sample_n(size = floor(0.05 * n())) #use only 5% to speed up for testing
+    sample_n(size = floor(frac_pred_set * n())) #use only 5% to speed up for testing
   
   df <- df_crs %>%
     filter(stats_filter == TRUE) %>%

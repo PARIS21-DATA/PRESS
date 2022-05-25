@@ -41,16 +41,14 @@ df_crs <- readRDS(crs_path)
 
 #---------------------------- Set parameters -----------------------------------
 
-# Switch to switch from lemmatization to stemming 
-stemming <- TRUE
-lang <- "de"
+# All languages to include in classification
+languages <- c("en", "fr", "es", "de")
 
 
 #------------------------- Data frame preparation ------------------------------
 
 # Add unique title id and detect language of title
 df_crs <- df_crs %>%
-  #filter(language == lang) %>% ##??? to solve later
   mutate(projecttitle_lower = tolower(projecttitle)) %>%
   mutate(title_id = as.numeric(as.factor(projecttitle_lower))) %>% 
   mutate(title_language = cld2::detect_language(projecttitle)) 
@@ -62,12 +60,15 @@ df_crs_backup <- df_crs
 # with backup according to title id to avoid unecessary computation 
 df_crs <- df_crs_backup %>%
   select(title_id, projecttitle, projecttitle_lower, longdescription, title_language, long_language = language) %>%
-  filter(!duplicated(title_id)) 
+  filter(!duplicated(title_id))
+
+# Use only projects in en, fr, es and de
+df_crs <- df_crs %>%
+  filter(title_language %in% c(languages, NA) & long_language %in% c(languages,NA))
 
 # Inspect language distribution of long descriptions
 table(df_crs$long_language)
 
-# Translate German long descriptions 
 
 
 #------------------------ Translation of German --------------------------------
@@ -75,66 +76,106 @@ table(df_crs$long_language)
 # Auth key for free account 
 deepl_auth_key <- "fcec1af3-2663-3f39-7f16-dcd07b334f30:fx"
 
-
-
-
-
-#------------------------ Title detection --------------------------------------
-
-# Get keywords
-list_keywords_stat_en <- readLines(paste0("data/statistics_reduced_", "en", ".txt"))  %>% trimws()
-list_keywords_gender_en <- readLines(paste0("data/gender_", "en", ".txt"))  %>% trimws()
-list_keywords_stat_lang <- readLines(paste0("data/statistics_reduced_", lang, ".txt"))  %>% trimws()
-list_keywords_gender_lang <- readLines(paste0("data/gender_", lang, ".txt"))  %>% trimws()
-
-#lang <- "en"
-df_crs <- df_crs %>% filter(title_language == lang)
-
-# Lemmatize or stem keywords 
-if (stemming) {
-  list_keywords_stat_en <- stem_and_concatenate(list_keywords_stat_en, language = lang)
-  list_keywords_gender_en <- stem_and_concatenate(list_keywords_gender_en, language = lang)
-  list_keywords_stat_lang <- stem_and_concatenate(list_keywords_stat_lang, language = lang)
-  list_keywords_gender_lang <- stem_and_concatenate(list_keywords_gender_lang, language = lang)
-} else {
-  list_keywords_stat_en <- clean_and_lemmatize(list_keywords_stat_en, language = lang)
-  list_keywords_gender_en <- clean_and_lemmatize(list_keywords_gender_en, language = lang)
-  if(lang == "en") list_keywords_gender_en <- list_keywords_gender_en %>% append("women") # due to many spelling mistakes like women_s, women?s..
-}
-
-if (stemming) {
-  df_crs <- df_crs %>%
-    mutate(projecttitle_clean = stem_and_concatenate(projecttitle_lower, language = lang),
-           longdescription_clean = stem_and_concatenate(longdescription, language = lang)) %>%
-    mutate(match_stat = str_detect(projecttitle_clean, paste(list_keywords_stat_lang, collapse = "|")),
-           match_gender = str_detect(projecttitle_clean, paste(list_keywords_gender_lang, collapse = "|")))
-} else {
-  df_crs <- df_crs %>%
-    mutate(projecttitle_clean = clean_and_lemmatize(projecttitle_lower, language = lang),
-           longdescription_clean = clean_and_lemmatize(longdescription, language = lang)) %>%
-    mutate(match_stat = str_detect(projecttitle_clean, paste(list_keywords_stat_en, collapse = "|")),
-           match_gender = str_detect(projecttitle_clean, paste(list_keywords_gender_en, collapse = "|")))
-}
-
-# Detect acronyms in raw titles
-list_acronyms <- readLines(paste0("data/statistics_reduced_acronyms_", lang, ".txt"))  %>% trimws()
+# Translate German long descriptions (takes very long)
 df_crs <- df_crs %>%
-  mutate(match_stat = str_detect(projecttitle, paste(list_acronyms, collapse = " | "))  | match_stat)
+  mutate(longdescription = ifelse(long_language == "de", 
+                                  deeplr::toEnglish2(longdescription, auth_key = deepl_auth_key),
+                                  longdescription))
+
+
+
+
+#--------------------------- Title detection -----------------------------------
+
+# Set languages for stemming and lemmatization
+stem_languages <- c("de", "fr", "es")
+lemma_languages <- c("en")
+
+# Add match_stat, match_gender so that it will be found later on
+df_crs$match_stat <- NA
+df_crs$match_gender <- NA
+df_crs$mining <- NA
+
+
+# Go through every language, load keywords, clean keywords and detect stat and gender
+#!!! TO DO: projecttitle_clean is overwritten by stemming languages 
+for (lang in languages){
+  list_keywords_stat <- readLines(paste0("./Data/statistics_reduced_", lang, ".txt"))  %>% trimws()
+  list_keywords_gender <- readLines(paste0("./Data/gender_", lang, ".txt"))  %>% trimws()
+  demining_small_arms <- readLines(paste0("./Data/demining_small_arms_", lang, ".txt"))  %>% trimws()
+  list_acronyms <- readLines(paste0("./Data/statistics_reduced_acronyms_", lang, ".txt"))  %>% trimws()
+  
+  if (lang %in% lemma_languages) {
+    list_keywords_stat <- clean_and_lemmatize(list_keywords_stat, language = lang)
+    list_keywords_gender <- clean_and_lemmatize(list_keywords_gender, language = lang)
+    list_keywords_gender <- list_keywords_gender %>% append("women") # due to many spelling mistakes like women_s, women?s..
+    demining_small_arms <- clean_and_lemmatize(demining_small_arms, language = lang)
+    
+    # Clean projcettitle and detect stat, gender and mining 
+    df_crs <- df_crs %>%
+      mutate(projecttitle_clean = ifelse(title_language == lang | is.na(title_language), 
+                                         clean_and_lemmatize(projecttitle_lower, language = lang),
+                                         projecttitle_lower)) %>%
+      mutate(match_stat = ifelse(title_language == lang | is.na(title_language), 
+                                 str_detect(projecttitle_clean, paste(list_keywords_stat, collapse = "|")),
+                                 match_stat),
+             match_gender = ifelse(title_language == lang | is.na(title_language),
+                                   str_detect(projecttitle_clean, paste(list_keywords_gender, collapse = "|")),
+                                   match_gender)) %>%
+      mutate(mining = ifelse(title_language == lang | is.na(title_language),
+                             str_detect(projecttitle_clean, paste(demining_small_arms, collapse = "|")),
+                             mining)) %>% 
+      mutate(match_stat = ifelse(title_language == lang | is.na(title_language),
+                                 str_detect(projecttitle_lower, paste(list_acronyms, collapse = " | ")) | match_stat,
+                                 match_stat))
+    print(paste0(lang, " finished"))
+    
+  }
+  else if (lang %in% stem_languages) {
+    list_keywords_stat <- stem_and_concatenate(list_keywords_stat, language = lang) 
+    list_keywords_gender <- stem_and_concatenate(list_keywords_gender, language = lang)
+    demining_small_arms <- stem_and_concatenate(demining_small_arms, language = lang)
+    demining_small_arms <- stem_and_concatenate(demining_small_arms, language = lang)
+    
+    # Clean projcettitle and detect stat, gender and mining 
+    df_crs <- df_crs %>%
+      mutate(projecttitle_clean = ifelse(title_language == lang, 
+                                         stem_and_concatenate(projecttitle_lower, language = lang),
+                                         projecttitle_clean)) %>%
+      mutate(match_stat = ifelse(title_language == lang, 
+                                 str_detect(projecttitle_clean, paste(list_keywords_stat, collapse = "|")),
+                                 match_stat),
+             match_gender = ifelse(title_language == lang,
+                                   str_detect(projecttitle_clean, paste(list_keywords_gender, collapse = "|")),
+                                   match_gender)) %>%
+      mutate(mining = ifelse(title_language == lang,
+                             str_detect(projecttitle_clean, paste(demining_small_arms, collapse = "|")), 
+                             mining)) %>%
+      mutate(match_stat = ifelse(title_language == lang,
+                                 str_detect(projecttitle_lower, paste(list_acronyms, collapse = " | ")) | match_stat,
+                                 match_stat))
+    print(paste0(lang, " finished"))
+    
+    }
+}
+
+write.xlsx(df_crs, file = "./Tmp/Text detection/crs_4lang_classified.xlsx", rownames = F)
+
+df_crs <- df_crs %>%
+  mutate(text_detection_wo_mining = match_stat & !mining) %>%
+  select(-projecttitle_lower)
 
 # Number of detected projects 
 sum(df_crs$match_stat)
 sum(df_crs$match_gender)
 
+#!!! KEEP for later maybe
 # Exclude mining projects, since they contain survey -> not statistical project
-if (lang == "en") {
-  df_crs$mining = grepl("land mine|small arm|demining|demine|landmine", df_crs$projecttitle_lower, ignore.case = T)
-} else if (lang == "de"){
-  df_crs$mining = grepl("Landmine|Handfeuerwaffe|Minenentschärfung|Minenräumung|entmienen", df_crs$projecttitle_lower, ignore.case = T)
-}
-
-df_crs <- df_crs %>%
-  mutate(text_detection_wo_mining = match_stat & !mining) %>%
-  select(-projecttitle_lower)
+#if (lang == "en") {
+#  df_crs$mining = grepl("land mine|small arm|demining|demine|landmine", df_crs$projecttitle_lower, ignore.case = T)
+#} else if (lang == "de"){
+#  df_crs$mining = grepl("Landmine|Handfeuerwaffe|Minenentschärfung|Minenräumung|entmienen", df_crs$projecttitle_lower, ignore.case = T)
+#} 
 
 
 #--------------------------- Merge and check results ---------------------------
@@ -150,7 +191,7 @@ df_crs <- df_crs %>%
   mutate(language = ifelse(language %in% langues, language, "other"))
 
 df_crs <- df_crs %>%
-  mutate( text_detection_wo_mining_w_scb = text_detection_wo_mining | scb)
+  mutate(text_detection_wo_mining_w_scb = text_detection_wo_mining | scb)
 table(df_crs$text_detection_wo_mining) %>% print
 table(df_crs$text_detection_wo_mining_w_scb) %>% print
 which(is.na(df_crs$text_detection_wo_mining_w_scb))

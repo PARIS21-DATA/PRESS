@@ -63,29 +63,28 @@ lemmatize_and_match <- function(df, lang){
 
 # Function to clean strings and lemmatize
 clean_and_lemmatize <- function (string, language = "en"){
-  if (!(language %in% c("en", "de"))) stop("No supported language chosen")
+  #if (!(language %in% c("en", "de"))) stop("No supported language chosen")
+  
   string <- string %>% 
     tolower %>% 
     removeWords("'s") %>% # remove possesive s so that plural nouns get lemmatized correctly, e.g. "women's"
     removeNumbers() %>%
     removePunctuation(preserve_intra_word_dashes = TRUE) %>%
-    stripWhitespace 
+    stripWhitespace %>%  
+    removeWords(c(stopwords('english'))) %>% 
+    removeWords(c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) %>% # exclude "use" from smart stopwords 
+    lemmatize_strings()
   
-  if(language == "en") {
-    string <- string %>%  
-      removeWords(c(stopwords('english'))) %>% 
-      removeWords(c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) %>% # exclude "use" from smart stopwords 
-      lemmatize_strings()
-  } else if (language == "de") {
-    string <- string %>%  
-      removeWords(c(stopwords('german'))) %>%
-      enc2utf8() %>%
-      udpipe_annotate(ud_model, .) %>%
-      as.data.frame() %>%
-      pull(lemma) %>% 
-      paste(collapse = " ") %>%
-      tolower
-  }
+  # } else if (language == "de") {
+  #   string <- string %>%  
+  #     removeWords(c(stopwords('german'))) %>%
+  #     enc2utf8() %>%
+  #     udpipe_annotate(ud_model, .) %>%
+  #     as.data.frame() %>%
+  #     pull(lemma) %>% 
+  #     paste(collapse = " ") %>%
+  #     tolower
+  # }
   
   return(string)
 }
