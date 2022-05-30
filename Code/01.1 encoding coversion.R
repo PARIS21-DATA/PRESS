@@ -5,10 +5,10 @@ df_crs <- readRDS("Data/Raw/CRS/crs_full.rds")
 df_crs_de <- df_crs %>% 
   filter(donorname == "Germany")
 beep()
-df_crs %>% select(year) %>% table()
+# df_crs %>% select(year) %>% table()
 df_crs_de %>% select(agencyname) %>% unique
 infoRDS("Data/Raw/CRS/crs_full.rds")
-iconv(df_crs_de$agencycode,from = "CP1252", to = "UTF-8 ") %>% unique
+iconv(df_crs_de$agencyname,from = "CP1252", to = "UTF-8") %>% unique
 
 convert_char_win2utf <- function(x) {
   if(is.character(x)) {x <- iconv( x, from = "CP1252" , to = "UTF-8")  }
@@ -26,4 +26,5 @@ df_crs_de <- df_crs_de_ls %>%
 
 df_crs_de$agencyname %>% unique
 
-saveRDS(df_crs_de, file = "Data/Raw/CRS/crs_de.rds")
+saveRDS(df_crs_de, file = "Data/Raw/CRS/crs_de.rds", ascii = F)
+infoRDS("Data/Raw/CRS/crs_de.rds")
