@@ -64,9 +64,15 @@ names(df_crs)<- tolower(names(df_crs))
 df_crs$process_id <- 1:nrow(df_crs)
 
 start <- Sys.time()
+readr::write_rds(df_crs, file ="./Data/Raw/CRS/crs_full1.rds" )
+print_time_diff(start)
+# Time difference of 64.25225 secs
+start <- Sys.time()
+
 saveRDS(df_crs, file  = "./Data/Raw/CRS/crs_full.rds")
 beep(2)
 print_time_diff(start)
+# Time difference of 161.5576 secs
 
 df_crs_sample <- df_crs[sample(nrow(df_crs),nrow(df_crs)/40 ), ]
 rm(df_crs)
