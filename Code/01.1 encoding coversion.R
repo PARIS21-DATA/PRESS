@@ -11,7 +11,7 @@ infoRDS("Data/Raw/CRS/crs_full.rds")
 iconv(df_crs_de$agencyname,from = "CP1252", to = "UTF-8") %>% unique
 
 convert_char_win2utf <- function(x) {
-  if(is.character(x)) {x <- iconv( x, from = "CP1252" , to = "UTF-8")  }
+  if(is.character(x)) {x <- iconv( x, from = "CP1252" , to = "utf-8")  }
   return(x)
 }
 
@@ -28,3 +28,5 @@ df_crs_de$agencyname %>% unique
 
 saveRDS(df_crs_de, file = "Data/Raw/CRS/crs_de.rds", ascii = F)
 infoRDS("Data/Raw/CRS/crs_de.rds")
+
+df_crs_de <- readRDS("Data/Raw/CRS/crs_de.rds")
