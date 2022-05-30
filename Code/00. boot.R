@@ -23,7 +23,8 @@ packages <-
     "SnowballC", 
     "tidytext", 
     "stringdist",
-    "tm"
+    "tm", 
+    "data.table"
   )
 # Install uninstalled packages
 lapply(packages[!(packages %in% installed.packages())], install.packages)
@@ -33,7 +34,7 @@ rm(packages)
 # Set wd
 setwd(getwd())
 # extremely important for mac os:
-Sys.setlocale("LC_ALL", "C")
+if(Sys.info()[1]=="Darwin") Sys.setlocale("LC_ALL", "C")
 
 # source("data/functions.R")
 

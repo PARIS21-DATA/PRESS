@@ -12,14 +12,33 @@ print_time_diff <- function(start_time) {
 crs_zip_folder <-  "./Data/Raw/CRS/zip"
 crs_txt_folder <-  "./Data/Raw/CRS/txt"
 
+### ---------
+# Extract txt from zips
+start <- Sys.time()
 crs_zip_files <- paste(crs_zip_folder, list.files(crs_zip_folder), sep = "/")
-lapply(crs_zip_files, unzip,overwrite = T, exdir = crs_txt_folder)
+
+if(length(list.files("./data/Raw/CRS/txt/"))==0)  lapply(crs_zip_files, unzip,overwrite = T, exdir = crs_txt_folder)
 rm(crs_zip_folder, crs_zip_files)
+print_time_diff(start) # Time difference of 52.25433 secs
+
 
 crs_txt_files <- paste(crs_txt_folder, list.files(crs_txt_folder), sep = "/")
 
+
+### ---------
+# read txt
+start <- Sys.time()
 list_crs <- lapply( crs_txt_files, read.csv , sep = "|", header = T, stringsAsFactors = F, encoding = "utf-8" )
 beep()
+print_time_diff(start)
+# Time difference of 187.5492 secs
+
+
+lapply(list_crs, function(x) print(ncol(x)))
+lapply(list_crs, function(x) print(nrow(x)))
+start <- Sys.time()
+df_crs <-  rbindlist(list_crs, fill = T)
+print_time_diff(start)
 
 # df_crs = bind_rows(list_crs) # not successful
 # crs_vars = lapply(list_crs, names)
@@ -35,35 +54,20 @@ beep()
 # rm(df_crs, df)
 # gc()
 
-start <- Sys.time()
-df_crs <-  rbind(list_crs[[1]], 
-               list_crs[[2]], 
-               list_crs[[3]], 
-               list_crs[[4]], 
-               list_crs[[5]], 
-               list_crs[[6]], 
-               list_crs[[7]], 
-               list_crs[[8]], 
-               list_crs[[9]], 
-               list_crs[[10]], 
-               list_crs[[11]], 
-               list_crs[[12]], 
-               list_crs[[13]], 
-               list_crs[[14]] 
-)
-print_time_diff(start)
-# Time difference of 86.15631 secs
-beep(2)
+
+
 
 # making basic changes
 df_crs <- df_crs %>%
   mutate(source = "crs")
 names(df_crs)<- tolower(names(df_crs))
-row.names(df_crs) <- c()
-df_crs$process_id <- row.names(df_crs)
+df_crs$process_id <- 1:nrow(df_crs)
 
+start <- Sys.time()
 saveRDS(df_crs, file  = "./Data/Raw/CRS/crs_full.rds")
 beep(2)
+print_time_diff(start)
+
 df_crs_sample <- df_crs[sample(nrow(df_crs),nrow(df_crs)/40 ), ]
 rm(df_crs)
 df_crs <- df_crs_sample
