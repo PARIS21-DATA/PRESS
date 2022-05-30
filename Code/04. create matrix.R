@@ -281,6 +281,7 @@ df_crs_0 %>% filter(text_id %in% positive_text_id) %>% .$description %>% print
 # c = full_join(a, b, by = "text_id") %>%
 #   filter(is.na(description.x)|is.na(description.y))
 # c$description.x
+positive_text_id <- positive_text_id[c(2:4, 6)]
 
 saveRDS(positive_text_id, file = crs_path_new)
 
