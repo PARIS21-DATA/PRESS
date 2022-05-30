@@ -1,4 +1,6 @@
-df_crs_og_og <-  readRDS("Data/Raw/CRS/crs_full.rds")
+df_crs_og_og <-  readRDS("Data/Raw/CRS/crs_de.rds")
+
+df_crs_og_og$agencyname %>% unique
 
 source("Code/04. create matrix.R")
 
@@ -70,7 +72,9 @@ b = df_crs_og %>%
 b$projecttitle %>% unique
 
 c = b$projecttitle %>% unique
-c = c[c(2,3,7,8,10,11,14,20, 21, 24, 27,29)]
+c = c[c(1:4 , 7 , 13:17, 27,28, 31, 34, 36)]
+
+# c = c[c(2,3,7,8,10,11,14,20, 21, 24, 27,29)]
 b1 = b %>% filter(projecttitle %in% c )
 b1$projecttitle %>% unique
 
@@ -113,5 +117,7 @@ names(df_crs_og_positive_reduced) = d4d_names$original
 write.csv(df_crs_og_positive_reduced, file = "Data/Germany Projects.csv", row.names = F)
 saveRDS(df_crs_og_positive_reduced, file = "Data/Germany Projects.rds")
 
-df_crs_og_og %>% filter(donorname == "Germany") %>% .$agencyname 
-  table()
+df_crs_og_positive_reduced %>% .$AgencyName %>% unique
+
+# df_crs_og_og %>% filter(donorname == "Germany") %>% .$agencyname 
+  # table()

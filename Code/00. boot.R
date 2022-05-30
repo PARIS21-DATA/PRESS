@@ -34,7 +34,7 @@ rm(packages)
 # Set wd
 setwd(getwd())
 # extremely important for mac os:
-if(Sys.info()[1]=="Darwin") Sys.setlocale("LC_ALL", "C")
+# if(Sys.info()[1]=="Darwin") Sys.setlocale("LC_ALL", "C")
 
 # source("data/functions.R")
 

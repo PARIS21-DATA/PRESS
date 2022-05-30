@@ -11,7 +11,9 @@ df_crs <- df_crs %>%
   filter(!duplicated(title_id)) 
 
 # beep(4)
-list_keywords <- readLines(paste0("data/statistics_reduced_", lang2analyse, ".txt"),encoding = "utf-8")  %>%
+list_keywords <- readLines(paste0("data/statistics_reduced_", lang2analyse, ".txt")
+                           ,encoding = "UTF-8"
+                           )  %>%
   trimws()
 
 # list_keywords_simon <- readLines("data/statistics_simon.txt") %>%
@@ -20,7 +22,7 @@ list_keywords <- readLines(paste0("data/statistics_reduced_", lang2analyse, ".tx
 # 
 # list_keywords <- list_keywords_simon
 
-list_keywords_gender <- readLines(paste0("data/gender_", lang2analyse, ".txt"), encoding = "utf-8")  %>%
+list_keywords_gender <- readLines(paste0("data/gender_", lang2analyse, ".txt"), encoding = "UTF-8")  %>%
   trimws()
 
 
@@ -45,13 +47,13 @@ print_time_diff(start)
 #                           # TT.options=list(path="./TreeTagger", preset="en")
 #                           )
 
-list_blacklist <- readLines(paste0("data/blacklist_", lang2analyse, ".txt"))  %>%
+list_blacklist <- readLines(paste0("data/blacklist_", lang2analyse, ".txt"), encoding = "UTF-8")  %>%
   trimws()
 
 list_blacklist <- paste0(" ", list_blacklist, " ")
 
 
-list_acronyms <- readLines(paste0("data/statistics_reduced_acronyms_", lang2analyse, ".txt"))  %>%
+list_acronyms <- readLines(paste0("data/statistics_reduced_acronyms_", lang2analyse, ".txt"), encoding = "UTF-8")  %>%
   trimws()
 list_acronyms <- paste0(" ", list_acronyms, " ")
 
