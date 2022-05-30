@@ -36,10 +36,10 @@ df_crs_raw <- df_crs_raw %>%
 beep()
 # only needed when working on a Mac. Also not working well becausee it will convert utf8 to NA
 
-if(!skip_icov) {df_crs_raw = df_crs_raw %>%
-  mutate(projecttitle = iconv(projecttitle, "WINDOWS-1252", "UTF-8"),
-         shortdescription = iconv(shortdescription, "WINDOWS-1252", "UTF-8"),
-         longdescription= iconv(longdescription, "WINDOWS-1252", "UTF-8"))}
+# if(!skip_icov) {df_crs_raw = df_crs_raw %>%
+#   mutate(projecttitle = iconv(projecttitle, "WINDOWS-1252", "UTF-8"),
+#          shortdescription = iconv(shortdescription, "WINDOWS-1252", "UTF-8"),
+#          longdescription= iconv(longdescription, "WINDOWS-1252", "UTF-8"))}
 
 
 # adopting JA's function
