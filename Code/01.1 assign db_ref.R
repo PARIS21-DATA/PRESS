@@ -4,8 +4,8 @@
 rm(list = ls())
 crs_path <- "./Data/Raw/CRS/crs_sample.rds"
 crs_path_lang <- "./Data/Raw/CRS/df_crs_de.rds"
-crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" , ".rds")
-df_crs_raw <- readRDS(crs_path_lang)
+crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" , "_full.rds")
+df_crs_raw <- readRDS(crs_path)
 
 # Subset necessary information
 df_crs <- df_crs_raw %>%
@@ -41,7 +41,7 @@ df_crs$db_ref <- with(df_crs,
                         usd_disbursement, 
                         recipientcode , 
                         usd_received, # this is a new addition in 2022
-                        sep="_"
+                        sep = "_"
                       )
 ) %>%
   as.factor %>%

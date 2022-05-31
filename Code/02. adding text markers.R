@@ -3,7 +3,7 @@
 ### 
 rm(list = ls())
 source <- "crs"
-crs_path <- "./Data/intermediate/crs01_1.rds"
+crs_path <- "./Data/intermediate/crs01_1_full.rds"
 crs_path_new <- "./Data/intermediate/crs02.rds"
 df_crs_raw <- readRDS(crs_path)
 rm(crs_path)
