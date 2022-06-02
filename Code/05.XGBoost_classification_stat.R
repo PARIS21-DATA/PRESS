@@ -284,7 +284,7 @@ if (iteration) {
 #---------------------------- Visualization  -----------------------------------------
 
 # Plot accuracy and precision trajectories
-source("./Code/05.1 plot_threshold_precision.R")
+source("./Code/05.1 plot_threshold_precision_stat.R")
 
 pred <- pred %>% mutate(total = str_count(string = text_cleaned, pattern = "\\S+")) %>%
   mutate(predictions = as.factor(predictions))

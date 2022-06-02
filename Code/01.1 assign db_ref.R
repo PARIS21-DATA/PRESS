@@ -1,11 +1,36 @@
-### ---------------
-# start data cleaning 
-### 
+################################################################################
+#
+# Assigning df refference to each projects
+# Author: Yu Tian, Johannes Abele
+# Date: 05/10/2022
+#
+# Objective: 
+#            
+# 
+# input files: - /Data/Raw/CRS/crs_sample.rds
+#              
+#
+# output file: - /Data/Intermediate/crs01_1_full.rds"
+#
+#
+################################################################################
+
+
+# ------------------------------- Preparation ----------------------------------
+
 rm(list = ls())
+
+# Load packages
+source("./Code/00. boot.R")
+
+# Set all paths 
 crs_path <- "./Data/Raw/CRS/crs_sample.rds"
 crs_path_lang <- "./Data/Raw/CRS/df_crs_de.rds"
 crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" , "_full.rds")
 df_crs_raw <- readRDS(crs_path)
+
+
+# ------------------------------- Create db ref --------------------------------
 
 # Subset necessary information
 df_crs <- df_crs_raw %>%
@@ -26,7 +51,7 @@ df_crs <- df_crs_raw %>%
     sectorcode
   )
 
-# Create unique idetifier db_ref for each project transforming a joined sting of 
+# Create unique identifier db_ref for each project transforming a joined sting of 
 # all project information first into factor and then into numeric
 df_crs$db_ref <- with(df_crs, 
                       paste(

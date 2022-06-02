@@ -20,26 +20,24 @@ stem_and_concatenate <- function(x_string, language = "en"){
   return(x_string_stem)  
 }
 
-stem_and_match <- function(df, lang){
-  df <- df %>%
-    mutate(projecttitle_clean = stem_and_concatenate(projecttitle_lower, language = lang),
-           longdescription_clean = stem_and_concatenate(longdescription, language = lang)) %>%
-    mutate(match_stat = str_detect(projecttitle_clean, paste(list_keywords_stat_lang, collapse = "|")),
-           match_gender = str_detect(projecttitle_clean, paste(list_keywords_gender_lang, collapse = "|")))
+stem_and_concatenate_tm <- function(string, language = "en") {
+  string <- string %>% 
+    tolower %>% 
+    removeWords("'s") %>% # remove possesive s so that plural nouns get lemmatized correctly, e.g. "women's"
+    removeNumbers() %>%
+    removePunctuation(preserve_intra_word_dashes = TRUE) %>%
+    stripWhitespace %>%  
+    removeWords(c(stopwords(language))) %>% 
+    #removeWords(c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) %>% # exclude "use" from smart stopwords 
+    stem_strings(language = language)
+
+  return(string)
 }
 
-lemmatize_and_match <- function(df, lang){
-  df_crs <- df_crs %>%
-    mutate(projecttitle_clean = clean_and_lemmatize(projecttitle_lower, language = lang),
-           longdescription_clean = clean_and_lemmatize(longdescription, language = lang)) %>%
-    mutate(match_stat = str_detect(projecttitle_clean, paste(list_keywords_stat_en, collapse = "|")),
-           match_gender = str_detect(projecttitle_clean, paste(list_keywords_gender_en, collapse = "|")))
-} 
-
 # # Try German
-# library(udpipe)
-# ud_model <- udpipe_download_model("german")
-# ud_model <- udpipe_load_model(ud_model)
+#library(udpipe)
+#ud_model <- udpipe_download_model("german")
+#ud_model <- udpipe_load_model(ud_model)
 #
 # # Try spiCy
 # install.packages("spacyr")
@@ -63,28 +61,32 @@ lemmatize_and_match <- function(df, lang){
 
 # Function to clean strings and lemmatize
 clean_and_lemmatize <- function (string, language = "en"){
-  #if (!(language %in% c("en", "de"))) stop("No supported language chosen")
+  if (!(language %in% c("en", "de"))) stop("No supported language chosen")
   
   string <- string %>% 
     tolower %>% 
     removeWords("'s") %>% # remove possesive s so that plural nouns get lemmatized correctly, e.g. "women's"
     removeNumbers() %>%
     removePunctuation(preserve_intra_word_dashes = TRUE) %>%
-    stripWhitespace %>%  
-    removeWords(c(stopwords('english'))) %>% 
-    removeWords(c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) %>% # exclude "use" from smart stopwords 
-    lemmatize_strings()
+    stripWhitespace
   
-  # } else if (language == "de") {
-  #   string <- string %>%  
-  #     removeWords(c(stopwords('german'))) %>%
-  #     enc2utf8() %>%
-  #     udpipe_annotate(ud_model, .) %>%
-  #     as.data.frame() %>%
-  #     pull(lemma) %>% 
-  #     paste(collapse = " ") %>%
-  #     tolower
-  # }
+  if (language == "en") {
+    string <- string %>%
+      removeWords(c(stopwords('english'))) %>% 
+      removeWords(c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) %>% # exclude "use" from smart stopwords 
+      lemmatize_strings()
+  
+  } else if (language == "de") {
+     string <- string %>%  
+       enc2utf8() %>%
+       udpipe_annotate(ud_model, .) %>%
+       as.data.frame() %>%
+       pull(lemma) %>% 
+       paste(collapse = " ") %>%
+       tolower %>%
+       removeWords(c(stopwords('german'))) 
+   }
   
   return(string)
 }
+
