@@ -9,14 +9,14 @@
 #            
 # 
 # input files: - /Code/00.1 text_preparation_functions.R
-#              - /Data/intermediate/crs02_sample.rds
+#              - /Data/intermediate/crs02_full.rds
 #              - /Data/statistics_reduced_*.txt
 #              - /Data/gender_*.txt
 #              - /Data/demining_small_arms_*.txt
 #              - /Data/statistics_reduced_acronyms_*.txt
 #              
 #
-# output file: - 
+# output file: - /Data/intermediate/crs03_full.rds
 #
 #
 ################################################################################
@@ -34,7 +34,7 @@ source("./Code/00.1 text_preparation_functions.R")
 
 # Set paths
 crs_path_new <- "./Data/intermediate/crs03_sample.rds"
-crs_path <- "./Data/intermediate/crs02_sample.rds"
+crs_path <- "./Data/intermediate/crs02_full.rds"
 df_crs <- readRDS(crs_path)
 
 # we used to make the project with same description as 1 as long as one of the same description is marked as 1
@@ -62,14 +62,14 @@ df_crs_backup <- df_crs
 # Select necessary columns and drop projects with duplicated title ids, later merged 
 # with backup according to title id to avoid unecessary computation 
 df_crs <- df_crs_backup %>%
-  select(title_id, projecttitle, projecttitle_lower, longdescription, title_language) %>%
+  select(title_id, projecttitle, projecttitle_lower, longdescription, title_language, long_language) %>%
   filter(!duplicated(title_id))
 
 # Use only projects in en, fr, es and de
 df_crs <- df_crs %>%
   filter(title_language %in% c(languages, NA) & long_language %in% c(languages,NA))
 
-# Inspect language distribution of long descriptions
+# Inspect language distributions
 table(df_crs$long_language)
 table(df_crs$title_language)
 
@@ -100,6 +100,7 @@ df_crs$match_gender <- NA
 df_crs$mining <- NA
 
 # Go through every language, load keywords, clean keywords and detect stat, mining and gender
+#???: Considerations about computation speed possible, not sure if code below is the fastest one can do
 for (lang in languages){
   list_keywords_stat <- read_lines(paste0("./Data/statistics_reduced_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()
   list_keywords_gender <- read_lines(paste0("./Data/gender_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()
