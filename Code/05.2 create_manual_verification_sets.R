@@ -22,4 +22,16 @@ write.xlsx(pred, file = "./Tmp/XGBoost/Manual verification/pred_data.xlsx", row.
 file_names_verified <- list.files(path = "./Data/Manually verified/")
 file_names_verified <- paste0("./Data/Manually verified/", file_names_verified)
 
-files <- read.xlsx(file_names_verified[1], startRow = 1, cols = 1:5)
+stat_projects_verified <- read.xlsx(file_names_verified[1], startRow = 1, cols = 1:5)
+
+for (file in file_names_verified[2:length(file_names_verified)]) {
+  file_current <- read.xlsx(file, startRow = 1, cols = 1:5)
+  stat_projects_verified <- stat_projects_verified %>%
+    rbind(file_current)
+  
+}
+
+stat_projects_verified_tmp <- stat_projects_verified %>%
+  mutate(match_stat = ifelse(Yes == "X" | Yes == "x" & !is.na(Yes), TRUE, FALSE)) %>%
+  mutate(match_stat = replace_na(match_stat, FALSE)) %>%
+  select(text_id, longdescription, match_stat)

@@ -1,9 +1,9 @@
 Statistik
 Umfrage
-Volkszählung
+VolkszÃ¤hlung
 Datenbank
 big Data
-Daten für Entscheidungen
+Daten fÃ¼r Entscheidungen
 Melderegister
 Grundbucheintrag
 Kataster
@@ -16,23 +16,23 @@ nationales Konto
 Preisindex
 Produktionsindex
 Data Science
-Daten für die Entwicklung
+Daten fÃ¼r die Entwicklung
 Datenjournalismus
-Daten für Bildung
+Daten fÃ¼r Bildung
 bildungsbezogene Daten
-Daten für das Gesundheitssystem
-Daten zur Friedensförderung
+Daten fÃ¼r das Gesundheitssystem
+Daten zur FriedensfÃ¶rderung
 globale Daten
 globaler Puls
 Gesundheitsdaten
-Flüchtlingsdaten
+FlÃ¼chtlingsdaten
 Migrationsdaten
 Datenerfassung
 Handeln durch Daten
 Datenprojekt
 offene Regierungsdaten
 Sterberegister
-Bevölkerungsstatistik
+BevÃ¶lkerungsstatistik
 Datenportal
 Datenarchiv
 Archivdaten
@@ -42,8 +42,8 @@ Mikrodaten
 Metadaten
 Datenverwaltung
 Datendokumentation
-Qualitätsdaten
-Datenqualität
+QualitÃ¤tsdaten
+DatenqualitÃ¤t
 Zugangsdaten
 offene Daten
 Daten verwenden
@@ -51,7 +51,7 @@ Daten produzieren
 Produktionsdaten
 Datenbenutzer
 Datenproduzent
-Datenübermittlung
+DatenÃ¼bermittlung
 Datenbewusstsein
 Datenerstellung
 Datenverarbeitung
@@ -63,11 +63,11 @@ Datenstandards
 Datenkuratierung
 Daten kuratieren
 demografische Daten
-mdg-Überwachung
-sdg-überwachung
-Überwachung von mdg
-Überwachung von sdg
+mdg-Ã¼berwachung
+sdg-Ã¼berwachung
+Ã¼berwachung von mdg
+Ã¼berwachung von sdg
 Freigabedaten
 Datenfreigabe
-prsp-Überwachung
+prsp-Ã¼berwachung
 Datenrevolution

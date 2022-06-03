@@ -9,7 +9,8 @@ land regist
 cadaster
 sdg indicator
 information system 
-birth register
+birth regist
+business regist
 national account
 price index 
 production index

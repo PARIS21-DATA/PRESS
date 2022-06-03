@@ -8,8 +8,11 @@ gender
 sex
 social protection
 gender based violence
+GBV
 violence against women 
+VAW
 data disaggregation
+sex disaggregation
 gender index
 gender indicators
 Gender statistics
@@ -21,8 +24,14 @@ time use survey
 sdg5
 unpaid work
 women empowerment
-GBVIMS
+WEE
 gender responsive
 gender parity
 gender equity
 gender mainstreaming
+care work
+reproductive
+SRHR
+intersectional
+FGM
+gender sensitive

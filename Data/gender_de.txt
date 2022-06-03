@@ -1,6 +1,6 @@
 Frauen
 weiblich
-Mädchen
+MÃ¤dchen
 schwanger
 Ehe
 Geburt
@@ -8,4 +8,3 @@ Gender
 Geschlecht
 sozialer Schutz
 soziale Absicherung
-
