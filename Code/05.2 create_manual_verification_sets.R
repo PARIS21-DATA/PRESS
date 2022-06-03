@@ -1,4 +1,5 @@
 
+# Create manual verification sets to correct mistakes in learning set
 positive_text_id <- df_crs %>% filter(stats_filter == TRUE) %>% pull(text_id) %>% unique
 
 df_positive <- df_crs_original %>%
@@ -15,4 +16,10 @@ for (i in 1:10) {
 
 write.xlsx(pred, file = "./Tmp/XGBoost/Manual verification/pred_data.xlsx", row.names = FALSE)
 
- 
+
+#----------------------- Read manual verification sets -------------------------
+
+file_names_verified <- list.files(path = "./Data/Manually verified/")
+file_names_verified <- paste0("./Data/Manually verified/", file_names_verified)
+
+files <- read.xlsx(file_names_verified[1], startRow = 1, cols = 1:5)

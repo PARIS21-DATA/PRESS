@@ -1,31 +1,31 @@
-#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
-#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
-# 2021-07-21
-# Script classify PRESS projects into CSA domains from 2012 onwards
-# Guglielmo Zappala
+################################################################################
+#
+# XGBoost classification for statistical projects
+# Author: Guglielmo Zapalla, Johannes Abele, Yu Tian
+# Date: Mai 2022
+#
+# Objective: 
+#            
+#            
+# 
+# input files: - 
+#              - /Data/Intermediate/crs03_full.rds
+#              - 
+#              
+#
+# output file: - 
+#
+#
+################################################################################
 
-# Input files: - projects_to_classify_for_csa.csv
-#              - new_PRESS.csv
 
-# Output files: - classified_PRESS_2012.csv
-#               - classified_crs_csa.csv
+# ------------------------------- Preparation ----------------------------------
 
-#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
-#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
-
-#%#%#%#%#%#%#%#%#%#%
-# Objective
-# The purpose of this script is to take the PRESS 2020 data, clean the project title and description
-# and a build an algorithms using XGBoost classifier to predict CSA domains from descriptions
-# dropping all years before 2012
-#%#%#%#%#%#%#%#%#%#%
-
-#%#%#%#%#%#%#%#%#%#%
-# Loading packages
-#%#%#%#%#%#%#%#%#%#%
 
 # Clear environment
 remove(list = ls())
+
+setwd(getwd())
 
 # Load required libraries
 packages <-
@@ -53,22 +53,19 @@ packages <-
     "cld2"
   )
 # Install uninstalled packages
-lapply(packages[!(packages %in% installed.packages())], install.packages)
+#lapply(packages[!(packages %in% installed.packages())], install.packages)
 lapply(packages, library, character.only = TRUE)
 rm(packages)
 
-
-#%#%#%#%#%#%#%#%#%#%
-# Loading data
-#%#%#%#%#%#%#%#%#%#%
-
-# setting working directory for experimenting - in the future loading data from github might be the easier solution
-setwd(getwd())
-
+# Set paths
 crs_path <- "./Data/intermediate/crs03.rds"
 crs_path_new <- "./Data/intermediate/positive_text_id.rds"
+
+# Set languages
 lang <-  "en"
 language <- "english"
+
+# Load data
 df_crs <- readRDS(crs_path)
 df_crs_original <- df_crs 
 df_crs <- df_crs_original %>%
@@ -77,23 +74,26 @@ df_crs <- df_crs_original %>%
   distinct()
 
 # Test duplicated long descriptions 
-freq_long <- as.data.frame(table(df_crs_original %>% pull(description_comb)))
-freq_long_gender <- as.data.frame(table(df_crs_original %>%
-                                   filter(match_gender == TRUE) %>% 
-                                   pull(description_comb)))
-freq_df <- as.data.frame(table(df %>%
-                      filter(gender_filter == TRUE) %>% 
-                      pull(description)))
+# freq_long <- as.data.frame(table(df_crs_original %>% pull(description_comb)))
+# freq_long_gender <- as.data.frame(table(df_crs_original %>%
+#                                    filter(match_gender == TRUE) %>% 
+#                                    pull(description_comb)))
+# freq_df <- as.data.frame(table(df %>%
+#                       filter(gender_filter == TRUE) %>% 
+#                       pull(description)))
 
-#%#%#%#%#%#%#%#%#%#%
-# Preparing the target variable Y: Statistical Activity
-#%#%#%#%#%#%#%#%#%#%
 
-# Set parameters
-iteration <- FALSE
-print_importance_matrix <- TRUE
-n_gram <- 1
-neg_sample_fraction <- 1
+#-------------------------------- Set parameters -------------------------------
+
+iteration <- FALSE                # Set to FALSE to rerun the whole classification with adjusted learning set (negatively marked as ones with low probability in 0th iteration)
+print_importance_matrix <- TRUE   # Set to TRUE to plot most important words
+n_gram <- 1                       # Set to higher integers to use longer ngrams
+neg_sample_fraction <- 1          # Fraction of negatively marked to positively marked in learning set
+plot_results <- FALSE             # Set to TRUE to visualize results
+frac_pred_set <- 0.05             # use only 5% of full prediction set to speed up for testing
+
+
+#---------------------- Define learning and prediction data --------------------
 
 # We assign projects that were classified as statistical projects by title pattern matching to df
 if (iteration) { 
@@ -109,25 +109,20 @@ if (iteration) {
   
   pred <- df_crs %>%
     filter((gender_filter == FALSE | is.na(gender_filter)) & !(text_id %in% pred_negative$text_id)) %>%
-    sample_n(size = floor(0.05 * n())) #use only 5% to speed up for testing
+    sample_n(size = floor(frac_pred_set * n())) #use only frac_pred_set% to speed up for testing
 } else {
   pred <- df_crs %>%
     filter(gender_filter == FALSE | is.na(gender_filter)) %>%
-    sample_n(size = floor(0.05 * n())) #use only 5% to speed up for testing
+    sample_n(size = floor(frac_pred_set * n())) #use only frac_pred_set% to speed up for testing
   
   df <- df_crs %>%
     filter(gender_filter == TRUE) %>%
     rbind(pred %>% sample_n(size = neg_sample_fraction * df_crs %>% filter(gender_filter == TRUE) %>% nrow)) %>%
     filter(!is.na(gender_filter))
 }
- 
 
 
-#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
-#### Text cleaning and corpus creation #
-#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%
-
-# IMPORTANT: 1. Stemming vs. lemmatization vs. original words
+#---------------------- Text cleaning and corpus creation ----------------------
 
 # Define function to create corpus
 create_corpus <- function (data){
@@ -152,13 +147,7 @@ create_corpus <- function (data){
 corpus_df <- create_corpus(df)
 corpus_df_pred <- create_corpus(pred)
 
-
-#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#
-#### Data Exploration/Testing ###
-#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#
-
-######## Integrate into the original dataframe that contains the domain labels
-
+# Integrate into the original dataframe that contains the domain labels
 # convert corpus to dataframe
 text_df <- t(data.frame(text = sapply(corpus_df, as.character), stringsAsFactors = FALSE))
 rownames(text_df) <- NULL
@@ -170,13 +159,8 @@ rownames(text_df_pred) <- NULL
 df$text_cleaned <- text_df[,1]
 pred$text_cleaned <- text_df_pred[,1]
 
-#%#%#%#%#%#%#%#%#%#%%#%#%%#%#
-# Training the Model: XGBoost
-#%#%#%#%#%#%#%#%#%#%%#%#%%#%#
 
-###########################################
-### Test run for ONE category: domain 1 ###
-###########################################
+#---------------------- Training the Model: XGBoost ----------------------------
 
 # Splitting in training and test - here you use as training all 
 dt <- sort(sample(nrow(df), nrow(df)*0.8))
@@ -266,7 +250,7 @@ pred <- mutate(pred, predictions = ifelse(predictions_raw > threshold, 1, 0))
 table(factor(test_data$predictions, levels=min(test_data$gender_filter):max(test_data$gender_filter)), 
       factor(test_data$gender_filter, levels=min(test_data$gender_filter):max(test_data$gender_filter)))
 
-# Prediction accuracy: 88 % 
+# Prediction accuracy:  % 
 precision <- test_data %>% filter(predictions == 1 & gender_filter == TRUE) %>% nrow
 precision <- precision / (precision + test_data %>% filter(predictions == 1 & gender_filter == FALSE) %>% nrow)
 print(paste0("Accuracy: ", mean(test_data$predictions == test_data$gender_filter)))
@@ -275,52 +259,10 @@ print(paste0("Fraction of detected projects: ", mean(pred$predictions)))
 
 
 
-#---------------------------- Visualization  -----------------------------------------
+#---------------------------- Visualization  -----------------------------------
 
 # Plot accuracy and precision trajectories
-source("./Code/05.1 plot_threshold_precision_gender.R")
+if (plot_results) source("./Code/05.1 visualize_XGBoost_results_gender.R")
 
-pred <- pred %>% mutate(total = str_count(string = text_cleaned, pattern = "\\S+")) %>%
-  mutate(predictions = as.factor(predictions))
 
-# Histograms of word distributions  
-hist_word_count_distr <- ggplot(pred, aes(x = total, fill = predictions)) + 
-  geom_histogram(binwidth = 2) + 
-  xlab("Number of words in description combination") +
-  ylab("Number of documents") + 
-  ggtitle(paste0("Word distribution with binwidth 2 for threshold of ", threshold))
-ggsave(paste0("./Tmp/XGBoost/Gender/word_distr_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"test+train.pdf"), width = 9, height = 7)
-
-# Histogram of donor/sector frequency
-df <- df %>%
-  left_join(df_crs %>% select(donorname, text_id), by = "text_id") %>% 
-  mutate(donorname = as.factor(donorname))
-
-# Test data
-ggplot(df, aes(x = donorname, fill = gender_filter)) + 
-  geom_bar() + 
-  xlab("Donorname") +
-  ylab("Count") + 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  ggtitle(paste0("Donor distribution in train + test data (n=", nrow(df), ")"))
-ggsave("./Tmp/XGBoost/Gender/hist_donorname_train+test_data.pdf", width = 13, height = 7)
-
-# Pred data
-ggplot(pred, aes(x = donorname)) + 
-  geom_bar() + 
-  xlab("Donorname") +
-  ylab("Count") + 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  ggtitle(paste0("Donor distribution in test data (pred data n=", nrow(pred), ")"))
-ggsave("./Tmp/XGBoost/Gender/hist_donorname_pred_data.pdf", width = 11, height = 7)
-
-# Sector test data
-ggplot(df, aes(x = sectorname, fill = gender_filter)) + 
-  geom_bar() + 
-  xlab("Sector") +
-  ylab("Count") + 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  ggtitle(paste0("Sector distribution in test + test data (n=", nrow(df), ")"))
-ggsave("./Tmp/XGBoost/hist_sector_train+test_data.pdf", width = 11, height = 7)
-  
 

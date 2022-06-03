@@ -34,7 +34,7 @@ source("./Code/00.1 text_preparation_functions.R")
 
 # Set paths
 crs_path_new <- "./Data/intermediate/crs03_sample.rds"
-crs_path <- "./Data/intermediate/crs02_full.rds"
+crs_path <- "./Data/intermediate/crs02_sample.rds"
 df_crs <- readRDS(crs_path)
 
 # we used to make the project with same description as 1 as long as one of the same description is marked as 1
@@ -82,11 +82,15 @@ table(df_crs$title_language)
 deepl_auth_key <- "fcec1af3-2663-3f39-7f16-dcd07b334f30:fx"
 
 # Translate German long descriptions (takes very long)
-df_crs <- df_crs %>%
-  mutate(longdescription = ifelse(long_language == "de" & !is.na(long_language), 
-                                  deeplr::toEnglish2(longdescription, auth_key = deepl_auth_key),
-                                  longdescription))
+df_crs_de <- df_crs %>% filter(long_language == "de") # subset German long language
+df_crs_de$longdescription <- deeplr::toEnglish2(df_crs_de$longdescription, auth_key = deepl_auth_key)
+saveRDS(df_crs_de, file  = "./Data/Raw/CRS/df_crs_de_translated.rds") # save translation
 
+# Add German long descriptions
+df_crs <- df_crs %>%
+  filter(long_language != "de" | is.na(long_language)) %>%
+  rbind(df_crs_de)
+rm(df_crs_de)
 
 #--------------------------- Title detection -----------------------------------
 
@@ -164,7 +168,7 @@ for (lang in languages){
     if (lang == "de") {
       # Look for nouns in composed words in German (note collapse = " | " -> collapse = "|")
       df_crs <- df_crs %>% 
-        mutate(match_gender = ifelse(title_language == lang & !is.na(title_language),
+        mutate(match_gender = ifelse(title_language == lang & match_gender == FALSE & !is.na(title_language),
                                      str_detect(projecttitle_clean, paste(list_keywords_gender_composed, collapse = "|")),
                                      match_gender))
     }

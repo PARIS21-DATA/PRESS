@@ -37,7 +37,8 @@ packages <-
     "textclean",
     "lexicon",
     "quanteda",
-    "deeplr"
+    "deeplr",
+    "stringdist"
   )
 
 # Install uninstalled packages
