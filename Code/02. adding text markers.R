@@ -10,7 +10,7 @@ print_time_diff <- function(start_time) {
 source <- "crs"
 skip_icov <- T
 job_specific_suffix <- ""
-job_specific_suffix <- "_de"
+job_specific_suffix <- "_full"
 crs_path <- paste0("./Data/intermediate/crs01_1", job_specific_suffix, ".rds")
 crs_path_new <- paste0("./Data/intermediate/crs02", job_specific_suffix, ".rds")
 start <- Sys.time()
@@ -66,17 +66,19 @@ df_crs <- df_crs_raw %>%
          longdescription = clean_titles(longdescription))
 print("Cleaning 3 text columns")
 
-saveRDS(df_crs, "./Data/intermediate/crs02_de_cleaned.rds")
+# saveRDS(df_crs, "./Data/intermediate/crs02_de_cleaned.rds")
 
 print_time_diff(start)
 gc()
+# for the whole crs data:
+# Time difference of 148.8021 secs
 
 df_crs <- df_crs %>%
   mutate(desc_2mine = ifelse(stringdist(projecttitle, longdescription)< max_string_dist, NA, longdescription)) %>%
   mutate(text_id = as.numeric(as.factor(desc_2mine)))
 
 
-saveRDS(df_crs, "./Data/intermediate/crs02_de_desc.rds")
+# saveRDS(df_crs, "./Data/intermediate/crs02_de_desc.rds")
 gc()
 print("find the best text for desc_2mine")
 print_time_diff(start)
@@ -104,7 +106,7 @@ df_crs <- df_crs %>%
   mutate(scb = ifelse(purposecode==16062,1,0),
          pop = ifelse(purposecode==13010,1,0),
          gen_ppcode = (purposecode %in% c(15170:15180)),
-         gen_donor = (donorname == "UN Women"),
+         gen_donor = (channelcode == 41146),
          gen_marker = (gender %in% c(1, 2) & (!is.na(gender))), 
          gen_marker1 = gender == 1, 
          gen_marker2 = gender ==2
@@ -159,7 +161,10 @@ names(df_crs)
 
 
 #Output::
-saveRDS(df_crs, file=crs_path_new)
+# saveRDS(df_crs, file=crs_path_new)
+write_rds(df_crs, file=crs_path_new)
+
 print("Save file:")
 print_time_diff(start)
-beep()
+
+beep(3)
