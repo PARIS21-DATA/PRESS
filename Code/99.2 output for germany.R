@@ -1,8 +1,8 @@
 df_crs_og_og <-  readRDS("Data/Raw/CRS/crs_de.rds")
-
+positive_text_id <- read_rds(paste0("./Data/intermediate/positive_text_id", "_de", ".rds"))
 df_crs_og_og$agencyname %>% unique
 
-source("Code/04. create matrix.R")
+# source("Code/04. create matrix.R")
 
 rm(list = ls()[!ls() %in% c("positive_text_id", "df_crs_og_og")])
 
@@ -86,6 +86,7 @@ df_crs_og_positive = df_crs_og_positive %>% rbind(b1)
 df_crs_og_positive = df_crs_og_positive %>%
   mutate(source = ifelse(process_id %in% from_code, "Purpose code: statistical capacity building", "Text mining"))
 
+which(duplicated(df_crs_og_positive$process_id))
 
 
 d4d_names <- data.frame(original = names(original_d4d), stringsAsFactors = F) %>% 
