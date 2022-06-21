@@ -4,13 +4,16 @@ census
 database
 big data
 data for decisions
-civil regist
-land regist 
+civil registration
+civil register
+land registration
+land register
 cadaster
 sdg indicator
 information system 
-birth regist
-business regist
+birth registration
+birth register
+business register
 national account
 price index 
 production index

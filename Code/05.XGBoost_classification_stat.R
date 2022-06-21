@@ -69,7 +69,7 @@ df_crs <- readRDS(crs_path)
 df_crs_original <- df_crs 
 df_crs <- df_crs_original %>%
   filter(is.na(desc_2mine) == FALSE) %>%
-  select(text_id, description = desc_2mine, stats_filter = text_detection_wo_mining_w_scb, gender_filter = text_filter_gender) %>%
+  select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb, gender_filter = text_filter_gender) %>%
   distinct()
 
 #library(openxlsx)
@@ -111,7 +111,7 @@ if (iteration) {
     filter(!is.na(stats_filter))
   
   pred <- df_crs %>%
-    filter(text_id %in% positive_text_id & !(text_id %in% pred_negative$text_id)) %>%
+    filter((stats_filter == FALSE | is.na(stats_filter)) & !(text_id %in% pred_negative$text_id)) %>%
     sample_n(size = floor(frac_pred_set * n())) #use only frac_pred_set% to speed up for testing
 } else {
   pred <- df_crs %>%
@@ -120,8 +120,8 @@ if (iteration) {
   
   df <- df_crs %>%
     filter(stats_filter == TRUE) %>%
-    rbind(pred %>% sample_n(size = neg_sample_fraction * df_crs %>% filter(stats_filter == TRUE) %>% nrow)) %>%
-    filter(!is.na(stats_filter))
+    rbind(pred %>% filter(!is.na(stats_filter)) %>% sample_n(size = neg_sample_fraction * df_crs %>% filter(stats_filter == TRUE) %>% nrow))
+    
 }
  
 

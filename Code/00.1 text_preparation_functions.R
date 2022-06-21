@@ -20,21 +20,11 @@ stem_and_concatenate <- function(x_string, language = "en"){
   return(x_string_stem)  
 }
 
-stem_and_concatenate_tm <- function(string, language = "en") {
-  string <- string %>% 
-    tolower %>% 
-    removeWords("'s") %>% # remove possesive s so that plural nouns get lemmatized correctly, e.g. "women's"
-    removeNumbers() %>%
-    removePunctuation(preserve_intra_word_dashes = TRUE) %>%
-    stripWhitespace %>%  
-    removeWords(c(stopwords(language))) %>% 
-    #removeWords(c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) %>% # exclude "use" from smart stopwords 
-    stem_strings(language = language)
-
-  return(string)
-}
-
-# # Try German
+# Try German Lemmatization
+# udpipe is supposed to provide a package for lemmatization of foreign languages 
+# but in some tests the results were not overwhelming (no lemmatization of past participles (gehabt -> haben),
+# compound words (Schiffskapitaen), ...) so stemming was used 
+#
 #library(udpipe)
 #ud_model <- udpipe_download_model("german")
 #ud_model <- udpipe_load_model(ud_model)

@@ -1,77 +1,4 @@
-################################################################################
-#
-# XGBoost classification for statistical projects
-# Author: Guglielmo Zapalla, Johannes Abele, Yu Tian
-# Date: Mai 2022
-#
-# Objective: 
-#            
-#            
-# 
-# input files: - 
-#              - /Data/Intermediate/crs03_full.rds
-#              - 
-#              
-#
-# output file: - 
-#
-#
-################################################################################
 
-
-# ------------------------------- Preparation ----------------------------------
-
-
-# Clear environment
-remove(list = ls())
-
-setwd(getwd())
-
-# Load required libraries
-packages <-
-  c(
-    "tidyverse",
-    "e1071",
-    "caTools",
-    "caret",
-    "tm",
-    "textstem",
-    "tidytext",
-    "mgsub",
-    "textclean",
-    "lexicon",
-    "wordcloud",
-    "quanteda",
-    "textcat",
-    "text2vec",
-    "xgboost",
-    "rlist",
-    "remotes",
-    "ParBayesianOptimization",
-    "mlr",
-    "DiagrammeR",
-    "cld2"
-  )
-# Install uninstalled packages
-#lapply(packages[!(packages %in% installed.packages())], install.packages)
-lapply(packages, library, character.only = TRUE)
-rm(packages)
-
-# Set paths
-crs_path <- "./Data/intermediate/crs03.rds"
-crs_path_new <- "./Data/intermediate/positive_text_id.rds"
-
-# Set languages
-lang <-  "en"
-language <- "english"
-
-# Load data
-df_crs <- readRDS(crs_path)
-df_crs_original <- df_crs 
-df_crs <- df_crs_original %>%
-  filter(is.na(description_comb) == FALSE) %>%
-  select(text_id, description = description_comb, gender_filter = match_gender, donorname) %>%
-  distinct()
 
 # Test duplicated long descriptions 
 # freq_long <- as.data.frame(table(df_crs_original %>% pull(description_comb)))
@@ -82,42 +9,48 @@ df_crs <- df_crs_original %>%
 #                       filter(gender_filter == TRUE) %>% 
 #                       pull(description)))
 
+for (iteration in c(FALSE, TRUE)) {
 
 #-------------------------------- Set parameters -------------------------------
 
-iteration <- FALSE                # Set to FALSE to rerun the whole classification with adjusted learning set (negatively marked as ones with low probability in 0th iteration)
+#iteration <- FALSE               # Set to FALSE to rerun the whole classification with adjusted learning set (negatively marked as ones with low probability in 0th iteration)
 print_importance_matrix <- TRUE   # Set to TRUE to plot most important words
 n_gram <- 1                       # Set to higher integers to use longer ngrams
-neg_sample_fraction <- 1          # Fraction of negatively marked to positively marked in learning set
+neg_sample_fraction <- 1.1        # Fraction of negatively marked to positively marked in learning set
 plot_results <- FALSE             # Set to TRUE to visualize results
-frac_pred_set <- 0.05             # use only 5% of full prediction set to speed up for testing
+frac_pred_set <- 0.5              # use only 5% of full prediction set to speed up for testing
 
 
 #---------------------- Define learning and prediction data --------------------
 
 # We assign projects that were classified as statistical projects by title pattern matching to df
 if (iteration) { 
+  df_sample <- df_crs %>%
+    filter(gender_filter == TRUE) %>%
+    sample_n(size = n())
+  
   pred_negative <- pred %>% 
     filter(predictions_raw <= 0.3) %>%
-    sample_n(size = neg_sample_fraction * df_crs %>% filter(gender_filter == TRUE) %>% nrow)  %>% 
+    sample_n(size = neg_sample_fraction * nrow(df_sample))  %>% 
     select(text_id, description, gender_filter, donorname) 
-  
-  df <- df_crs %>%
-    filter(gender_filter == TRUE) %>%
+
+  df <- df_sample %>%
     rbind(pred_negative) %>%
     filter(!is.na(gender_filter))
   
-  pred <- df_crs %>%
-    filter((gender_filter == FALSE | is.na(gender_filter)) & !(text_id %in% pred_negative$text_id)) %>%
-    sample_n(size = floor(frac_pred_set * n())) #use only frac_pred_set% to speed up for testing
+  pred <- pred_for_all
+  
 } else {
   pred <- df_crs %>%
     filter(gender_filter == FALSE | is.na(gender_filter)) %>%
     sample_n(size = floor(frac_pred_set * n())) #use only frac_pred_set% to speed up for testing
   
-  df <- df_crs %>%
+  df_sample <- df_crs %>%
     filter(gender_filter == TRUE) %>%
-    rbind(pred %>% filter(!is.na(gender_filter)) %>% sample_n(size = neg_sample_fraction * df_crs %>% filter(gender_filter == TRUE) %>% nrow))
+    sample_n(size = n())
+  
+  df <- df_sample %>%
+    rbind(pred %>% filter(!is.na(gender_filter)) %>% sample_n(size = neg_sample_fraction * nrow(df_sample)))
 }
 
 
@@ -221,11 +154,11 @@ fit.xgb <- xgboost(data = as.matrix(train_data_dtm), label = label.train, max.de
 #xgb.importance(model = fit.xgb, )
 
 # Check which words have a high importance for the prediction
-if (print_importance_matrix) {
+if (print_importance_matrix & iteration) {
   importance.matrix <- xgb.importance(model = fit.xgb)
   it_add <- "it0"
   if (iteration) it_add <- "it1"
-  pdf(paste0("./Tmp/XGBoost/Gender/importance_matrix_", it_add,"_", neg_sample_fraction, "_n", nrow(df), "test+train.pdf"))
+  pdf(paste0("./Tmp/XGBoost/Gender permutation results/importance_matrix_", it_add, "_", "_n", nrow(df), "learning_", gen_identifier, ".pdf"))
   xgb.plot.importance(importance.matrix, top_n = 30, rel_to_first = TRUE, xlab = "Relative importance")
   dev.off()
 }
@@ -256,12 +189,11 @@ print(paste0("Accuracy: ", mean(test_data$predictions == test_data$gender_filter
 print(paste0("Precision: ", precision))
 print(paste0("Fraction of detected projects: ", mean(pred$predictions)))
 
-
+}
 
 #---------------------------- Visualization  -----------------------------------
 
 # Plot accuracy and precision trajectories
-if (plot_results) source("./Code/05.1 visualize_XGBoost_results_gender.R")
-
+#if (plot_results) source("./Code/05.1 visualize_XGBoost_results_gender.R")
 
 

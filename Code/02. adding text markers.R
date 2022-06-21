@@ -41,6 +41,7 @@ cols_needed <- c("process_id",
                  "sectorname",
                  "sectorcode",
                  "channelcode",
+                 "sdgfocus",
                  "gender")
 
 # every step, we try to use a subset of the data to make the process quicker
@@ -104,7 +105,8 @@ df_crs <- df_crs_raw %>%
          pop = ifelse(purposecode==13010,1,0), 
          gen_ppcode = ifelse(purposecode %in% c(15170:15180), 1, 0), # add gender purpose code identifier
          gen_marker = ifelse(gender == 1 & !is.na(gender), 1, 0), # add gender marker (0 - no gender, 1 - gender primary purpose, 2 - gender secondary)
-         gen_donor = ifelse(channelcode == 41146, 1, 0) # all projects from UN Women
+         gen_donor = ifelse(channelcode == 41146, 1, 0), # all projects from UN Women
+         gen_sdg = str_detect(sdgfocus, "^5|,5")
          ) %>%
   select(-cols_needed[which(!cols_needed %in% c("process_id", "longdescription"))])
 

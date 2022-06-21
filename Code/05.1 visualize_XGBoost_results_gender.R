@@ -2,7 +2,7 @@
 #
 # Visualization of XGBoost results 
 # Author: Johannes Abele
-# Date: Mai 2022
+# Date: May 2022
 #
 # Objective: 
 #            

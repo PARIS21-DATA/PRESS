@@ -33,9 +33,11 @@ source("./Code/00. boot.R")
 source("./Code/00.1 text_preparation_functions.R")
 
 # Set paths
-crs_path_new <- "./Data/intermediate/crs03_sample.rds"
+crs_path_new <- "./Data/intermediate/crs03_sample_en.rds"
 crs_path <- "./Data/intermediate/crs02_sample.rds"
 df_crs <- readRDS(crs_path)
+#df_crs <- sample_n(df_crs, size = nrow(df_crs)/50) # take sample to speed up testing
+#saveRDS(df_crs, "./Data/intermediate/crs02_sample.rds")
 
 # we used to make the project with same description as 1 as long as one of the same description is marked as 1
 # it is wrong because some projects with the same name will have different purpose codes
@@ -44,7 +46,7 @@ df_crs <- readRDS(crs_path)
 #---------------------------- Set parameters -----------------------------------
 
 # All languages to include in classification
-languages <- c("en", "fr", "es", "de")
+languages <- c("en")
 
 
 #------------------------- Data frame preparation ------------------------------
@@ -106,10 +108,10 @@ df_crs$mining <- NA
 # Go through every language, load keywords, clean keywords and detect stat, mining and gender
 #???: Considerations about computation speed possible, not sure if code below is the fastest one can do
 for (lang in languages){
-  list_keywords_stat <- read_lines(paste0("./Data/statistics_reduced_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()
-  list_keywords_gender <- read_lines(paste0("./Data/gender_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()
-  demining_small_arms <- read_lines(paste0("./Data/demining_small_arms_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()
-  list_acronyms <- read_lines(paste0("./Data/statistics_reduced_acronyms_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()
+  list_keywords_stat <- read_lines(paste0("./Data/Final keyword lists/statistics_reduced_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()
+  list_keywords_gender <- read_lines(paste0("./Data/Final keyword lists/gender_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()
+  demining_small_arms <- read_lines(paste0("./Data/Final keyword lists/demining_small_arms_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()
+  list_acronyms <- read_lines(paste0("./Data/Final keyword lists/statistics_reduced_acronyms_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()
   
   # Use lemmatization for en
   if (lang %in% lemma_languages) {
@@ -186,7 +188,7 @@ df_crs <- df_crs %>%
   select(-projecttitle_lower)
 
 # Number of detected projects 
-lang <- "de" # select lang
+lang <- "en" # select lang
 sum(df_crs %>% filter(title_language == lang) %>% pull(match_stat), na.rm = T)
 sum(df_crs %>% filter(title_language == lang) %>% pull(match_gender), na.rm = T)
 
@@ -201,12 +203,28 @@ rm(df_crs_backup)
 # Include projects with scb purpose code
 df_crs <- df_crs %>%
   mutate(text_detection_wo_mining_w_scb = match_stat | scb)
-table(df_crs$text_detection_wo_mining) %>% print
-table(df_crs$text_detection_wo_mining_w_scb) %>% print
+#table(df_crs$text_detection_wo_mining) %>% print
+#table(df_crs$text_detection_wo_mining_w_scb) %>% print
 
-# Construct final gender filter out of gen_donor (UN Women), gender purpose code and the text detections 
-df_crs <- df_crs %>%
-  mutate(text_filter_gender = gen_donor|gen_ppcode|match_gender)
+# Construct final gender filter out of gen_donor (UN Women), gender purpose code and the text detections
+# source("./Code/03.1 gender_preclassification_comp.R") # compile different data sets for comparison of gender markers
+#df_crs <- df_crs %>%
+#  mutate(text_filter_gender = gen_donor|gen_ppcode|match_gender)
+
+# Create different combinations of gender filters to see differences in classification
+gen_combinations <- c("gen_donor", "gen_ppcode", "gen_sdg", "gen_marker",
+                      "gen_donor|gen_ppcode", "gen_donor|gen_ppcode|gen_marker|gen_sdg",
+                      "(gen_donor&gen_ppcode&gen_marker&gen_sdg)")
+#gen_combinations <- gtools::permutations(n = 3, r = 3, v = gen_combinations)
+#gen_combinations <- apply(gen_combinations, 1, function(x) paste0(x, collapse = '|'))
+gen_combinations <- paste0("match_gender|", gen_combinations)
+gen_combinations <- c("match_gender", gen_combinations) 
+
+for (comb in gen_combinations){
+  df_crs_tmp <- df_crs %>%
+      mutate(text_filter_gender = eval(parse(text = comb)))
+  saveRDS(df_crs_tmp, file = str_replace_all(paste0("./Data/Gender permutations/df_crs_", comb, ".rds"), "\\|", "_"))
+}
 
 a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, match_gender) %>% unique %>% nrow
 b = df_crs %>% select(text_id) %>% unique %>% nrow
