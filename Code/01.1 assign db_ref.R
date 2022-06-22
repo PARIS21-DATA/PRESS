@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Assigning df refference to each projects
+# Assigning df refference to each project
 # Author: Yu Tian, Johannes Abele
 # Date: 05/10/2022
 #
@@ -83,6 +83,7 @@ df_crs <- df_crs %>%
   select(db_ref, process_id) %>%
   inner_join(df_crs_raw, by = "process_id")
 rm(df_crs_raw)
-gc()
 
 saveRDS(df_crs, file  = crs_path_new)
+
+gc()

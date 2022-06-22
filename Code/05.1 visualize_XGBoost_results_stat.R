@@ -2,21 +2,20 @@
 #
 # Visualization of XGBoost results 
 # Author: Johannes Abele
-# Date: 05/10/2022
+# Date: May 2022
 #
-# Objective: 
-#            
+# Objective: Visualize the results from the stat classification. 
+#            1. Plot of the precision, accuracy and recall for different thresholds
+#            2. Histogram of amount of words-distribution with color acc. to classification
+#            3. Histogram of donor distribution for learning set ""
+#            4. Histogram of donor distribution for prediction set ""
+#            5. Histogram of the sectors for learning set ""
 #            
 # 
-# input files: - /Code/00.1 text_preparation_functions.R
-#              - /Data/intermediate/crs02_full.rds
-#              - /Data/statistics_reduced_*.txt
-#              - /Data/gender_*.txt
-#              - /Data/demining_small_arms_*.txt
-#              - /Data/statistics_reduced_acronyms_*.txt
+# input files: - uses data frames from previous stat classification
 #              
 #
-# output file: - /Data/intermediate/crs03_full.rds
+# output files: - 1. - 5. 
 #
 #
 ################################################################################
@@ -58,11 +57,11 @@ ggplot(threshold_step, aes(x = threshold)) +
   geom_vline(xintercept = max_F1, linetype = "dotted" ) +
   ylab("value") +
   ggtitle(paste0("Precision trajectory after ", it_add, " in intervalls ", intervall, " for a negative marked ration of ", neg_sample_fraction))
-ggsave(paste0("./Tmp/XGBoost/threshold_precision_accuracy_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"test+train.pdf"), width = 9, height = 7)
+ggsave(paste0("./Tmp/XGBoost/Stat/threshold_precision_accuracy_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"test+train.pdf"), width = 9, height = 7)
 
 #library(xlsx)
-#write.xlsx(test_data, file = "./Tmp/XGBoost/test_data.xlsx", row.names = FALSE)
-#write.xlsx(pred, file = "./Tmp/XGBoost/pred_data.xlsx", row.names = FALSE)
+#write.xlsx(test_data, file = "./Tmp/XGBoost/Stat/test_data.xlsx", row.names = FALSE)
+#write.xlsx(pred, file = "./Tmp/XGBoost/Stat/pred_data.xlsx", row.names = FALSE)
 
 
 #---------------------------- Plot histograms ----------------------------------
@@ -76,7 +75,7 @@ hist_word_count_distr <- ggplot(pred, aes(x = total, fill = predictions)) +
   xlab("Number of words in description combination") +
   ylab("Number of documents") + 
   ggtitle(paste0("Word distribution with binwidth 2 for threshold of ", threshold))
-ggsave(paste0("./Tmp/XGBoost/word_distr_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"test+train.pdf"), width = 9, height = 7)
+ggsave(paste0("./Tmp/XGBoost/Stat/word_distr_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"test+train.pdf"), width = 9, height = 7)
 
 # Histogram of donor/sector frequency
 df <- df %>%
@@ -91,7 +90,7 @@ ggplot(df, aes(x = donorname, fill = stats_filter)) +
   ylab("Count") + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   ggtitle(paste0("Donor distribution in train + test data (n=", nrow(df), ")"))
-ggsave("./Tmp/XGBoost/hist_donorname_train+test_data.pdf", width = 11, height = 7)
+ggsave("./Tmp/XGBoost/Stat/hist_donorname_train+test_data.pdf", width = 11, height = 7)
 
 # Pred data
 ggplot(pred, aes(x = donorname)) + 
@@ -100,7 +99,7 @@ ggplot(pred, aes(x = donorname)) +
   ylab("Count") + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   ggtitle(paste0("Donor distribution in test data (pred data n=", nrow(pred), ")"))
-ggsave("./Tmp/XGBoost/hist_donorname_pred_data.pdf", width = 11, height = 7)
+ggsave("./Tmp/XGBoost/Stat/hist_donorname_pred_data.pdf", width = 11, height = 7)
 
 # Sector test data
 ggplot(df, aes(x = sectorname, fill = stats_filter)) + 
@@ -109,5 +108,5 @@ ggplot(df, aes(x = sectorname, fill = stats_filter)) +
   ylab("Count") + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   ggtitle(paste0("Sector distribution in test + test data (n=", nrow(df), ")"))
-ggsave("./Tmp/XGBoost/hist_sector_train+test_data.pdf", width = 11, height = 7)
+ggsave("./Tmp/XGBoost/Stat/hist_sector_train+test_data.pdf", width = 11, height = 7)
 

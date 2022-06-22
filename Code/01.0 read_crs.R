@@ -10,7 +10,6 @@
 # input files: - Data/Raw/CRS/zip/*.zip
 #              - Data/Raw/CRS/txt/*.txt
 #              - 
-#              - 
 #              
 #
 # output file: - /Data/Raw/CRS/crs_sample.rds
@@ -83,8 +82,7 @@ beep(2)
 # Take a sample of the entire data frame for further testing 
 df_crs_sample <- df_crs[sample(nrow(df_crs),nrow(df_crs)/10), ]
 rm(df_crs)
+
 df_crs <- df_crs_sample
 saveRDS(df_crs, file  = "./Data/Raw/CRS/crs_sample.rds") 
-beep()
-rm(list = ls())
 gc()

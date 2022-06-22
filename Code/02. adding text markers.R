@@ -8,7 +8,7 @@
 #            
 #            
 # 
-# input files: - /Data/intermediate/crs01_1_full.rds
+# input files: - /Data/intermediate/crs01_1_full.rds 
 #              
 #
 # output file: - /Data/intermediate/crs02_full.rds
@@ -23,13 +23,17 @@ rm(list = ls())
 
 source <- "crs"
 
-# Set paths
-crs_path <- "./Data/intermediate/crs01_1_full.rds"
-crs_path_new <- "./Data/intermediate/crs02_full.rds"
+# Set paths (change to sample to work with sample of CRS data)
+crs_path <- "./Data/intermediate/crs01_1_sample.rds"
+crs_path_new <- "./Data/intermediate/crs02_sample.rds"
 
 # Load data
 df_crs_raw <- readRDS(crs_path)
 rm(crs_path)
+
+#df_crs <- sample_n(df_crs_raw, size = nrow(df_crs_raw)/50) # take sample to speed up testing
+#saveRDS(df_crs, "./Data/intermediate/crs01_1_sample.rds")
+
 
 # Define all columns needed later on
 cols_needed <- c("process_id", 
@@ -42,7 +46,10 @@ cols_needed <- c("process_id",
                  "sectorcode",
                  "channelcode",
                  "sdgfocus",
-                 "gender")
+                 "gender",
+                 "crsid",
+                 "recipientname",
+                 "usd_disbursement_defl")
 
 # every step, we try to use a subset of the data to make the process quicker
 

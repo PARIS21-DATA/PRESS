@@ -4,16 +4,18 @@
 # Author: Johannes Abele
 # Date: May 2022
 #
-# Objective: 
-#            
+# Objective: Visualize the results from the gender classification. 
+#            1. Plot of the precision, accuracy and recall for different thresholds
+#            2. Histogram of amount of words-distribution with color acc. to classification
+#            3. Histogram of donor distribution for learning set ""
+#            4. Histogram of donor distribution for prediction set ""
+#            5. Histogram of the sectors for learning set ""
 #            
 # 
-# input files: - /Code/00.1 text_preparation_functions.R
-#              - /Data/intermediate/crs02_full.rds
-#              - 
+# input files: - uses data frames from previous gender classification
 #              
 #
-# output file: - /Data/intermediate/crs03_full.rds
+# output file: - 1. - 5. 
 #
 #
 ################################################################################
@@ -24,9 +26,7 @@
 threshold_step <- data.frame(threshold = as.numeric(), accuracy = as.numeric(), precision = as.numeric(), recall = as.numeric())
 intervall <- 0.01
 for (i in seq(0, 1, by = intervall)) {
-  # Crucial to decide the cut-off value or threshold - i.e., from what probability do we say an observation is gender_filter? 
-  # The SDG lab uses a list of thresholds with a different threshold for each SDG. It remains unclear how they arrived at the threshold.
-  # I will start with a simple 0.5. But this should be tested and optimized. 
+  
   threshold <- i
   test_data <- mutate(test_data, predictions = ifelse(predictions_raw > threshold, 1, 0))
   pred <- mutate(pred, predictions = ifelse(predictions_raw > threshold, 1, 0))

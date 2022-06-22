@@ -4,7 +4,7 @@
 # Author: Yu Tian, Johannes Abele
 # Date: 05/10/2022
 #
-# Objective: 
+# Objective: Detect stat or gender keywords in titles for all languages 
 #            
 #            
 # 
@@ -211,15 +211,16 @@ df_crs <- df_crs %>%
 #df_crs <- df_crs %>%
 #  mutate(text_filter_gender = gen_donor|gen_ppcode|match_gender)
 
-# Create different combinations of gender filters to see differences in classification
+# Create different combinations of gender filters to see differences in subsequent classification
 gen_combinations <- c("gen_donor", "gen_ppcode", "gen_sdg", "gen_marker",
                       "gen_donor|gen_ppcode", "gen_donor|gen_ppcode|gen_marker|gen_sdg",
                       "(gen_donor&gen_ppcode&gen_marker&gen_sdg)")
-#gen_combinations <- gtools::permutations(n = 3, r = 3, v = gen_combinations)
+#gen_combinations <- gtools::permutations(n = 3, r = 3, v = gen_combinations) # leave for other potential other projects
 #gen_combinations <- apply(gen_combinations, 1, function(x) paste0(x, collapse = '|'))
 gen_combinations <- paste0("match_gender|", gen_combinations)
 gen_combinations <- c("match_gender", gen_combinations) 
 
+# Go through all different combinations for gender_filter and save in Gender permutations-folder
 for (comb in gen_combinations){
   df_crs_tmp <- df_crs %>%
       mutate(text_filter_gender = eval(parse(text = comb)))
@@ -231,8 +232,6 @@ b = df_crs %>% select(text_id) %>% unique %>% nrow
 
 
 print(paste0("There are ", a-b, " projects with same names but different purpose code"))
-
-names(df_crs)
 
 saveRDS(df_crs,file = crs_path_new)
 

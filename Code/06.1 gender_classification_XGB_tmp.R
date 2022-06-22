@@ -1,13 +1,10 @@
-
-
-# Test duplicated long descriptions 
-# freq_long <- as.data.frame(table(df_crs_original %>% pull(description_comb)))
-# freq_long_gender <- as.data.frame(table(df_crs_original %>%
-#                                    filter(match_gender == TRUE) %>% 
-#                                    pull(description_comb)))
-# freq_df <- as.data.frame(table(df %>%
-#                       filter(gender_filter == TRUE) %>% 
-#                       pull(description)))
+################################################################################
+#
+# Temporary script for testing different combinations of gender markers in CRS as gender_filter
+# Author: Guglielmo Zapalla, Johannes Abele, Yu Tian
+# Date: Mai 2022
+#
+################################################################################
 
 for (iteration in c(FALSE, TRUE)) {
 

@@ -24,19 +24,18 @@ library(deeplr)
 deepl_auth_key <- "fcec1af3-2663-3f39-7f16-dcd07b334f30:fx" # auth key corresponds to deepL account johannes.abele@oecd.org
 
 # Translate keyword lists 
-# WARNING: Uncomment write.table commands overwrites current keyword lists 
-list_keywords_stat_en <- read_lines("data/statistics_reduced_en.txt")  %>% trimws()
+list_keywords_stat_en <- read_lines("./Data/Final keyword lists/statistics_reduced_en.txt")  %>% trimws()
 list_keywords_stat_de <- deeplr::toGerman2(list_keywords_stat_en, auth_key = deepl_auth_key) # German
 list_keywords_stat_es <- deeplr::toSpanish2(list_keywords_stat_en, auth_key = deepl_auth_key) # Spanish
 list_keywords_stat_fr <- deeplr::toFrench2(list_keywords_stat_en, auth_key = deepl_auth_key) # French
-# write.table(list_keywords_stat_de, file = "./data/statistics_reduced_de.txt", row.names = F, col.names = F, quote = FALSE)
-# write.table(list_keywords_stat_es, file = "./data/statistics_reduced_es.txt", row.names = F, col.names = F, quote = FALSE)
-# write.table(list_keywords_stat_fr, file = "./data/statistics_reduced_fr.txt", row.names = F, col.names = F, quote = FALSE)
+write.table(list_keywords_stat_de, file = "./data/statistics_reduced_de.txt", row.names = F, col.names = F, quote = FALSE)
+write.table(list_keywords_stat_es, file = "./data/statistics_reduced_es.txt", row.names = F, col.names = F, quote = FALSE)
+write.table(list_keywords_stat_fr, file = "./data/statistics_reduced_fr.txt", row.names = F, col.names = F, quote = FALSE)
 
-list_keywords_gender_en <- readLines("data/gender_en.txt")  %>% trimws()
+list_keywords_gender_en <- readLines("./Data/Final keyword lists/gender_en.txt")  %>% trimws()
 list_keywords_gender_de <- deeplr::toGerman2(list_keywords_gender_en, auth_key = deepl_auth_key) 
 list_keywords_gender_es <- deeplr::toSpanish2(list_keywords_gender_en, auth_key = deepl_auth_key)
 list_keywords_gender_fr <- deeplr::toFrench2(list_keywords_gender_en, auth_key = deepl_auth_key)
-# write.table(list_keywords_gender_de, file = "./data/gender_de.txt", row.names = F, col.names = F, quote = FALSE)
-# write.table(list_keywords_gender_es, file = "./data/gender_es.txt", row.names = F, col.names = F, quote = FALSE)
-# write.table(list_keywords_gender_fr, file = "./data/gender_fr.txt", row.names = F, col.names = F, quote = FALSE)
+write.table(list_keywords_gender_de, file = "./data/gender_de.txt", row.names = F, col.names = F, quote = FALSE)
+write.table(list_keywords_gender_es, file = "./data/gender_es.txt", row.names = F, col.names = F, quote = FALSE)
+write.table(list_keywords_gender_fr, file = "./data/gender_fr.txt", row.names = F, col.names = F, quote = FALSE)

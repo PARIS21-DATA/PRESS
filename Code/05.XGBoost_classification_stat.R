@@ -4,16 +4,18 @@
 # Author: Guglielmo Zapalla, Johannes Abele, Yu Tian
 # Date: 05/10/2022
 #
-# Objective: 
-#            
-#            
+# Objective: Classify the projects with distinct long descriptions that were marged
+#            as FALSE by the title detection into statistical projects. The method
+#            was adapted from the CSA classification but with additional options 
+#            (iterative process, possibility of ngrams). 
+#
+#
+#
 # 
-# input files: - 
-#              - /Data/Intermediate/crs03_full.rds
-#              - 
+# input files: - /Data/Intermediate/crs03_full.rds
 #              
 #
-# output file: - 
+# output file: - ./Tmp/XGBoost/importance_matrix_*.pdf
 #
 #
 ################################################################################
@@ -57,24 +59,16 @@ lapply(packages, library, character.only = TRUE)
 rm(packages)
 
 # Set paths
-crs_path <- "./Data/Intermediate/crs03_full1.rds"
+crs_path <- "./Data/Intermediate/crs03_sample.rds"
 crs_path_new <- "./Data/intermediate/positive_text_id.rds"
-
-# Set languages
-lang <-  "en"
-language <- "english"
 
 # Load data
 df_crs <- readRDS(crs_path)
 df_crs_original <- df_crs 
 df_crs <- df_crs_original %>%
-  filter(is.na(desc_2mine) == FALSE) %>%
-  select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb, gender_filter = text_filter_gender) %>%
+  filter(is.na(description_comb) == FALSE) %>%
+  select(text_id, description = description_comb, stats_filter = text_detection_wo_mining_w_scb) %>%
   distinct()
-
-#library(openxlsx)
-#openxlsx::write.xlsx(df_crs, file = "./Tmp/XGBoost/full_unclassified_crs.xlsx", rowNames = FALSE)
-
 
 # # Test duplicated long descriptions 
 # freq_long <- as.data.frame(table(df_crs_original %>% pull(description_comb)))
@@ -86,14 +80,18 @@ df_crs <- df_crs_original %>%
 #                       pull(description)))
 
 
+#!!!WARNING: Whole process starts from here
+for (iteration in c(FALSE, TRUE)) {
+
 #-------------------------------- Set parameters -------------------------------
 
-iteration <- FALSE                # Set to FALSE to rerun the whole classification with adjusted learning set (negatively marked as ones with low probability in 0th iteration)
+#iteration <- FALSE                # Set to FALSE to rerun the whole classification with adjusted learning set (negatively marked as ones with low probability in 0th iteration)
 print_importance_matrix <- TRUE   # Set to TRUE to plot most important words
 n_gram <- 1                       # Set to higher integers to use longer ngrams
 neg_sample_fraction <- 1          # Fraction of negatively marked to positively marked in learning set
 plot_results <- FALSE             # Set to TRUE to visualize results
 frac_pred_set <- 0.05             # use only 5% of full prediction set to speed up for testing
+save_fit_xgb <- TRUE              # Set to TRUE to save fitted xgb model
 
 
 #---------------------- Define learning and prediction data --------------------
@@ -209,7 +207,7 @@ if (n_gram == 1) {
 test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
 prediction_data_dtm <- pred$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
   
-# Train the model for one statistical domain - parameters taken from SDG lab code. These might benefit from tuning
+# Train the model- parameters taken from SDG lab code. These might benefit from tuning
 eta_par <- 0.1
 nrounds_par <- 5 / eta_par
   
@@ -222,8 +220,11 @@ label.prediction <- as.numeric(pred$stats_filter)
 fit.xgb <- xgboost(data = as.matrix(train_data_dtm), label = label.train, max.depth = 17, eta = eta_par, nthread = 2, 
                    nrounds = nrounds_par, objective = "binary:logistic", verbose = 1)
 
-# Change importance matrix
-#xgb.importance(model = fit.xgb, )
+# Save the fitted model so that it can be loaded later on (especially for very large training sets)
+if (save_fit_xgb) save(fit.xgb, file = "./Tmp/XGBoost/Fitted models/fit.xgb.stat.Rdata")
+
+# Uncomment to load previously fitted model
+#fit.xgb <- load("./Tmp/XGBoost/Fitted models/fit.xgb.stat.Rdata")
 
 # Check which words have a high importance for the prediction
 if (print_importance_matrix) {
@@ -243,9 +244,8 @@ pred1.xgb <- predict(fit.xgb, as.matrix(prediction_data_dtm))
 test_data$predictions_raw <- pred.xgb
 pred$predictions_raw <- pred1.xgb
   
-# Crucial to decide the cut-off value or threshold - i.e., from what probability do we say an observation is stats_filter? 
+# Crucial to decide the cut-off value or threshold - i.e., from what probability do we say an observation is stats? 
 # The SDG lab uses a list of thresholds with a different threshold for each SDG. It remains unclear how they arrived at the threshold.
-# I will start with a simple 0.5. But this should be tested and optimized. 
 threshold <- 0.95
 test_data <- mutate(test_data, predictions = ifelse(predictions_raw > threshold, 1, 0))
 pred <- mutate(pred, predictions = ifelse(predictions_raw > threshold, 1, 0))
@@ -261,7 +261,7 @@ print(paste0("Accuracy: ", mean(test_data$predictions == test_data$stats_filter)
 print(paste0("Precision: ", precision))
 print(paste0("Fraction of detected projects: ", mean(pred$predictions)))
   
-
+}
 
 #---------------------------- Visualization  -----------------------------------------
 
