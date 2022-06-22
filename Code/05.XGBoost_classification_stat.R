@@ -231,7 +231,7 @@ if (print_importance_matrix) {
   importance.matrix <- xgb.importance(model = fit.xgb)
   it_add <- "it0"
   if (iteration) it_add <- "it1"
-  pdf(paste0("./Tmp/XGBoost/importance_matrix_", it_add,"_", neg_sample_fraction, "_n", nrow(df), "test+train.pdf"))
+  pdf(paste0("./Tmp/XGBoost/Stat/importance_matrix_", it_add,"_", neg_sample_fraction, "_n", nrow(df), "test+train.pdf"))
   xgb.plot.importance(importance.matrix, top_n = 30, rel_to_first = TRUE, xlab = "Relative importance")
   dev.off()
 }
