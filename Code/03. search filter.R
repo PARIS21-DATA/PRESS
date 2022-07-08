@@ -33,14 +33,19 @@ source("./Code/00. boot.R")
 source("./Code/00.1 text_preparation_functions.R")
 
 # Set paths
-crs_path_new <- "./Data/intermediate/crs03_sample_en.rds"
-crs_path <- "./Data/intermediate/crs02_sample.rds"
+crs_path_new <- "./Data/intermediate/crs03_sample_uk.rds"
+crs_path <- "./Data/intermediate/crs02.rds"
 df_crs <- readRDS(crs_path)
-#df_crs <- sample_n(df_crs, size = nrow(df_crs)/50) # take sample to speed up testing
-#saveRDS(df_crs, "./Data/intermediate/crs02_sample.rds")
+df_crs_sample <- sample_n(df_crs, size = nrow(df_crs)/20) # take sample to speed up testing
+saveRDS(df_crs_sample, "./Data/intermediate/crs02_sample.rds")
 
 # we used to make the project with same description as 1 as long as one of the same description is marked as 1
 # it is wrong because some projects with the same name will have different purpose codes
+
+# Country specific treatment
+df_crs <- df_crs_sample %>%
+  filter(!donorname == "United Kingdom") %>%
+  rbind(df_crs_uk)
 
 
 #---------------------------- Set parameters -----------------------------------
@@ -222,9 +227,9 @@ gen_combinations <- c("match_gender", gen_combinations)
 
 # Go through all different combinations for gender_filter and save in Gender permutations-folder
 for (comb in gen_combinations){
-  df_crs_tmp <- df_crs %>%
+  df_crs_tmp <- df_crs %>% 
       mutate(text_filter_gender = eval(parse(text = comb)))
-  saveRDS(df_crs_tmp, file = str_replace_all(paste0("./Data/Gender permutations/df_crs_", comb, ".rds"), "\\|", "_"))
+  saveRDS(df_crs_tmp, file = str_replace_all(paste0("./Data/Gender permutations/df_crs_uk_", comb, ".rds"), "\\|", "_"))
 }
 
 a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, match_gender) %>% unique %>% nrow

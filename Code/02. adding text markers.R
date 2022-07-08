@@ -21,11 +21,14 @@
 
 rm(list = ls())
 
+# Load packages
+source("./Code/00. boot.R")
+
 source <- "crs"
 
 # Set paths (change to sample to work with sample of CRS data)
-crs_path <- "./Data/intermediate/crs01_1_sample.rds"
-crs_path_new <- "./Data/intermediate/crs02_sample.rds"
+crs_path <- "./Data/intermediate/crs03.rds"
+crs_path_new <- "./Data/intermediate/crs02.rds"
 
 # Load data
 df_crs_raw <- readRDS(crs_path)
