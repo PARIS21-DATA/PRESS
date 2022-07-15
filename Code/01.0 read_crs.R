@@ -77,7 +77,7 @@ saveRDS(df_crs, file  = "./Data/Raw/CRS/crs_full.rds")
 beep(2)
 
 # If full data available in Data/Raw/, uncomment to load 
-#df_crs <- readRDS("./Data/Raw/CRS/crs_full.rds")
+#df_crs <- readRDS("./Data/Raw/CRS/crs_utf8_full.rds")
 
 # Take a sample of the entire data frame for further testing 
 df_crs_sample <- df_crs[sample(nrow(df_crs),nrow(df_crs)/10), ]

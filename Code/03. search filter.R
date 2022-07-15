@@ -33,25 +33,26 @@ source("./Code/00. boot.R")
 source("./Code/00.1 text_preparation_functions.R")
 
 # Set paths
-crs_path_new <- "./Data/intermediate/crs03_sample_uk.rds"
-crs_path <- "./Data/intermediate/crs02.rds"
+crs_path_new <- "./Data/intermediate/crs03_full.rds"
+crs_path <- "./Data/intermediate/crs02_full.rds"
 df_crs <- readRDS(crs_path)
-df_crs_sample <- sample_n(df_crs, size = nrow(df_crs)/20) # take sample to speed up testing
-saveRDS(df_crs_sample, "./Data/intermediate/crs02_sample.rds")
+df_crs_sample <- sample_n(df_crs, size = nrow(df_crs)/10) # take sample to speed up testing
+# saveRDS(df_crs_sample, "./Data/intermediate/crs02_sample.rds")
 
 # we used to make the project with same description as 1 as long as one of the same description is marked as 1
 # it is wrong because some projects with the same name will have different purpose codes
 
 # Country specific treatment
+df_crs_donor <- df_crs %>% filter(donorname == "United Kingdom")
 df_crs <- df_crs_sample %>%
   filter(!donorname == "United Kingdom") %>%
-  rbind(df_crs_uk)
+  rbind(df_crs_donor)
 
 
 #---------------------------- Set parameters -----------------------------------
 
-# All languages to include in classification
-languages <- c("en")
+# All languages to include in classification - options: en, fr, es, de
+languages <- c("en", "fr", "es")
 
 
 #------------------------- Data frame preparation ------------------------------
@@ -63,6 +64,10 @@ df_crs <- df_crs %>%
   mutate(title_language = cld2::detect_language(projecttitle)) %>%
   mutate(long_language = cld2::detect_language(longdescription))
 
+# Use only projects in en, fr, es and de
+df_crs <- df_crs %>%
+  filter(title_language %in% c(languages, NA) & long_language %in% c(languages,NA))
+
 # Save raw data for later
 df_crs_backup <- df_crs
 
@@ -72,9 +77,6 @@ df_crs <- df_crs_backup %>%
   select(title_id, projecttitle, projecttitle_lower, longdescription, title_language, long_language) %>%
   filter(!duplicated(title_id))
 
-# Use only projects in en, fr, es and de
-df_crs <- df_crs %>%
-  filter(title_language %in% c(languages, NA) & long_language %in% c(languages,NA))
 
 # Inspect language distributions
 table(df_crs$long_language)
@@ -131,16 +133,25 @@ for (lang in languages){
                                          clean_and_lemmatize(projecttitle_lower, language = lang),
                                          projecttitle_lower)) %>%
       mutate(match_stat = ifelse(title_language == lang | is.na(title_language), 
-                                 str_detect(projecttitle_clean, paste(list_keywords_stat, collapse = " | ")),
+                                 str_detect(projecttitle_clean, paste0(paste(list_keywords_stat, collapse = " | ")," |^", 
+                                                                       paste(list_keywords_stat, collapse = "|^"),"|", # beginning of string
+                                                                       paste(list_keywords_stat, collapse = "$|"), "$")), # end of string
                                  match_stat),
              match_gender = ifelse(title_language == lang | is.na(title_language),
-                                   str_detect(projecttitle_clean, paste(list_keywords_gender, collapse = " | ")),
+                                   str_detect(projecttitle_clean, paste0(paste(list_keywords_gender, collapse = " | ")," |^", 
+                                                                         paste(list_keywords_gender, collapse = "|^"),"|", # beginning of string
+                                                                         paste(list_keywords_gender, collapse = "$|"), "$")), # end of string 
                                    match_gender)) %>%
       mutate(mining = ifelse(title_language == lang | is.na(title_language),
-                             str_detect(projecttitle_clean, paste(demining_small_arms, collapse = " | ")),
+                             str_detect(projecttitle_clean, paste0(paste(demining_small_arms, collapse = " | ")," |^", 
+                                                                   paste(demining_small_arms, collapse = "|^"),"|", # beginning of string
+                                                                   paste(demining_small_arms, collapse = "$|"), "$")), # end of string 
                              mining)) %>% 
       mutate(match_stat = ifelse(title_language == lang | is.na(title_language),
-                                 str_detect(projecttitle_lower, paste(list_acronyms, collapse = " | ")) | match_stat,
+                                 str_detect(projecttitle_lower,  paste0(paste(list_acronyms, collapse = " | ")," |^", 
+                                                                        paste(list_acronyms, collapse = "|^"),"|", # beginning of string
+                                                                        paste(list_acronyms, collapse = "$|"), "$")) # end of string 
+                                 | match_stat,
                                  match_stat))
     print(paste0(lang, " finished"))
     
@@ -160,17 +171,26 @@ for (lang in languages){
       mutate(projecttitle_clean = ifelse(title_language == lang & !is.na(title_language), 
                                          stem_and_concatenate(projecttitle_lower, language = lang),
                                          projecttitle_clean)) %>%
-      mutate(match_stat = ifelse(title_language == lang & !is.na(title_language), 
-                                 str_detect(projecttitle_clean, paste(list_keywords_stat, collapse = " | ")),
+      mutate(match_stat = ifelse(title_language == lang | is.na(title_language), 
+                                 str_detect(projecttitle_clean, paste0(paste(list_keywords_stat, collapse = " | ")," |^", 
+                                                                       paste(list_keywords_stat, collapse = "|^"),"|", # beginning of string
+                                                                       paste(list_keywords_stat, collapse = "$|"), "$")), # end of string
                                  match_stat),
-             match_gender = ifelse(title_language == lang & !is.na(title_language),
-                                   str_detect(projecttitle_clean, paste(list_keywords_gender, collapse = " | ")),
+             match_gender = ifelse(title_language == lang | is.na(title_language),
+                                   str_detect(projecttitle_clean, paste0(paste(list_keywords_gender, collapse = " | ")," |^", 
+                                                                         paste(list_keywords_gender, collapse = "|^"),"|", # beginning of string
+                                                                         paste(list_keywords_gender, collapse = "$|"), "$")), # end of string 
                                    match_gender)) %>%
-      mutate(mining = ifelse(title_language == lang & !is.na(title_language),
-                             str_detect(projecttitle_clean, paste(demining_small_arms, collapse = " | ")), 
-                             mining)) %>%
-      mutate(match_stat = ifelse(title_language == lang & !is.na(title_language),
-                                 str_detect(projecttitle_lower, paste(list_acronyms, collapse = " | ")) | match_stat,
+      mutate(mining = ifelse(title_language == lang | is.na(title_language),
+                             str_detect(projecttitle_clean, paste0(paste(demining_small_arms, collapse = " | ")," |^", 
+                                                                   paste(demining_small_arms, collapse = "|^"),"|", # beginning of string
+                                                                   paste(demining_small_arms, collapse = "$|"), "$")), # end of string 
+                             mining)) %>% 
+      mutate(match_stat = ifelse(title_language == lang | is.na(title_language),
+                                 str_detect(projecttitle_lower,  paste0(paste(list_acronyms, collapse = " | ")," |^", 
+                                                                        paste(list_acronyms, collapse = "|^"),"|", # beginning of string
+                                                                        paste(list_acronyms, collapse = "$|"), "$")) # end of string 
+                                 | match_stat,
                                  match_stat))
     if (lang == "de") {
       # Look for nouns in composed words in German (note collapse = " | " -> collapse = "|")
@@ -193,7 +213,7 @@ df_crs <- df_crs %>%
   select(-projecttitle_lower)
 
 # Number of detected projects 
-lang <- "en" # select lang
+lang <- "fr" # select lang
 sum(df_crs %>% filter(title_language == lang) %>% pull(match_stat), na.rm = T)
 sum(df_crs %>% filter(title_language == lang) %>% pull(match_gender), na.rm = T)
 
@@ -201,7 +221,8 @@ sum(df_crs %>% filter(title_language == lang) %>% pull(match_gender), na.rm = T)
 #--------------------------- Merge and check results ---------------------------
 
 # Merge with original data according to title id 
-df_crs <- left_join(df_crs_backup, df_crs)
+df_crs <- left_join(df_crs_backup, df_crs %>%
+                      select(title_id, match_stat, match_gender, mining, projecttitle_clean, text_detection_wo_mining), by = "title_id")
 
 rm(df_crs_backup)
 
@@ -213,8 +234,8 @@ df_crs <- df_crs %>%
 
 # Construct final gender filter out of gen_donor (UN Women), gender purpose code and the text detections
 # source("./Code/03.1 gender_preclassification_comp.R") # compile different data sets for comparison of gender markers
-#df_crs <- df_crs %>%
-#  mutate(text_filter_gender = gen_donor|gen_ppcode|match_gender)
+df_crs <- df_crs %>%
+  mutate(text_filter_gender = match_gender)
 
 # Create different combinations of gender filters to see differences in subsequent classification
 gen_combinations <- c("gen_donor", "gen_ppcode", "gen_sdg", "gen_marker",

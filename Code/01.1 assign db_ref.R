@@ -24,7 +24,7 @@ rm(list = ls())
 source("./Code/00. boot.R")
 
 # Set all paths 
-crs_path <- "./Data/Raw/CRS/crs_sample.rds"
+crs_path <- "./Data/Raw/CRS/crs_utf8_full.rds"
 crs_path_lang <- "./Data/Raw/CRS/df_crs_de.rds"
 crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" , "_full.rds")
 df_crs_raw <- readRDS(crs_path)
@@ -41,7 +41,7 @@ df_crs <- df_crs_raw %>%
     longdescription, 
     crsid,
     donorcode, 
-    year ,
+    year,
     usd_commitment, 
     purposecode, 
     usd_disbursement, 

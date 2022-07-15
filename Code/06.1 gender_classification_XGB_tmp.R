@@ -24,7 +24,7 @@ frac_pred_set <- 0.5              # use only 5% of full prediction set to speed 
 if (iteration) { 
   df_sample <- df_crs %>%
     filter(gender_filter == TRUE) %>%
-    sample_n(size = n())
+    sample_n(size = n()/3)
   
   pred_negative <- pred %>% 
     filter(predictions_raw <= 0.3) %>%
@@ -44,7 +44,7 @@ if (iteration) {
   
   df_sample <- df_crs %>%
     filter(gender_filter == TRUE) %>%
-    sample_n(size = n())
+    sample_n(size = n()/3)
   
   df <- df_sample %>%
     rbind(pred %>% filter(!is.na(gender_filter)) %>% sample_n(size = neg_sample_fraction * nrow(df_sample)))
@@ -53,41 +53,49 @@ if (iteration) {
 
 #---------------------- Text cleaning and corpus creation ----------------------
 
-# Define function to create corpus
-create_corpus <- function (data){
-  source <- VectorSource(data$description)
-  corpus <- VCorpus(source) 
-  corpus <- tm_map(corpus, content_transformer(tolower)) # lower case
-  corpus <- tm_map(corpus, removeWords, c("'s")) # remove possesive s so that plural nouns get lemmatized correctly, e.g. "women's"
-  corpus <- tm_map(corpus, removeNumbers)# remove numbers
-  corpus <- tm_map(corpus, removePunctuation, preserve_intra_word_dashes = TRUE) # remove punctuation. We want to keep dashes inside words such as in high-level
-  corpus <- tm_map(corpus, stripWhitespace) # remove remaining white space
-  corpus <- tm_map(corpus, removeWords, c(stopwords('english'))) # remove stopwords for English
-  corpus <- tm_map(corpus, removeWords, c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) # remove some extra stopwords not captured by the previous list
-  corpus <- tm_map(corpus, removeWords, c("iii")) # remove roman number 3 that is very common
-  #corpus <- tm_map(corpus, replace_contraction) # extra step to catch exceptions such as "aren't" - might not be necessary
-  corpus <- tm_map(corpus, lemmatize_strings) # lemmatize words - this might not be the best choice in particular with a English-French language mix
-  corpus <- tm_map(corpus, PlainTextDocument) # transform into a format that can be used more easily later on
-  return(corpus)
-}
+# # Define function to create corpus
+# create_corpus <- function (data){
+#   source <- VectorSource(data$description)
+#   corpus <- VCorpus(source) 
+#   corpus <- tm_map(corpus, content_transformer(tolower)) # lower case
+#   corpus <- tm_map(corpus, removeWords, c("'s")) # remove possesive s so that plural nouns get lemmatized correctly, e.g. "women's"
+#   corpus <- tm_map(corpus, removeNumbers)# remove numbers
+#   corpus <- tm_map(corpus, removePunctuation, preserve_intra_word_dashes = TRUE) # remove punctuation. We want to keep dashes inside words such as in high-level
+#   corpus <- tm_map(corpus, stripWhitespace) # remove remaining white space
+#   corpus <- tm_map(corpus, removeWords, c(stopwords('english'))) # remove stopwords for English
+#   corpus <- tm_map(corpus, removeWords, c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) # remove some extra stopwords not captured by the previous list
+#   corpus <- tm_map(corpus, removeWords, c("iii")) # remove roman number 3 that is very common
+#   #corpus <- tm_map(corpus, replace_contraction) # extra step to catch exceptions such as "aren't" - might not be necessary
+#   corpus <- tm_map(corpus, lemmatize_strings) # lemmatize words - this might not be the best choice in particular with a English-French language mix
+#   corpus <- tm_map(corpus, PlainTextDocument) # transform into a format that can be used more easily later on
+#   return(corpus)
+# }
 
-# If we can it would be great to remove roman numbers but we might be able to catch them by removing very rare words later on
-## Create corpus for df, pred 
-corpus_df <- create_corpus(df)
-corpus_df_pred <- create_corpus(pred)
-
-# Integrate into the original dataframe that contains the domain labels
-# convert corpus to dataframe
-text_df <- t(data.frame(text = sapply(corpus_df, as.character), stringsAsFactors = FALSE))
-rownames(text_df) <- NULL
-
-text_df_pred <- t(data.frame(text = sapply(corpus_df_pred, as.character), stringsAsFactors = FALSE))
-rownames(text_df_pred) <- NULL
+# # If we can it would be great to remove roman numbers but we might be able to catch them by removing very rare words later on
+# ## Create corpus for df, pred 
+# corpus_df <- create_corpus(df)
+# corpus_df_pred <- create_corpus(pred)
+# 
+# # Integrate into the original dataframe that contains the domain labels
+# # convert corpus to dataframe
+# text_df <- t(data.frame(text = sapply(corpus_df, as.character), stringsAsFactors = FALSE))
+# rownames(text_df) <- NULL
+# 
+# text_df_pred <- t(data.frame(text = sapply(corpus_df_pred, as.character), stringsAsFactors = FALSE))
+# rownames(text_df_pred) <- NULL
+# 
+# # change original description with cleaned description
+# df$text_cleaned <- text_df[,1]
+# pred$text_cleaned <- text_df_pred[,1]
 
 # change original description with cleaned description
-df$text_cleaned <- text_df[,1]
-pred$text_cleaned <- text_df_pred[,1]
-
+if (lang %in% lemma_languages) {
+  df$text_cleaned <- clean_and_lemmatize(df$description, language = lang)
+  pred$text_cleaned <- clean_and_lemmatize(pred$description, language = lang)
+} else if (lang %in% stem_languages) {
+  df$text_cleaned <- stem_and_concatenate(pred$description, language = lang)
+  pred$text_cleaned <- stem_and_concatenate(pred$description, language = lang)
+}
 
 #---------------------- Training the Model: XGBoost ----------------------------
 

@@ -27,8 +27,8 @@ source("./Code/00. boot.R")
 source <- "crs"
 
 # Set paths (change to sample to work with sample of CRS data)
-crs_path <- "./Data/intermediate/crs03.rds"
-crs_path_new <- "./Data/intermediate/crs02.rds"
+crs_path <- "./Data/Intermediate/crs01_1_full.rds"
+crs_path_new <- "./Data/Intermediate/crs02_full.rds"
 
 # Load data
 df_crs_raw <- readRDS(crs_path)
@@ -40,18 +40,20 @@ rm(crs_path)
 
 # Define all columns needed later on
 cols_needed <- c("process_id", 
+                 "crsid",
+                 "year",
                  "projecttitle", 
                  "shortdescription", 
                  "longdescription", 
-                 "purposecode",
                  "donorname", 
+                 "recipientname",
+                 "purposecode",
                  "sectorname",
                  "sectorcode",
                  "channelcode",
                  "sdgfocus",
                  "gender",
-                 "crsid",
-                 "recipientname",
+                 "rmnch",
                  "usd_disbursement_defl")
 
 # every step, we try to use a subset of the data to make the process quicker

@@ -55,7 +55,7 @@ ggplot(threshold_step, aes(x = threshold)) +
   geom_vline(xintercept = max_F1, linetype = "dotted" ) +
   ylab("value") +
   ggtitle(paste0("Precision trajectory after ", it_add, " in intervalls ", intervall, " for a negative marked ration of ", neg_sample_fraction))
-ggsave(paste0("./Tmp/XGBoost/Gender/threshold_precision_accuracy_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"test+train.pdf"), width = 9, height = 7)
+ggsave(paste0("./Tmp/XGBoost/Gender/", lang , "_threshold_precision_accuracy_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"learning.pdf"), width = 9, height = 7)
 
 #write.xlsx(test_data, file = "./Tmp/XGBoost/Gender/test_data.xlsx", row.names = FALSE)
 #write.xlsx(pred, file = "./Tmp/XGBoost/Gender/pred_data.xlsx", row.names = FALSE)
@@ -63,7 +63,11 @@ ggsave(paste0("./Tmp/XGBoost/Gender/threshold_precision_accuracy_", it_add, "_",
 
 #----------------------------- Plot histograms ---------------------------------
 
-pred <- pred %>% mutate(total = str_count(string = text_cleaned, pattern = "\\S+")) %>%
+threshold <- 0.95
+pred <- mutate(pred, predictions = ifelse(predictions_raw > threshold, 1, 0))
+
+pred <- pred %>% 
+  mutate(total = str_count(string = text_cleaned, pattern = "\\S+")) %>%
   mutate(predictions = as.factor(predictions))
 
 # Histograms of word distributions  
@@ -72,12 +76,12 @@ hist_word_count_distr <- ggplot(pred, aes(x = total, fill = predictions)) +
   xlab("Number of words in description combination") +
   ylab("Number of documents") + 
   ggtitle(paste0("Word distribution with binwidth 2 for threshold of ", threshold))
-ggsave(paste0("./Tmp/XGBoost/Gender/word_distr_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"test+train.pdf"), width = 9, height = 7)
+ggsave(paste0("./Tmp/XGBoost/Gender/", lang , "_word_distr_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"_learning.pdf"), width = 9, height = 7)
 
 # Histogram of donor/sector frequency
-df <- df %>%
-  left_join(df_crs %>% select(donorname, text_id), by = "text_id") %>% 
-  mutate(donorname = as.factor(donorname))
+# df <- df %>%
+#   left_join(df_crs %>% select(donorname, text_id), by = "text_id") %>% 
+#   mutate(donorname = as.factor(donorname))
 
 # Test data
 ggplot(df, aes(x = donorname, fill = gender_filter)) + 
@@ -86,22 +90,22 @@ ggplot(df, aes(x = donorname, fill = gender_filter)) +
   ylab("Count") + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   ggtitle(paste0("Donor distribution in train + test data (n=", nrow(df), ")"))
-ggsave("./Tmp/XGBoost/Gender/hist_donorname_train+test_data.pdf", width = 13, height = 7)
+ggsave(paste0("./Tmp/XGBoost/Gender/", lang , "_hist_donorname_learning_data.pdf"), width = 13, height = 7)
 
 # Pred data
-ggplot(pred, aes(x = donorname)) + 
+ggplot(pred, aes(x = donorname, fill = predictions)) + 
   geom_bar() + 
   xlab("Donorname") +
   ylab("Count") + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  ggtitle(paste0("Donor distribution in test data (pred data n=", nrow(pred), ")"))
-ggsave("./Tmp/XGBoost/Gender/hist_donorname_pred_data.pdf", width = 11, height = 7)
+  ggtitle(paste0("Donor distribution in pred data (pred data n=", nrow(pred), ")"))
+ggsave(paste("./Tmp/XGBoost/Gender/", lang , "_hist_donorname_pred_data.pdf"), width = 15, height = 9)
 
 # Sector test data
-ggplot(df, aes(x = sectorname, fill = gender_filter)) + 
-  geom_bar() + 
-  xlab("Sector") +
-  ylab("Count") + 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  ggtitle(paste0("Sector distribution in test + test data (n=", nrow(df), ")"))
-ggsave("./Tmp/XGBoost/Gender/hist_sector_train+test_data.pdf", width = 11, height = 7)
+# ggplot(df, aes(x = sectorname, fill = gender_filter)) + 
+#   geom_bar() + 
+#   xlab("Sector") +
+#   ylab("Count") + 
+#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+#   ggtitle(paste0("Sector distribution in test + test data (n=", nrow(df), ")"))
+# ggsave("./Tmp/XGBoost/Gender/", lang , "_hist_sector_learning_data.pdf", width = 11, height = 7)

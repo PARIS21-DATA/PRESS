@@ -59,17 +59,32 @@ packages <-
 lapply(packages, library, character.only = TRUE)
 rm(packages)
 
+source("./Code/00. boot.R")
+source("./Code/00.1 text_preparation_functions.R")
+
 # Set paths
-crs_path <- "./Data/intermediate/crs03_sample.rds"
-crs_path_new <- "./Data/intermediate/positive_text_id.rds"
+crs_path <- "./Data/Intermediate/crs03_full.rds"
+crs_path_new <- "./Data/Intermediate/positive_text_id.rds"
 
 # Load data
 df_crs <- readRDS(crs_path)
+
+# Set specific language
+lang <- "en"
+df_crs <- df_crs %>%
+  filter(title_language %in% c(lang, NA) & long_language %in% c(lang,NA))
+
+# Set languages for stemming and lemmatization
+stem_languages <- c("de", "fr", "es")
+lemma_languages <- c("en")
+
+# Reduce data set to variables important for prediction
 df_crs_original <- df_crs 
 df_crs <- df_crs_original %>%
-  filter(is.na(description_comb) == FALSE) %>%
+  filter(!is.na(description_comb)) %>%
   select(text_id, description = description_comb, gender_filter = match_gender, donorname) %>%
-  distinct()
+  distinct() 
+  
 
 # Test duplicated long descriptions 
 # freq_long <- as.data.frame(table(df_crs_original %>% pull(description_comb)))
@@ -85,26 +100,30 @@ for (iteration in c(FALSE, TRUE)) {
 
 #-------------------------------- Set parameters -------------------------------
 
-#iteration <- FALSE                # Set to FALSE to rerun the whole classification with adjusted learning set (negatively marked as ones with low probability in 0th iteration)
+#iteration <- FALSE               # Set to FALSE to rerun the whole classification with adjusted learning set (negatively marked as ones with low probability in 0th iteration)
 print_importance_matrix <- TRUE   # Set to TRUE to plot most important words
 n_gram <- 1                       # Set to higher integers to use longer ngrams
+full_learning_percent <- 0.25        # take only x% of full learning set size is too large for RAM
 neg_sample_fraction <- 1          # Fraction of negatively marked to positively marked in learning set
 plot_results <- FALSE             # Set to TRUE to visualize results
-frac_pred_set <- 0.05             # use only 5% of full prediction set to speed up for testing
+frac_pred_set <- 0.05                # use only 5% of full prediction set to speed up for testing
 save_fit_xgb <- TRUE              # Set to TRUE to save fitted xgb model
 
 
 #---------------------- Define learning and prediction data --------------------
 
+size_positive_train <- neg_sample_fraction * full_learning_percent * df_crs %>% filter(gender_filter == TRUE) %>% nrow
+
 # We assign projects that were classified as statistical projects by title pattern matching to df
 if (iteration) { 
   pred_negative <- pred %>% 
     filter(predictions_raw <= 0.3) %>%
-    sample_n(size = neg_sample_fraction * df_crs %>% filter(gender_filter == TRUE) %>% nrow)  %>% 
+    sample_n(size = size_positive_train) %>% 
     select(text_id, description, gender_filter, donorname) 
   
   df <- df_crs %>%
     filter(gender_filter == TRUE) %>%
+    sample_n(size = n()*full_learning_percent) %>%
     rbind(pred_negative) %>%
     filter(!is.na(gender_filter))
   
@@ -118,45 +137,55 @@ if (iteration) {
   
   df <- df_crs %>%
     filter(gender_filter == TRUE) %>%
-    rbind(pred %>% filter(!is.na(gender_filter)) %>% sample_n(size = neg_sample_fraction * df_crs %>% filter(gender_filter == TRUE) %>% nrow))
+    sample_n(size = n()*full_learning_percent) %>%
+    rbind(pred %>% filter(!is.na(gender_filter)) %>% sample_n(size = size_positive_train))
 }
 
 
 #---------------------- Text cleaning and corpus creation ----------------------
 
-# Define function to create corpus
-create_corpus <- function (data){
-  source <- VectorSource(data$description)
-  corpus <- VCorpus(source) 
-  corpus <- tm_map(corpus, content_transformer(tolower)) # lower case
-  corpus <- tm_map(corpus, removeWords, c("'s")) # remove possesive s so that plural nouns get lemmatized correctly, e.g. "women's"
-  corpus <- tm_map(corpus, removeNumbers)# remove numbers
-  corpus <- tm_map(corpus, removePunctuation, preserve_intra_word_dashes = TRUE) # remove punctuation. We want to keep dashes inside words such as in high-level
-  corpus <- tm_map(corpus, stripWhitespace) # remove remaining white space
-  corpus <- tm_map(corpus, removeWords, c(stopwords('english'))) # remove stopwords for English
-  corpus <- tm_map(corpus, removeWords, c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) # remove some extra stopwords not captured by the previous list
-  corpus <- tm_map(corpus, removeWords, c("iii")) # remove roman number 3 that is very common
-  #corpus <- tm_map(corpus, replace_contraction) # extra step to catch exceptions such as "aren't" - might not be necessary
-  corpus <- tm_map(corpus, lemmatize_strings) # lemmatize words - this might not be the best choice in particular with a English-French language mix
-  corpus <- tm_map(corpus, PlainTextDocument) # transform into a format that can be used more easily later on
-  return(corpus)
-}
-
-## Create corpus for df, pred 
-corpus_df <- create_corpus(df)
-corpus_df_pred <- create_corpus(pred)
-
-# Integrate into the original dataframe that contains the domain labels
-# convert corpus to dataframe
-text_df <- t(data.frame(text = sapply(corpus_df, as.character), stringsAsFactors = FALSE))
-rownames(text_df) <- NULL
-
-text_df_pred <- t(data.frame(text = sapply(corpus_df_pred, as.character), stringsAsFactors = FALSE))
-rownames(text_df_pred) <- NULL
+# # Define function to create corpus
+# create_corpus <- function (data, language = "en"){
+#   source <- VectorSource(data$description)
+#   corpus <- VCorpus(source) 
+#   corpus <- tm_map(corpus, content_transformer(tolower)) # lower case
+#   corpus <- tm_map(corpus, removeWords, c("'s")) # remove possesive s so that plural nouns get lemmatized correctly, e.g. "women's"
+#   corpus <- tm_map(corpus, removeNumbers)# remove numbers
+#   corpus <- tm_map(corpus, removePunctuation, preserve_intra_word_dashes = TRUE) # remove punctuation. We want to keep dashes inside words such as in high-level
+#   corpus <- tm_map(corpus, stripWhitespace) # remove remaining white space
+#   corpus <- tm_map(corpus, removeWords, c(stopwords(language = langauge))) # remove stopwords for English
+#   corpus <- tm_map(corpus, removeWords, c(stopwords(source = "smart")[!stopwords(source = "smart") %in% "use"])) # remove some extra stopwords not captured by the previous list
+#   corpus <- tm_map(corpus, removeWords, c("iii")) # remove roman number 3 that is very common
+#   #corpus <- tm_map(corpus, replace_contraction) # extra step to catch exceptions such as "aren't" - might not be necessary
+#   corpus <- tm_map(corpus, lemmatize_strings) # lemmatize words - this might not be the best choice in particular with a English-French language mix
+#   corpus <- tm_map(corpus, PlainTextDocument) # transform into a format that can be used more easily later on
+#   return(corpus)
+# }
+# 
+# ## Create corpus for df, pred 
+# corpus_df <- create_corpus(df)
+# corpus_df_pred <- create_corpus(pred)
+# 
+# # Integrate into the original dataframe that contains the domain labels
+# # convert corpus to dataframe
+# text_df <- t(data.frame(text = sapply(corpus_df, as.character), stringsAsFactors = FALSE))
+# rownames(text_df) <- NULL
+# 
+# text_df_pred <- t(data.frame(text = sapply(corpus_df_pred, as.character), stringsAsFactors = FALSE))
+# rownames(text_df_pred) <- NULL
+# 
+# # change original description with cleaned description
+# df$text_cleaned <- text_df[,1]
+# pred$text_cleaned <- text_df_pred[,1]
 
 # change original description with cleaned description
-df$text_cleaned <- text_df[,1]
-pred$text_cleaned <- text_df_pred[,1]
+if (lang %in% lemma_languages) {
+  df$text_cleaned <- clean_and_lemmatize(df$description, language = lang)
+  pred$text_cleaned <- clean_and_lemmatize(pred$description, language = lang)
+} else if (lang %in% stem_languages) {
+  df$text_cleaned <- stem_and_concatenate(df$description, language = lang)
+  pred$text_cleaned <- stem_and_concatenate(pred$description, language = lang)
+}
 
 
 #---------------------- Training the Model: XGBoost ----------------------------
@@ -218,7 +247,7 @@ fit.xgb <- xgboost(data = as.matrix(train_data_dtm), label = label.train, max.de
                    nrounds = nrounds_par, objective = "binary:logistic", verbose = 1)
 
 # Save the fitted model so that it can be loaded later on (especially for very large training sets)
-if (save_fit_xgb) save(fit.xgb, file = "./Tmp/XGBoost/Fitted models/fit.xgb.gender.Rdata")
+if (save_fit_xgb) save(fit.xgb, file = paste0("./Tmp/XGBoost/Fitted models/fit.xgb.gender_", lang , ".Rdata"))
 
 # Uncomment to load previously fitted model
 #fit.xgb <- load("./Tmp/XGBoost/Fitted models/fit.xgb.gender.Rdata")
@@ -228,7 +257,7 @@ if (print_importance_matrix) {
   importance.matrix <- xgb.importance(model = fit.xgb)
   it_add <- "it0"
   if (iteration) it_add <- "it1"
-  pdf(paste0("./Tmp/XGBoost/Gender/importance_matrix_", it_add,"_", neg_sample_fraction, "_n", nrow(df), "test+train.pdf"))
+  pdf(paste0("./Tmp/XGBoost/Gender/", lang , "_importance_matrix_", it_add,"_", neg_sample_fraction, "_n", nrow(df), "learning.pdf"))
   xgb.plot.importance(importance.matrix, top_n = 30, rel_to_first = TRUE, xlab = "Relative importance")
   dev.off()
 }
@@ -259,6 +288,16 @@ print(paste0("Precision: ", precision))
 print(paste0("Fraction of detected projects: ", mean(pred$predictions)))
 
 }
+
+#---------------- Merge prediction results with original data ------------------
+
+df_crs_final <- df_crs_original %>%
+  left_join(pred %>% select(text_id, description_comb = description, donorname, text_mining_gen = predictions_raw), by = c("text_id", "description_comb", "donorname"))
+
+# Save prediction results
+saveRDS(df_crs_final, file = paste0("./Output/Gender/", lang, "_classification_results.rds"))
+write.xlsx(df_crs_final, file = paste0("./Output/Gender/", lang, "_classification_results.xlsx"), rowNames = FALSE)
+
 
 #---------------------------- Visualization  -----------------------------------
 

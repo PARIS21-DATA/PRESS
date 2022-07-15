@@ -10,7 +10,7 @@ pred_all <- data.frame(text_id = as.numeric(),
 
 for (gen_file in files_gen_comb[1]) {
   # Create identifier for naming files 
-  gen_identifier <- str_replace_all(gen_file, "./Data/Gender permutations/df_crs_", "")
+  gen_identifier <- str_replace_all(gen_file, "./Data/Gender permutations/df_crs_uk_", "")
   gen_identifier <- str_replace_all(gen_identifier, ".rds", "")
   
   df_crs <- readRDS(gen_file)
@@ -26,7 +26,8 @@ for (gen_file in files_gen_comb[1]) {
   
   if (gen_file == files_gen_comb[1]) {
     pred <- df_crs %>%
-      filter((gender_filter == FALSE | is.na(gender_filter)) & match_stat == TRUE) %>%
+      filter(donorname == "United Kingdom") %>%
+      filter(gender_filter == FALSE | is.na(gender_filter)) #%>%
       sample_n(size = floor(0.9 * n())) %>% 
       rbind(df_crs %>% 
               filter((gender_filter == FALSE | is.na(gender_filter)) & match_stat == FALSE) %>% 
@@ -50,22 +51,23 @@ for (gen_file in files_gen_comb[1]) {
   
 }
 
-#saveRDS(pred_all, "./Data/Gender permutations/pred_all_12345678.rds")
+#saveRDS(pred_all, "./Data/Gender permutations/pred_all_uk.rds")
 
 pred_all_tmp <- pred_all %>%
   mutate(description = NULL) %>%
   left_join(df_crs_original %>% 
               filter(!is.na(description_comb)) %>% 
-              select(text_id, description = longdescription, text_detection = match_gender, 
-                     gen_donor, gen_ppcode, gen_marker, gen_sdg, text_detection_stat = text_detection_wo_mining_w_scb,
-                     crsid, recipientname, usd_disbursement_defl, projecttitle), 
+              select(text_id, year, description = longdescription, text_detection_gen = match_gender, 
+                     gen_donor, gen_ppcode, gen_marker, gen_sdg, rmnch, text_detection_stat = text_detection_wo_mining_w_scb,
+                     crsid, recipientname, usd_disbursement_defl, projecttitle, shortdescription, purposecode), 
             by = "text_id") %>%
-  select(crsid, text_id, projecttitle, description, donorname, match_gender,
+  select(crsid, text_id, year, projecttitle, shortdescription, description, donorname, text_mining = match_gender,
 #         match_gender_gen_ppcode, match_gender_gen_sdg, match_gender_gen_donor_gen_ppcode, match_gender_gen_donor_gen_ppcode_gen_marker_gen_sdg,
 #         match_gender_intersection = 'match_gender_(gen_donor&gen_ppcode&gen_marker&gen_sdg)',
-         text_detection, gen_donor, gen_marker, gen_ppcode, gen_sdg, text_detection_stat, recipientname, usd_disbursement_defl)
+         text_detection_gen, text_detection_stat, gen_donor, gen_marker, gen_ppcode, gen_sdg, rmnch, purposecode, recipientname, usd_disbursement_defl) %>%
+  filter(!duplicated(crsid))
 
-write.xlsx(pred_all_tmp, file = "./Tmp/XGBoost/Gender permutation results/pred_all_dcd_info.xlsx", rowNames = FALSE)
+write.xlsx(pred_all_tmp, file = "./Tmp/XGBoost/Gender permutation results/pred_all_uk_crsid_distinct.xlsx", rowNames = FALSE)
 
 #pred_for_all <- read.xlsx("./Tmp/XGBoost/Gender permutation results/pred_all.xlsx", rowNames = FALSE)
 #pred_for_all <- df_crs %>%
