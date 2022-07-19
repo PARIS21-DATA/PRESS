@@ -36,17 +36,17 @@ source("./Code/00.1 text_preparation_functions.R")
 crs_path_new <- "./Data/intermediate/crs03_full.rds"
 crs_path <- "./Data/intermediate/crs02_full.rds"
 df_crs <- readRDS(crs_path)
-df_crs_sample <- sample_n(df_crs, size = nrow(df_crs)/10) # take sample to speed up testing
+#df_crs_sample <- sample_n(df_crs, size = nrow(df_crs)/10) # take sample to speed up testing
 # saveRDS(df_crs_sample, "./Data/intermediate/crs02_sample.rds")
 
 # we used to make the project with same description as 1 as long as one of the same description is marked as 1
 # it is wrong because some projects with the same name will have different purpose codes
 
 # Country specific treatment
-df_crs_donor <- df_crs %>% filter(donorname == "United Kingdom")
-df_crs <- df_crs_sample %>%
-  filter(!donorname == "United Kingdom") %>%
-  rbind(df_crs_donor)
+# df_crs_donor <- df_crs %>% filter(donorname == "United Kingdom")
+# df_crs <- df_crs_sample %>%
+#   filter(!donorname == "United Kingdom") %>%
+#   rbind(df_crs_donor)
 
 
 #---------------------------- Set parameters -----------------------------------
@@ -124,7 +124,7 @@ for (lang in languages){
   if (lang %in% lemma_languages) {
     list_keywords_stat <- clean_and_lemmatize(list_keywords_stat, language = lang)
     list_keywords_gender <- clean_and_lemmatize(list_keywords_gender, language = lang)
-    list_keywords_gender <- list_keywords_gender %>% append("women") # due to many spelling mistakes like women_s, women?s..
+    list_keywords_gender <- list_keywords_gender %>% append("womens") # due to many spelling mistakes like women_s, women?s..
     demining_small_arms <- clean_and_lemmatize(demining_small_arms, language = lang)
     
     # Clean projcettitle and detect stat, gender and mining 

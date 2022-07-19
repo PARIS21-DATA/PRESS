@@ -105,7 +105,7 @@ n_gram <- 1                       # Set to higher integers to use longer ngrams
 full_learning_percent <- 1     # take only x% of full learning set size is too large for RAM
 neg_sample_fraction <- 1          # Fraction of negatively marked to positively marked in learning set
 plot_results <- TRUE             # Set to TRUE to visualize results
-frac_pred_set <- 0.05             # use only 5% of full prediction set to speed up for testing
+frac_pred_set <- 1            # use only 5% of full prediction set to speed up for testing
 save_fit_xgb <- TRUE              # Set to TRUE to save fitted xgb model
 load_fit_xgb <- FALSE              # Used to load previously fitted model
 

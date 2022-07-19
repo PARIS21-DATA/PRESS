@@ -38,7 +38,22 @@ packages <-
     "lexicon",
     "quanteda",
     "deeplr",
-    "stringdist"
+    "stringdist",
+    "tidyverse",
+    "e1071",
+    "caTools",
+    "caret",
+    "tm",
+    "tidytext",
+    "mgsub",
+    "wordcloud",
+    "text2vec",
+    "xgboost",
+    "rlist",
+    "remotes",
+    "ParBayesianOptimization",
+    "mlr",
+    "DiagrammeR"
   )
 
 # Install uninstalled packages

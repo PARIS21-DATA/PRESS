@@ -32,10 +32,10 @@ for (i in seq(0, 1, by = intervall)) {
   pred <- mutate(pred, predictions = ifelse(predictions_raw > threshold, 1, 0))
   
   # Prediction accuracy: 88 % 
-  accuracy <- mean(test_data$predictions == test_data$gender_filter)
-  true_pos <- test_data %>% filter(gender_filter == TRUE & predictions == 1) %>% nrow
-  precision <- true_pos / (true_pos + test_data %>% filter(gender_filter == FALSE & predictions == 1) %>% nrow)
-  recall <- true_pos / (true_pos + test_data %>% filter(gender_filter == TRUE & predictions == 0) %>% nrow)
+  accuracy <- mean(test_data$predictions == test_data$class_filter)
+  true_pos <- test_data %>% filter(class_filter == TRUE & predictions == 1) %>% nrow
+  precision <- true_pos / (true_pos + test_data %>% filter(class_filter == FALSE & predictions == 1) %>% nrow)
+  recall <- true_pos / (true_pos + test_data %>% filter(class_filter == TRUE & predictions == 0) %>% nrow)
   
   threshold_step <- threshold_step %>%
     rbind(c(i, accuracy, precision, recall))
@@ -55,10 +55,10 @@ ggplot(threshold_step, aes(x = threshold)) +
   geom_vline(xintercept = max_F1, linetype = "dotted" ) +
   ylab("value") +
   ggtitle(paste0("Precision trajectory after ", it_add, " in intervalls ", intervall, " for a negative marked ration of ", neg_sample_fraction))
-ggsave(paste0("./Tmp/XGBoost/Gender/", lang , "_threshold_precision_accuracy_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"learning.pdf"), width = 9, height = 7)
+ggsave(paste0("./Tmp/XGBoost/", class_type, "/", lang , "_threshold_precision_accuracy_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"learning.pdf"), width = 9, height = 7)
 
-#write.xlsx(test_data, file = "./Tmp/XGBoost/Gender/test_data.xlsx", row.names = FALSE)
-#write.xlsx(pred, file = "./Tmp/XGBoost/Gender/pred_data.xlsx", row.names = FALSE)
+#write.xlsx(test_data, file = "./Tmp/XGBoost/", class_type, "/test_data.xlsx", row.names = FALSE)
+#write.xlsx(pred, file = "./Tmp/XGBoost/", class_type, "/pred_data.xlsx", row.names = FALSE)
 
 
 #----------------------------- Plot histograms ---------------------------------
@@ -76,7 +76,7 @@ hist_word_count_distr <- ggplot(pred, aes(x = total, fill = predictions)) +
   xlab("Number of words in description combination") +
   ylab("Number of documents") + 
   ggtitle(paste0("Word distribution with binwidth 2 for threshold of ", threshold))
-ggsave(paste0("./Tmp/XGBoost/Gender/", lang , "_word_distr_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"_learning.pdf"), width = 9, height = 7)
+ggsave(paste0("./Tmp/XGBoost/", class_type, "/", lang , "_word_distr_", it_add, "_", neg_sample_fraction,"_n", nrow(df),"_learning.pdf"), width = 9, height = 7)
 
 # Histogram of donor/sector frequency
 # df <- df %>%
@@ -84,13 +84,13 @@ ggsave(paste0("./Tmp/XGBoost/Gender/", lang , "_word_distr_", it_add, "_", neg_s
 #   mutate(donorname = as.factor(donorname))
 
 # Test data
-ggplot(df, aes(x = donorname, fill = gender_filter)) + 
+ggplot(df, aes(x = donorname, fill = class_filter)) + 
   geom_bar() + 
   xlab("Donorname") +
   ylab("Count") + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  ggtitle(paste0("Donor distribution in train + test data (n=", nrow(df), ")"))
-ggsave(paste0("./Tmp/XGBoost/Gender/", lang , "_hist_donorname_learning_data.pdf"), width = 13, height = 7)
+  ggtitle(paste0("Donor distribution in learning data (n=", nrow(df), ")"))
+ggsave(paste0("./Tmp/XGBoost/", class_type, "/", lang , "_hist_donorname_learning_data.pdf"), width = 13, height = 7)
 
 # Pred data
 ggplot(pred, aes(x = donorname, fill = predictions)) + 
@@ -99,10 +99,10 @@ ggplot(pred, aes(x = donorname, fill = predictions)) +
   ylab("Count") + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   ggtitle(paste0("Donor distribution in pred data (pred data n=", nrow(pred), ")"))
-ggsave(paste("./Tmp/XGBoost/Gender/", lang , "_hist_donorname_pred_data.pdf"), width = 15, height = 9)
+ggsave(paste0("./Tmp/XGBoost/", class_type, "/", lang , "_hist_donorname_pred_data.pdf"), width = 15, height = 9)
 
 # Sector test data
-# ggplot(df, aes(x = sectorname, fill = gender_filter)) + 
+# ggplot(df, aes(x = sectorname, fill = class_filter)) + 
 #   geom_bar() + 
 #   xlab("Sector") +
 #   ylab("Count") + 
