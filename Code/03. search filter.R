@@ -66,7 +66,8 @@ df_crs <- df_crs %>%
 
 # Use only projects in en, fr, es and de
 df_crs <- df_crs %>%
-  filter(title_language %in% c(languages, NA) & long_language %in% c(languages,NA))
+  filter(title_language %in% c(languages, NA) & long_language %in% c(languages,NA)) %>%
+  filter(!is.na(title_language) | !is.na(long_language)) # omit projects with both languages NA 
 
 # Save raw data for later
 df_crs_backup <- df_crs
@@ -76,7 +77,6 @@ df_crs_backup <- df_crs
 df_crs <- df_crs_backup %>%
   select(title_id, projecttitle, projecttitle_lower, longdescription, title_language, long_language) %>%
   filter(!duplicated(title_id))
-
 
 # Inspect language distributions
 table(df_crs$long_language)
@@ -101,6 +101,7 @@ df_crs <- df_crs %>%
   rbind(df_crs_de)
 rm(df_crs_de)
 
+
 #--------------------------- Title detection -----------------------------------
 
 # Set languages for stemming and lemmatization
@@ -113,7 +114,7 @@ df_crs$match_gender <- NA
 df_crs$mining <- NA
 
 # Go through every language, load keywords, clean keywords and detect stat, mining and gender
-#???: Considerations about computation speed possible, not sure if code below is the fastest one can do
+#???: Considerations about computation speed possible, not sure if code below is the fastest one
 for (lang in languages){
   list_keywords_stat <- read_lines(paste0("./Data/Final keyword lists/statistics_reduced_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()
   list_keywords_gender <- read_lines(paste0("./Data/Final keyword lists/gender_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()

@@ -42,9 +42,10 @@ df_crs <- readRDS(crs_path)
 # df_crs <- df_crs_raw
 
 # Set specific language
-lang <- "en"
+lang <- "fr"
 df_crs <- df_crs %>%
-  filter(title_language %in% c(lang, NA) & long_language %in% c(lang,NA))
+  filter(title_language %in% c(lang, NA) & long_language %in% c(lang,NA)) %>%
+  filter(!is.na(title_language) | !is.na(long_language))
 
 # Set languages for stemming and lemmatization
 stem_languages <- c("de", "fr", "es")
@@ -101,12 +102,13 @@ rm(df_crs_original, man_verified)
 #iteration <- TRUE              # Set to FALSE to rerun the whole classification with adjusted learning set (negatively marked as ones with low probability in 0th iteration)
 print_importance_matrix <- TRUE   # Set to TRUE to plot most important words
 n_gram <- 1                       # Set to higher integers to use longer ngrams
-full_learning_percent <- 0.3       # take only x% of full learning set size is too large for RAM
+full_learning_percent <- 1       # take only x% of full learning set size is too large for RAM
 neg_sample_fraction <- 1          # Fraction of negatively marked to positively marked in learning set
-plot_results <- FALSE             # Set to TRUE to visualize results
+plot_results <- TRUE             # Set to TRUE to visualize results
 frac_pred_set <- 1             # use only 5% of full prediction set to speed up for testing
 save_fit_xgb <- TRUE              # Set to TRUE to save fitted xgb model
-split_pred <- TRUE                # use to split up pred data into two data frames to handle large pred sets
+load_fit_xgb <- FALSE             # load previously fitted model
+split_pred <- FALSE                # use to split up pred data into two data frames to handle large pred sets
 n_pred_sets <- 30                 # number of splitted data prediction sets
 
 
@@ -122,7 +124,7 @@ if (iteration) {
   pred_negative <- pred %>% 
     filter(predictions_raw <= 0.3) %>%
     sample_n(size = size_positive_train) %>% 
-    select(text_id, description, class_filter, donorname) 
+    select(text_id, description, class_filter) 
   
   df <- df_crs %>%
     filter(class_filter == TRUE) %>%
@@ -246,7 +248,7 @@ test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% Doc
 
 print("Start to create pred DTM")
 if (split_pred) {
-  pred_splitted <- split(pred, (0:nrow(pred) %/% ceiling(nrow(pred)/(n_pred_sets))))
+  pred_splitted <- suppressWarnings(split(pred, (0:nrow(pred) %/% ceiling(nrow(pred)/(n_pred_sets)))))
   pred_splitted <- lapply(pred_splitted, function(y) {y %>% pull(text_cleaned) %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)})
   print("Pred DTM finished")
 } else {
@@ -265,11 +267,13 @@ label.test <- as.numeric(test_data$class_filter)
 # Training the model
 # Load previously fitted model, if not available fit 
 xgb.filename <- paste0("./Tmp/XGBoost/Fitted models/fit.xgb.", class_type, "_", lang)
-if (!file.exists(xgb.filename)) {
+if (!load_fit_xgb) {
   fit.xgb <- xgboost(data = as.matrix(train_data_dtm), label = label.train, max.depth = 17, eta = eta_par, nthread = 2, 
                      nrounds = nrounds_par, objective = "binary:logistic", verbose = 1)
-} else if (file.exists(xgb.filename)) {
+} else if (file.exists(xgb.filename) & load_fit_xgb) {
   fit.xgb <- readRDS(xgb.filename)
+} else if (!file.exists(xgb.filename) & load_fit_xgb) {
+  stop(paste0("No model found: ", "./Tmp/XGBoost/Fitted models/fit.xgb.", class_type, "_", lang))
 }
   
 if (!file.exists(xgb.filename) & iteration & save_fit_xgb){
@@ -292,11 +296,7 @@ if (print_importance_matrix) {
 #shared_features <- colnames(as.matrix(test_data_dtm)) %in% fit.xgb$feature_names
 test.xgb <- predict(fit.xgb, as.matrix(test_data_dtm))
 if (split_pred) {
-  #pred_splitted.xgb <- lapply(pred_splitted, as.matrix)
   pred_splitted <- map(pred_splitted, ~ predict(fit.xgb, as.matrix(.x)))
-  # for (i in 1:n_pred_sets){
-  #   pred_splitted.xgb[[i]] <- predict(fit.xgb, pred_splitted[[i]])
-  # }
 } else {
   pred.xgb <- predict(fit.xgb, as.matrix(prediction_data_dtm))
 }
@@ -347,11 +347,18 @@ names(df_crs_final)[names(df_crs_final) == "text_mining"] <- paste0("text_mining
 
 # Save prediction results
 saveRDS(df_crs_final, file = paste0("./Output/", class_type, "/", lang, "_classification_results.rds"))
-write.xlsx(pred, file = paste0("./Output/", class_type, "/", lang, "_pred_results.xlsx"), rowNames = FALSE)
-
+write.xlsx(df_crs_final, file = paste0("./Output/", class_type, "/", lang, "_classification_results.xlsx"), rowNames = FALSE)
 
 
 #---------------------------- Visualization  -----------------------------------
+
+pred <- pred %>%
+  left_join(df_crs_original %>% select(text_id, donorname), by = "text_id") %>%
+  distinct()
+
+df <- df %>%
+  left_join(df_crs_original %>% select(text_id, donorname), by = "text_id") %>%
+  distinct()
 
 # Plot accuracy and precision trajectories
 if (plot_results) source("./Code/05.1 visualize_XGBoost_results.R")
