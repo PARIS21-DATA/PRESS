@@ -1,6 +1,9 @@
 dhs
+encuesta de demografía y salud 
+EDS
 crvs
 cpi
+IPC
 d4d
 paris21
 gpsdd
@@ -10,5 +13,5 @@ devinfo
 nsds
 afristat
 ckan
-lfs Fragebogen
-ophi
+lfs 
+epa

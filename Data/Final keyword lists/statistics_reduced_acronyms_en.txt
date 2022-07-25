@@ -11,4 +11,3 @@ nsds
 afristat
 ckan
 lfs questionnaire
-ophi
