@@ -42,7 +42,7 @@ df_crs <- readRDS(crs_path)
 # df_crs <- df_crs_raw
 
 # Set specific language
-lang <- "fr"
+lang <- "en"
 df_crs <- df_crs %>%
   filter(title_language %in% c(lang, NA) & long_language %in% c(lang,NA)) %>%
   filter(!is.na(title_language) | !is.na(long_language))
@@ -65,8 +65,8 @@ class_type <- "gender"
 df_crs_original <- df_crs 
 if (class_type == "gender"){
   df_crs <- df_crs_original %>%
-    filter(!is.na(description_comb)) %>%
-    select(text_id, description = description_comb, class_filter = match_gender) %>%
+    filter(!is.na(descr2mine)) %>%
+    select(text_id, description = descr2mine, class_filter = match_gender) %>%
     distinct() %>%
     group_by(text_id) %>% # remove all ambiguous projects (same description, one FALSE one TRUE)
     filter(n() == 1) %>%
@@ -75,8 +75,8 @@ if (class_type == "gender"){
 } else if (class_type == "stat"){
   man_verified <- readRDS("./Data/Manually verified/stat_projects_verified.rds")
   df_crs <- df_crs_original %>%
-    filter(!is.na(description_comb)) %>%
-    select(text_id, description = description_comb, longdescription, class_filter = text_detection_wo_mining_w_scb) %>%
+    filter(!is.na(descr2mine)) %>%
+    select(text_id, description = descr2mine, longdescription, class_filter = text_detection_wo_mining_w_scb) %>%
     left_join(man_verified %>% select(longdescription, match_stat), by = "longdescription") %>%
     mutate(class_filter = ifelse(!is.na(match_stat), match_stat, class_filter)) %>% # integrate manually verified
     select(-longdescription, -match_stat) %>%
@@ -89,10 +89,10 @@ if (class_type == "gender"){
 rm(df_crs_original, man_verified)  
 
 # Test duplicated long descriptions 
-# freq_long <- as.data.frame(table(df_crs_original %>% pull(description_comb)))
+# freq_long <- as.data.frame(table(df_crs_original %>% pull(descr2mine)))
 # freq_long_gender <- as.data.frame(table(df_crs_original %>%
 #                                    filter(match_gender == TRUE) %>% 
-#                                    pull(description_comb)))
+#                                    pull(descr2mine)))
 # freq_df <- as.data.frame(table(df %>%
 #                       filter(class_filter == TRUE) %>% 
 #                       pull(description)))
@@ -102,17 +102,18 @@ rm(df_crs_original, man_verified)
 #iteration <- TRUE              # Set to FALSE to rerun the whole classification with adjusted learning set (negatively marked as ones with low probability in 0th iteration)
 print_importance_matrix <- TRUE   # Set to TRUE to plot most important words
 n_gram <- 1                       # Set to higher integers to use longer ngrams
-full_learning_percent <- 1       # take only x% of full learning set size is too large for RAM
+full_learning_percent <- 0.4       # take only x% of full learning set size is too large for RAM
 neg_sample_fraction <- 1          # Fraction of negatively marked to positively marked in learning set
 plot_results <- TRUE             # Set to TRUE to visualize results
 frac_pred_set <- 1             # use only 5% of full prediction set to speed up for testing
 save_fit_xgb <- TRUE              # Set to TRUE to save fitted xgb model
 load_fit_xgb <- FALSE             # load previously fitted model
-split_pred <- FALSE                # use to split up pred data into two data frames to handle large pred sets
+split_pred <- TRUE                # use to split up pred data into two data frames to handle large pred sets
 n_pred_sets <- 30                 # number of splitted data prediction sets
 
 
 #!!!WARNING: Whole process starts from here
+start <- Sys.time()
 for (iteration in c(FALSE, TRUE)) {
 
 #---------------------- Define learning and prediction data --------------------
@@ -330,6 +331,7 @@ print(paste0("Precision: ", precision))
 print(paste0("Fraction of detected projects: ", mean(pred$predictions)))
 
 }
+difftime(Sys.time(),start, units = "sec")
 
 #---------------- Merge prediction results with original data ------------------
 
@@ -338,10 +340,10 @@ print(paste0("Fraction of detected projects: ", mean(pred$predictions)))
 
 # To join stat classification to final gender crs data set
 # df_crs_final <- df_crs_final %>% 
-#   left_join(pred %>% select(text_id, description_comb = description, text_mining_stat = predictions_raw), by = c("text_id", "description_comb"))
+#   left_join(pred %>% select(text_id, descr2mine = description, text_mining_stat = predictions_raw), by = c("text_id", "descr2mine"))
 
 df_crs_final <- df_crs_original %>%
-  left_join(pred %>% select(text_id, description_comb = description, text_mining = predictions_raw), by = c("text_id", "description_comb")) 
+  left_join(pred %>% select(text_id, descr2mine = description, text_mining = predictions_raw), by = c("text_id", "descr2mine")) 
 
 names(df_crs_final)[names(df_crs_final) == "text_mining"] <- paste0("text_mining_", class_type)
 

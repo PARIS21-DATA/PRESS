@@ -53,7 +53,8 @@ packages <-
     "remotes",
     "ParBayesianOptimization",
     "mlr",
-    "DiagrammeR"
+    "DiagrammeR",
+    "digest"
   )
 
 # Install uninstalled packages

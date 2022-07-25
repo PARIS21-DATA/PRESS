@@ -45,6 +45,7 @@ list_crs <- lapply(crs_txt_files, read.csv , sep = "|", header = T, stringsAsFac
 beep()
 
 # Merge all crs from different years into one data frame
+# Try bin_rows() to avoid hard-coding (https://stackoverflow.com/questions/2851327/combine-a-list-of-data-frames-into-one-data-frame-by-row)
 start <- Sys.time()
 df_crs <-  rbind(list_crs[[1]], 
                list_crs[[2]], 

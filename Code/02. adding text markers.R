@@ -24,16 +24,14 @@ rm(list = ls())
 # Load packages
 source("./Code/00. boot.R")
 
-source <- "crs"
-
 # Set paths (change to sample to work with sample of CRS data)
 crs_path <- "./Data/Intermediate/crs01_1_full.rds"
 crs_path_new <- "./Data/Intermediate/crs02_full.rds"
 
 # Load data
 df_crs_raw <- readRDS(crs_path)
-rm(crs_path)
 
+# Uncomment to take a sample
 #df_crs <- sample_n(df_crs_raw, size = nrow(df_crs_raw)/50) # take sample to speed up testing
 #saveRDS(df_crs, "./Data/intermediate/crs01_1_sample.rds")
 
@@ -94,6 +92,7 @@ clean_titles <- function(title){
   return(title)
 }
 
+
 # Create a unique text_id that is made from the combination of the project title, 
 # short description and the long description 
 # REMARK: uncomment below to use project title or short description if long description not available (using stringdist)
@@ -102,15 +101,17 @@ df_crs <- df_crs_raw %>%
   mutate(projecttitle = clean_titles(projecttitle),
          shortdescription = clean_titles(shortdescription),
          longdescription = clean_titles(longdescription)) %>%
-  #mutate(description_comb = ifelse(stringdist(projecttitle, shortdescription) < max_string_dist, 
+  #mutate(descr2mine = ifelse(stringdist(projecttitle, shortdescription) < max_string_dist, 
   #                                 projecttitle, 
   #                                 paste(projecttitle, shortdescription, sep = ". "))) %>%
-  #mutate(description_comb = ifelse(stringdist(description_comb, longdescription) < max_string_dist, 
-  #                                 description_comb, 
-  #                                 paste(description_comb, longdescription, sep = ". "))) %>%
+  #mutate(descr2mine = ifelse(stringdist(descr2mine, longdescription) < max_string_dist, 
+  #                                 descr2mine, 
+  #                                 paste(descr2mine, longdescription, sep = ". "))) %>%
   #mutate(string_dist_title_long = stringdist(tolower(projecttitle), tolower(longdescription))) %>%
-  mutate(text_id = as.numeric(as.factor(longdescription))) %>%
-  mutate(description_comb = ifelse(stringdist(projecttitle, longdescription) < max_string_dist | str_count(longdescription) < 3, 
+  rowwise() %>% # use rowwise operations since digest concatenates vector of strings
+  mutate(text_id = digest(longdescription, algo = "xxhash32")) %>% # add text_id as hashed longdesription
+  ungroup() %>% # undo rowwise operations
+  mutate(descr2mine = ifelse(stringdist(projecttitle, longdescription) < max_string_dist | str_count(longdescription) < 3, 
                                    NA, 
                                    longdescription)) %>% # try only long description for DTM process that are distinct from title
   mutate(scb = ifelse(purposecode==16062,1,0), # add SCB identifier

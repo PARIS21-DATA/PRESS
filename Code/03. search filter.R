@@ -60,7 +60,9 @@ languages <- c("en", "fr", "es")
 # Add unique title id and detect language of title and long description
 df_crs <- df_crs %>%
   mutate(projecttitle_lower = tolower(projecttitle)) %>%
-  mutate(title_id = as.numeric(as.factor(projecttitle_lower))) %>% 
+  rowwise() %>%
+  mutate(title_id = digestVectorized(projecttitle_lower, algo = "xxhash32")) %>% 
+  ungroup() %>%
   mutate(title_language = cld2::detect_language(projecttitle)) %>%
   mutate(long_language = cld2::detect_language(longdescription))
 
