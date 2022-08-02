@@ -67,7 +67,7 @@ df_crs_CAN <- df_crs_raw %>%
   separate(projecttitle, into = c("projecttitle", "projecttitle_fr"), sep = "/", fill = "right", extra = "drop") %>%
   separate(shortdescription, into = c("shortdescription", "shortdescription_fr"), sep = "/", fill = "right", extra = "drop") %>%
   separate(longdescription, into = c("longdescription", "longdescription_fr"), sep = "/", fill = "right", extra = "drop") %>%
-  mutate(longdescription_fr = NULL, shortdescription_fr = NULL, projecttitle_fr = NULL)
+  mutate(longdescription_fr = NULL, shortdescription_fr = NULL, projecttitle_fr = NULL) # drop French part of seperated titles
 
 # Check same number of Canadian projects
 nrow(df_crs_CAN)
@@ -81,7 +81,7 @@ df_crs_raw <- df_crs_raw %>%
 rm(df_crs_CAN)
 
 
-#----------------- Adding text id + description combination --------------------
+#----------------- Adding text id + description to mine ------------------------
 
 # Define function to clean titles
 clean_titles <- function(title){
@@ -109,7 +109,7 @@ df_crs <- df_crs_raw %>%
   #                                 paste(descr2mine, longdescription, sep = ". "))) %>%
   #mutate(string_dist_title_long = stringdist(tolower(projecttitle), tolower(longdescription))) %>%
   rowwise() %>% # use rowwise operations since digest concatenates vector of strings
-  mutate(text_id = digest(longdescription, algo = "xxhash32")) %>% # add text_id as hashed longdesription
+  mutate(text_id = digest::digest(longdescription, algo = "xxhash32")) %>% # add text_id as hashed longdesription
   ungroup() %>% # undo rowwise operations
   mutate(descr2mine = ifelse(stringdist(projecttitle, longdescription) < max_string_dist | str_count(longdescription) < 3, 
                                    NA, 

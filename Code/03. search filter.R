@@ -52,7 +52,7 @@ df_crs <- readRDS(crs_path)
 #---------------------------- Set parameters -----------------------------------
 
 # All languages to include in classification - options: en, fr, es, de
-languages <- c("en", "fr", "es")
+languages <- c("en", "fr", "es", "de")
 
 
 #------------------------- Data frame preparation ------------------------------
@@ -61,7 +61,7 @@ languages <- c("en", "fr", "es")
 df_crs <- df_crs %>%
   mutate(projecttitle_lower = tolower(projecttitle)) %>%
   rowwise() %>%
-  mutate(title_id = digestVectorized(projecttitle_lower, algo = "xxhash32")) %>% 
+  mutate(title_id = digest::digest(projecttitle_lower, algo = "xxhash32")) %>% 
   ungroup() %>%
   mutate(title_language = cld2::detect_language(projecttitle)) %>%
   mutate(long_language = cld2::detect_language(longdescription))
@@ -99,7 +99,7 @@ saveRDS(df_crs_de, file  = "./Data/Raw/CRS/df_crs_de_translated.rds") # save tra
 
 # Add German long descriptions
 df_crs <- df_crs %>%
-  filter(long_language != "de" | is.na(long_language)) %>%
+  filter(long_language != "de") %>%
   rbind(df_crs_de)
 rm(df_crs_de)
 
@@ -111,12 +111,17 @@ stem_languages <- c("de", "fr", "es")
 lemma_languages <- c("en")
 
 # Add match_stat, match_gender so that it will be found later on
+df_crs$projecttitle_clean <- NA
 df_crs$match_stat <- NA
 df_crs$match_gender <- NA
 df_crs$mining <- NA
+df_crs$stat_keyword_matched <- NA
+df_crs$gen_keyword_matched <- NA
+df_crs$acronym_matched <- NA
 
 # Go through every language, load keywords, clean keywords and detect stat, mining and gender
 #???: Considerations about computation speed possible, not sure if code below is the fastest one
+start <- Sys.time()
 for (lang in languages){
   list_keywords_stat <- read_lines(paste0("./Data/Final keyword lists/statistics_reduced_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()
   list_keywords_gender <- read_lines(paste0("./Data/Final keyword lists/gender_", lang, ".txt"), skip_empty_rows = TRUE)  %>% trimws()
@@ -130,82 +135,130 @@ for (lang in languages){
     list_keywords_gender <- list_keywords_gender %>% append("womens") # due to many spelling mistakes like women_s, women?s..
     demining_small_arms <- clean_and_lemmatize(demining_small_arms, language = lang)
     
+    # Create regex for searching titles 
+    list_keywords_stat <- paste0(" ", paste(list_keywords_stat, collapse = " | ")," |^", # words with whitespaces
+                                 paste(list_keywords_stat, collapse = " |^")," | ", # beginning of string
+                                 paste(list_keywords_stat, collapse = "$| "), "$") # end of string
+    list_keywords_gender <- paste0(" ", paste(list_keywords_gender, collapse = " | ")," |^", 
+                                   paste(list_keywords_gender, collapse = " |^")," | ", # beginning of string
+                                   paste(list_keywords_gender, collapse = "$| "), "$") # end of string
+    demining_small_arms <- paste0(" ", paste(demining_small_arms, collapse = " | ")," |^", 
+                                  paste(demining_small_arms, collapse = " |^")," | ", # beginning of string
+                                  paste(demining_small_arms, collapse = "$| "), "$") # end of string
+    list_acronyms <- paste0(" ", paste(list_acronyms, collapse = " | ")," |^", 
+                            paste(list_acronyms, collapse = " |^")," | ", # beginning of string
+                            paste(list_acronyms, collapse = "$| "), "$") # end of string
+    
     # Clean projcettitle and detect stat, gender and mining 
     df_crs <- df_crs %>%
       mutate(projecttitle_clean = ifelse(title_language == lang | is.na(title_language), 
                                          clean_and_lemmatize(projecttitle_lower, language = lang),
                                          projecttitle_lower)) %>%
       mutate(match_stat = ifelse(title_language == lang | is.na(title_language), 
-                                 str_detect(projecttitle_clean, paste0(paste(list_keywords_stat, collapse = " | ")," |^", 
-                                                                       paste(list_keywords_stat, collapse = "|^"),"|", # beginning of string
-                                                                       paste(list_keywords_stat, collapse = "$|"), "$")), # end of string
+                                 str_detect(projecttitle_clean, list_keywords_stat), 
                                  match_stat),
              match_gender = ifelse(title_language == lang | is.na(title_language),
-                                   str_detect(projecttitle_clean, paste0(paste(list_keywords_gender, collapse = " | ")," |^", 
-                                                                         paste(list_keywords_gender, collapse = "|^"),"|", # beginning of string
-                                                                         paste(list_keywords_gender, collapse = "$|"), "$")), # end of string 
-                                   match_gender)) %>%
-      mutate(mining = ifelse(title_language == lang | is.na(title_language),
-                             str_detect(projecttitle_clean, paste0(paste(demining_small_arms, collapse = " | ")," |^", 
-                                                                   paste(demining_small_arms, collapse = "|^"),"|", # beginning of string
-                                                                   paste(demining_small_arms, collapse = "$|"), "$")), # end of string 
-                             mining)) %>% 
+                                   str_detect(projecttitle_clean, list_keywords_gender), 
+                                   match_gender),
+             mining = ifelse(title_language == lang | is.na(title_language),
+                             str_detect(projecttitle_clean, demining_small_arms),
+                             mining),
+             ) %>%
       mutate(match_stat = ifelse(title_language == lang | is.na(title_language),
-                                 str_detect(projecttitle_lower,  paste0(paste(list_acronyms, collapse = " | ")," |^", 
-                                                                        paste(list_acronyms, collapse = "|^"),"|", # beginning of string
-                                                                        paste(list_acronyms, collapse = "$|"), "$")) # end of string 
+                                 str_detect(projecttitle_lower, list_acronyms)
                                  | match_stat,
-                                 match_stat))
+                                 match_stat)) %>%
+      rowwise() %>%
+      mutate(stat_keyword_matched = ifelse((title_language == lang | is.na(title_language)) & match_stat,
+                                           str_match_all(projecttitle_clean, list_keywords_stat) %>% unlist %>% trimws %>% paste(collapse = ", "), # save all detected keywords
+                                           stat_keyword_matched),
+             gen_keyword_matched = ifelse((title_language == lang | is.na(title_language)) & match_gender,
+                                          str_match_all(projecttitle_clean, list_keywords_gender) %>% unlist %>% trimws %>% paste(collapse = ", "), # save all detected keywords
+                                          gen_keyword_matched),
+             acronym_matched = ifelse((title_language == lang | is.na(title_language)) & match_stat,
+                                      str_match_all(projecttitle_lower, list_acronyms) %>% unlist %>% trimws %>% paste(collapse = ", "), # save all detected keywords
+                                      acronym_matched))
     print(paste0(lang, " finished"))
     
   }
+  
   # Use stemming for fr, es, de
   else if (lang %in% stem_languages) {
     list_keywords_stat <- stem_and_concatenate(list_keywords_stat, language = lang) 
-    list_keywords_gender <- stem_and_concatenate(list_keywords_gender, language = lang)
     if (lang == "de") {
       list_keywords_gender_composed <- list_keywords_gender %>% str_subset("^[:upper:]") # For German: fetch all nouns (start with upper case) to search without whitespaces
-      list_keywords_gender_composed <- stem_and_concatenate(list_keywords_gender, language = lang)
-    } 
+      list_keywords_gender_composed <- stem_and_concatenate(list_keywords_gender_composed, language = lang)
+      list_keywords_gender <- list_keywords_gender %>% str_subset("^[:lower:]") %>% stem_and_concatenate(language = lang)
+    } else {
+      list_keywords_gender <- stem_and_concatenate(list_keywords_gender, language = lang)
+    }
     demining_small_arms <- stem_and_concatenate(demining_small_arms, language = lang)
+    
+    # Create regex for searching titles 
+    list_keywords_stat <- paste0(" ", paste(list_keywords_stat, collapse = " | ")," |^", # words with whitespaces
+                                 paste(list_keywords_stat, collapse = " |^")," | ", # beginning of string
+                                 paste(list_keywords_stat, collapse = "$| "), "$") # end of string
+    list_keywords_gender <- paste0(" ", paste(list_keywords_gender, collapse = " | ")," |^", 
+                                   paste(list_keywords_gender, collapse = " |^")," | ", # beginning of string
+                                   paste(list_keywords_gender, collapse = "$| "), "$") # end of string
+    demining_small_arms <- paste0(" ", paste(demining_small_arms, collapse = " | ")," |^", 
+                                  paste(demining_small_arms, collapse = " |^")," | ", # beginning of string
+                                  paste(demining_small_arms, collapse = "$| "), "$") # end of string
+    list_acronyms <- paste0(" ", paste(list_acronyms, collapse = " | ")," |^", 
+                            paste(list_acronyms, collapse = " |^")," | ", # beginning of string
+                            paste(list_acronyms, collapse = "$| "), "$") # end of string
     
     # Clean projcettitle and detect stat, gender and mining 
     df_crs <- df_crs %>%
       mutate(projecttitle_clean = ifelse(title_language == lang & !is.na(title_language), 
                                          stem_and_concatenate(projecttitle_lower, language = lang),
                                          projecttitle_clean)) %>%
-      mutate(match_stat = ifelse(title_language == lang | is.na(title_language), 
-                                 str_detect(projecttitle_clean, paste0(paste(list_keywords_stat, collapse = " | ")," |^", 
-                                                                       paste(list_keywords_stat, collapse = "|^"),"|", # beginning of string
-                                                                       paste(list_keywords_stat, collapse = "$|"), "$")), # end of string
+      mutate(match_stat = ifelse(title_language == lang & !is.na(title_language), 
+                                 str_detect(projecttitle_clean, list_keywords_stat), # end of string
                                  match_stat),
-             match_gender = ifelse(title_language == lang | is.na(title_language),
-                                   str_detect(projecttitle_clean, paste0(paste(list_keywords_gender, collapse = " | ")," |^", 
-                                                                         paste(list_keywords_gender, collapse = "|^"),"|", # beginning of string
-                                                                         paste(list_keywords_gender, collapse = "$|"), "$")), # end of string 
-                                   match_gender)) %>%
-      mutate(mining = ifelse(title_language == lang | is.na(title_language),
-                             str_detect(projecttitle_clean, paste0(paste(demining_small_arms, collapse = " | ")," |^", 
-                                                                   paste(demining_small_arms, collapse = "|^"),"|", # beginning of string
-                                                                   paste(demining_small_arms, collapse = "$|"), "$")), # end of string 
-                             mining)) %>% 
-      mutate(match_stat = ifelse(title_language == lang | is.na(title_language),
-                                 str_detect(projecttitle_lower,  paste0(paste(list_acronyms, collapse = " | ")," |^", 
-                                                                        paste(list_acronyms, collapse = "|^"),"|", # beginning of string
-                                                                        paste(list_acronyms, collapse = "$|"), "$")) # end of string 
+             match_gender = ifelse(title_language == lang & !is.na(title_language),
+                                   str_detect(projecttitle_clean, list_keywords_gender), # end of string 
+                                   match_gender),
+             mining = ifelse(title_language == lang & !is.na(title_language),
+                             str_detect(projecttitle_clean, demining_small_arms), # end of string 
+                             mining),
+      ) %>%
+      mutate(match_stat = ifelse(title_language == lang & !is.na(title_language),
+                                 str_detect(projecttitle_lower, list_acronyms) # end of string 
                                  | match_stat,
-                                 match_stat))
+                                 match_stat)) 
+    
     if (lang == "de") {
-      # Look for nouns in composed words in German (note collapse = " | " -> collapse = "|")
+      # Look for nouns within composed words in German (note collapse = " | " -> collapse = "|")
       df_crs <- df_crs %>% 
         mutate(match_gender = ifelse(title_language == lang & match_gender == FALSE & !is.na(title_language),
                                      str_detect(projecttitle_clean, paste(list_keywords_gender_composed, collapse = "|")),
-                                     match_gender))
+                                     match_gender)) %>%
+        rowwise() %>%
+        mutate(gen_keyword_matched = ifelse(title_language == lang & !is.na(title_language) & match_gender & str_detect(projecttitle_clean, paste(list_keywords_gender_composed, collapse = "|")), 
+                                            str_match_all(projecttitle_clean, paste(list_keywords_gender_composed, collapse = "|")) %>% unlist %>% trimws %>% paste(collapse = ", "), # end of string
+                                            gen_keyword_matched))
     }
+    
+    df_crs <- df_crs %>%
+      rowwise() %>%
+      mutate(stat_keyword_matched = ifelse(title_language == lang & !is.na(title_language) & match_stat, # save all detected keywords in dedicated columns
+                                           str_match_all(projecttitle_clean, list_keywords_stat) %>% unlist %>% trimws %>% paste(collapse = ", "), # end of string
+                                           stat_keyword_matched),
+             gen_keyword_matched = ifelse(title_language == lang & !is.na(title_language) & match_gender, 
+                                          str_match_all(projecttitle_clean, list_keywords_gender) %>% unlist %>% trimws %>% paste(collapse = ", "), # end of string
+                                          gen_keyword_matched),
+             acronym_matched = ifelse(title_language == lang & !is.na(title_language) & match_stat, 
+                                      str_match_all(projecttitle_lower, list_acronyms) %>% unlist %>% trimws %>% paste(collapse = ", "), # end of string
+                                      acronym_matched))
     
     print(paste0(lang, " finished"))
     }
 }
+df_crs <- df_crs %>% mutate(stat_keyword_matched = na_if(stat_keyword_matched, ""),
+                                          gen_keyword_matched = na_if(gen_keyword_matched, ""),
+                                          acronym_matched = na_if(acronym_matched, ""))
+duration_matching <- difftime(Sys.time(),start, units = "sec")
 
 # Uncomment to check result (large file for full CRS)
 #write.xlsx(df_crs, file = "./Tmp/Text detection/crs_4lang_classified.xlsx", rownames = F)
@@ -216,16 +269,17 @@ df_crs <- df_crs %>%
   select(-projecttitle_lower)
 
 # Number of detected projects 
-lang <- "fr" # select lang
-sum(df_crs %>% filter(title_language == lang) %>% pull(match_stat), na.rm = T)
-sum(df_crs %>% filter(title_language == lang) %>% pull(match_gender), na.rm = T)
+lang <- "de" # select lang
+sum(df_crs %>% filter(long_language == lang) %>% pull(match_stat), na.rm = T)
+sum(df_crs %>% filter(long_language == lang) %>% pull(match_gender), na.rm = T)
 
 
 #--------------------------- Merge and check results ---------------------------
 
 # Merge with original data according to title id 
 df_crs <- left_join(df_crs_backup, df_crs %>%
-                      select(title_id, match_stat, match_gender, mining, projecttitle_clean, text_detection_wo_mining), by = "title_id")
+                      select(title_id, match_stat, match_gender, mining, projecttitle_clean, text_detection_wo_mining, 
+                             stat_keyword_matched, gen_keyword_matched, acronym_matched), by = "title_id")
 
 rm(df_crs_backup)
 
@@ -235,32 +289,32 @@ df_crs <- df_crs %>%
 #table(df_crs$text_detection_wo_mining) %>% print
 #table(df_crs$text_detection_wo_mining_w_scb) %>% print
 
-# Construct final gender filter out of gen_donor (UN Women), gender purpose code and the text detections
+# Construct final gender filter (possible to use other combinations, e.g. match_gender | gen_ppcode)
 # source("./Code/03.1 gender_preclassification_comp.R") # compile different data sets for comparison of gender markers
 df_crs <- df_crs %>%
   mutate(text_filter_gender = match_gender)
 
-# Create different combinations of gender filters to see differences in subsequent classification
-gen_combinations <- c("gen_donor", "gen_ppcode", "gen_sdg", "gen_marker",
-                      "gen_donor|gen_ppcode", "gen_donor|gen_ppcode|gen_marker|gen_sdg",
-                      "(gen_donor&gen_ppcode&gen_marker&gen_sdg)")
-#gen_combinations <- gtools::permutations(n = 3, r = 3, v = gen_combinations) # leave for other potential other projects
-#gen_combinations <- apply(gen_combinations, 1, function(x) paste0(x, collapse = '|'))
-gen_combinations <- paste0("match_gender|", gen_combinations)
-gen_combinations <- c("match_gender", gen_combinations) 
-
-# Go through all different combinations for gender_filter and save in Gender permutations-folder
-for (comb in gen_combinations){
-  df_crs_tmp <- df_crs %>% 
-      mutate(text_filter_gender = eval(parse(text = comb)))
-  saveRDS(df_crs_tmp, file = str_replace_all(paste0("./Data/Gender permutations/df_crs_uk_", comb, ".rds"), "\\|", "_"))
-}
-
-a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, match_gender) %>% unique %>% nrow
-b = df_crs %>% select(text_id) %>% unique %>% nrow
-
-
-print(paste0("There are ", a-b, " projects with same names but different purpose code"))
+# # Create different combinations of gender filters to see differences in subsequent classification
+# gen_combinations <- c("gen_donor", "gen_ppcode", "gen_sdg", "gen_marker",
+#                       "gen_donor|gen_ppcode", "gen_donor|gen_ppcode|gen_marker|gen_sdg",
+#                       "(gen_donor&gen_ppcode&gen_marker&gen_sdg)")
+# #gen_combinations <- gtools::permutations(n = 3, r = 3, v = gen_combinations) # leave for other potential other projects
+# #gen_combinations <- apply(gen_combinations, 1, function(x) paste0(x, collapse = '|'))
+# gen_combinations <- paste0("match_gender|", gen_combinations)
+# gen_combinations <- c("match_gender", gen_combinations) 
+# 
+# # Go through all different combinations for gender_filter and save in Gender permutations-folder
+# for (comb in gen_combinations){
+#   df_crs_tmp <- df_crs %>% 
+#       mutate(text_filter_gender = eval(parse(text = comb)))
+#   saveRDS(df_crs_tmp, file = str_replace_all(paste0("./Data/Gender permutations/df_crs_uk_", comb, ".rds"), "\\|", "_"))
+# }
+# 
+# a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, match_gender) %>% unique %>% nrow
+# b = df_crs %>% select(text_id) %>% unique %>% nrow
+# 
+# 
+# print(paste0("There are ", a-b, " projects with same names but different purpose code"))
 
 saveRDS(df_crs,file = crs_path_new)
 
