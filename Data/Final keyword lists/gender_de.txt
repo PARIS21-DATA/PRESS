@@ -1,6 +1,6 @@
 Frauen
 weiblich
-M‰dchen
+M√§dchen
 schwanger
 Ehe
 Geburt
@@ -8,9 +8,9 @@ gender
 Sex
 Sozialschutz
 geschlechtsspezifische Gewalt
-GBV
+gbv
 Gewalt gegen Frauen
-VAW
+vaw
 Datendisaggregation
 Geschlechtertrennung
 gender index
@@ -23,15 +23,16 @@ Zeitverwendungsdaten
 Zeitbudgeterhebung
 sdg5
 unbezahlte Arbeit
-Erm‰chtigung von Frauen
-WEE
+Erm√§chtigung von Frauen
+wee
 geschlechtsspezifisch orientiert
-Geschlechterparit‰t
+Geschlechterparit√§t
 Geschlechtergerechtigkeit
 Gender-Mainstreaming
 Pflegearbeiten
 Fortpflanzung
-SRHR
+srhr
 intersektionell
-FGM
+fgm
 gender sensitive
+

@@ -27,7 +27,7 @@ source("./Code/00. boot.R")
 #---------------------------- Language analysis --------------------------------
 
 # If full data available in Data/Raw/, uncomment to load 
-df_crs <- readRDS("./Data/Raw/CRS/crs_full.rds")
+df_crs <- readRDS("./Data/Raw/CRS/crs_utf8_full.rds")
 
 # Subset crs data and detect languages of title and long description
 df_crs_lang <- df_crs %>%
@@ -104,7 +104,7 @@ n_char_title <- df_crs_de %>%
   paste(collapse = "") %>%
   str_replace_all(fixed(" "), "") %>%
   str_count()
-n_char_long <- df_crs_de %>% 
+n_char_long <- df_crs %>% 
   filter(long_language == lang) %>%
   pull(longdescription) %>%
   paste(collapse = "") %>%
@@ -113,7 +113,7 @@ n_char_long <- df_crs_de %>%
 print(paste0("Number of characters in titles to be translated: ", n_char_title))
 print(paste0("Title costs with deepL: ", (n_char_title)*0.00002," EUR"))
 print(paste0("Number of characters in long descriptions to be translated: ", n_char_long))
-print(paste0("Total costs with deepL: ", (n_char_title + n_char_long)*0.00002," EUR"))
+print(paste0("Total costs with deepL: ", n_char_long*0.00002," EUR"))
 
 sample_trans_lang <- deeplr::toEnglish2(df_crs$longdescription[12], auth_key = deepl_auth_key)
 sample_trans_lang  
