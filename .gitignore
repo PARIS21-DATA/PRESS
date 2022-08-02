@@ -15,3 +15,15 @@ data/raw/IATI
 # !data/intermediate/crs02.rds
 # !data/intermediate/crs03.rds
 
+# adding a few lines just to ignore YT's local files
+# will be deleted in the final version
+output/
+YTreviewtemp/
+*full.rds
+data/raw/crs/archive
+*rapp.history
+data/raw/crs/crs_full1.rds
+data/raw/crs/crs_full_win.rds
+data/intermediate/*_de.rds
+data/intermediate/*all.rds
+data/*de.rds
