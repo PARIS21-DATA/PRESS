@@ -106,8 +106,8 @@ full_learning_percent <- 1       # take only x% of full learning set size is too
 neg_sample_fraction <- 1          # Fraction of negatively marked to positively marked in learning set
 plot_results <- TRUE             # Set to TRUE to visualize results
 frac_pred_set <- 1             # use only 5% of full prediction set to speed up for testing
-save_fit_xgb <- TRUE              # Set to TRUE to save fitted xgb model
-load_fit_xgb <- FALSE             # load previously fitted model
+save_fit_xgb <- FALSE              # Set to TRUE to save fitted xgb model
+load_fit_xgb <- TRUE             # load previously fitted model
 split_pred <- FALSE                # use to split up pred data into two data frames to handle large pred sets
 n_pred_sets <- 10                 # number of splitted data prediction sets
 
@@ -229,34 +229,6 @@ if (n_gram == 1) {
 #total_data_dtm <- df$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
 train_data_dtm <- train_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
 
-# Creating document-feature-matrix for test data. Here we have to keep two things in mind:
-# 1. We have to exclude words that do not appear in the training data. The model does not know these and breaks.
-# 2. We have to include words (although with a 0) that appear in the training data but not in the test data. Otherwise the model gets confused as well.
-# See here for a detailed discussion: https://stackoverflow.com/questions/16630627/how-to-recreate-same-documenttermmatrix-with-new-test-data 
-if (n_gram == 1) {
-  control_list_ngram <- list(weighting = weightTf, dictionary=Terms(train_data_dtm))
-} else {
-  control_list_ngram = list(tokenize = NLP_tokenizer,
-                            removePunctuation = TRUE,
-                            removeNumbers = TRUE, 
-                            stopwords = stopwords(lang), 
-                            tolower = T, 
-                            lemmatization = T, 
-                            weighting = function(x) { weightTf(x) },
-                            dictionary=Terms(train_data_dtm))
-}
-test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
-
-print("Start to create pred DTM")
-if (split_pred) {
-  pred_splitted <- suppressWarnings(split(pred, (0:nrow(pred) %/% ceiling(nrow(pred)/(n_pred_sets)))))
-  pred_splitted <- lapply(pred_splitted, function(y) {y %>% pull(text_cleaned) %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)})
-  print("Pred DTM finished")
-} else {
-  prediction_data_dtm <- pred$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
-  print("Pred DTM finished")
-}
-
 # Train the model for one statistical domain - parameters taken from SDG lab code. These might benefit from tuning
 eta_par <- 0.1
 nrounds_par <- 5 / eta_par
@@ -281,6 +253,42 @@ if (!file.exists(xgb.filename) & iteration & save_fit_xgb){
   saveRDS(fit.xgb, xgb.filename)
 }
 
+# Creating document-feature-matrix for test data. Here we have to keep two things in mind:
+# 1. We have to exclude words that do not appear in the training data. The model does not know these and breaks.
+# 2. We have to include words (although with a 0) that appear in the training data but not in the test data. Otherwise the model gets confused as well.
+# See here for a detailed discussion: https://stackoverflow.com/questions/16630627/how-to-recreate-same-documenttermmatrix-with-new-test-data 
+if (load_fit_xgb) {
+  dictionary_dtm <- fit.xgb$feature_names
+} else {
+  dictionary_dtm <- Terms(train_data_dtm)
+}
+
+if (n_gram == 1) {
+  control_list_ngram <- list(weighting = weightTf, dictionary = dictionary_dtm)
+} else {
+  control_list_ngram = list(tokenize = NLP_tokenizer,
+                            removePunctuation = TRUE,
+                            removeNumbers = TRUE, 
+                            stopwords = stopwords(lang), 
+                            tolower = T, 
+                            lemmatization = T, 
+                            weighting = function(x) { weightTf(x) },
+                            dictionary = dictionary_dtm)
+}
+
+
+# Create prediction DTM
+print("Start to create test and pred DTM")
+if (split_pred) {
+  test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
+  pred_splitted <- suppressWarnings(split(pred, (0:nrow(pred) %/% ceiling(nrow(pred)/(n_pred_sets)))))
+  pred_splitted <- lapply(pred_splitted, function(y) {y %>% pull(text_cleaned) %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)})
+  print("Test and pred DTM finished")
+} else {
+  test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
+  prediction_data_dtm <- pred$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
+  print("Test and pred DTM finished")
+}
 
 
 # Check which words have a high importance for the prediction
