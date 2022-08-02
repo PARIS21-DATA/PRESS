@@ -1,11 +1,12 @@
 rm(list = ls())
 
 source("code/00.1 functions.R")
+
 print_time_diff <- function(start_time) {
   difftime(Sys.time(),start_time, units = "sec") %>% print
 }
 job_specific_suffix <- ""
-job_specific_suffix <- "_de"
+job_specific_suffix <- "_utf8_full"
 crs_path <- paste0("./Data/intermediate/crs02", job_specific_suffix, ".rds")
 crs_path_new <- paste0("./Data/intermediate/crs03", job_specific_suffix, ".rds")
 start <- Sys.time()
@@ -29,13 +30,17 @@ print_time_diff(start)
 # save(crs, file = "crs_2020_clean1_splitToDetect.RData")
 
 
-langs = c("en", "de")
+langs = c("en"
+          # , "de"
+          )
 
 for (lang2analyse in langs) {
   source(file = "Code/03.2 detecting for each language.R")
 }
 
-df_crs <- rbind(df_crs_de, df_crs_en) #!!! fix here
+df_crs <- rbind(df_crs_en 
+                # ,df_crs_de
+                ) #!!! fix here
 df_crs <- df_crs_full %>%
   filter(!language_title %in% langs) %>%
   bind_rows(df_crs)
@@ -78,14 +83,16 @@ print(paste0("There are ", a-b, " projects with same names but different purpose
 
 names(df_crs)
 
-str_rm_nul <- function(x) {
-  if(!is.character(x)) {return(x)} else{
-    x <- str_replace(x, "\200", "")
-    return(x)
-  }
-}
 
-df_crs_rm_nul <- lapply(df_crs, str_rm_nul)
+
+# str_rm_nul <- function(x) {
+#   if(!is.character(x)) {return(x)} else{
+#     x <- str_replace(x, "\200", "")
+#     return(x)
+#   }
+# }
+# 
+# df_crs_rm_nul <- lapply(df_crs, str_rm_nul)
 
 df_crs <- data.frame(df_crs_rm_nul, stringsAsFactors = F)
 rm(df_crs_rm_nul)

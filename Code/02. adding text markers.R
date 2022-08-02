@@ -10,7 +10,7 @@ print_time_diff <- function(start_time) {
 source <- "crs"
 skip_icov <- T
 job_specific_suffix <- ""
-job_specific_suffix <- "_full"
+job_specific_suffix <- "_utf8_full"
 crs_path <- paste0("./Data/intermediate/crs01_1", job_specific_suffix, ".rds")
 crs_path_new <- paste0("./Data/intermediate/crs02", job_specific_suffix, ".rds")
 start <- Sys.time()
@@ -27,7 +27,8 @@ cols_needed <- c("process_id",
                  "longdescription",
                  "purposecode",
                  "donorname",
-                 "gender")
+                 "gender", 
+                 "channelcode")
 
 
 # every step, we try to use a subset of the data to make the process quicker
@@ -73,8 +74,13 @@ gc()
 # for the whole crs data:
 # Time difference of 148.8021 secs
 
+# TO REVIVE afterwards
+# df_crs <- df_crs %>%
+#   mutate(desc_2mine = ifelse(stringdist(projecttitle, longdescription)< max_string_dist, NA, longdescription)) %>%
+#   mutate(text_id = as.numeric(as.factor(desc_2mine)))
+
 df_crs <- df_crs %>%
-  mutate(desc_2mine = ifelse(stringdist(projecttitle, longdescription)< max_string_dist, NA, longdescription)) %>%
+  mutate(desc_2mine = longdescription) %>%
   mutate(text_id = as.numeric(as.factor(desc_2mine)))
 
 
@@ -108,12 +114,10 @@ df_crs <- df_crs %>%
          gen_ppcode = (purposecode %in% c(15170:15180)),
          gen_donor = (channelcode == 41146),
          gen_marker = (gender %in% c(1, 2) & (!is.na(gender))), 
-         gen_marker1 = gender == 1, 
-         gen_marker2 = gender ==2
+         gen_marker1 = (gender == 1), 
+         gen_marker2 =( gender ==2)
   ) %>%
   select(-cols_needed[which(!cols_needed %in% c("process_id", "longdescription"))])
-
-
 
 
 df_crs_lang <- df_crs %>%
