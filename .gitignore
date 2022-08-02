@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+*.Rapp.history
 
 .DS_Store
 # data/intermediate
@@ -38,3 +39,6 @@ data/raw/crs/archive/**
 ~$*
 
 output/gender markers and analysis.csv
+
+
+
