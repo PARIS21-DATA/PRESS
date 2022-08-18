@@ -11,11 +11,13 @@ print_time_diff <- function(start_time) {
   difftime(Sys.time(),start_time, units = "sec") %>% print
 }
 
-job_specific_suffix <- ""
+# job_specific_suffix <- ""
 job_specific_suffix <- "_utf8_full"
 start <- Sys.time()
 crs_path <- paste0("./Data/Raw/CRS/crs", job_specific_suffix, ".rds")
-crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" ,job_specific_suffix,  ".rds")
+crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" ,
+                       job_specific_suffix, 
+                       ".rds")
 
 
 ### --- 
@@ -26,7 +28,6 @@ df_crs_raw <- readRDS(crs_path)
 print_time_diff(start)
 beep()
 # Time difference of 57.99225 secs
-
 
 
 ### --- 
@@ -93,7 +94,7 @@ gc()
 print_time_diff(start)
 # Time difference of 39.46608 secs
 
-saveRDS(df_crs, file  = crs_path_new)
+write_rds(df_crs, file  = crs_path_new)
 print_time_diff(start)
 beep(2)
 # Time difference of 141.4641 secs
