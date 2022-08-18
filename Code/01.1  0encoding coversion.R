@@ -22,8 +22,6 @@ df_crs_ls <- df_crs %>%
   lapply(convert_char_win2utf)
 beep(2)
 
-
-
 df_crs <- df_crs_ls %>% 
   data.frame(stringsAsFactors = F)
 
@@ -34,9 +32,10 @@ df_crs %>% filter(donorname %in% c("France","Spain", "Switzerland", "Germany")) 
   sample() %>%
   head(100)
 
-
 # saveRDS(df_crs, file = "Data/Raw/CRS/crs_utf8_full.rds", ascii = F)
 write_rds(df_crs, file = "Data/Raw/CRS/crs_utf8_full.rds")
+# note from web: 
+# If you've used saveRDS() in the past, you will have no trouble using write_rds() . The only major difference between the two is that write_rds() does not compress the file by default. The sister function of write_rds() is read_rds() .
 infoRDS("Data/Raw/CRS/crs_utf8_full.rds")
 rm(df_crs_raw)
 rm(df_crs_ls)
