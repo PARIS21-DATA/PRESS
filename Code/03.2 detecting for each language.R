@@ -1,14 +1,11 @@
 df_crs <- df_crs_full %>%
-  filter(language_title == lang2analyse) %>% ##??? to solve later
-  mutate(projecttitle_lower = tolower(projecttitle)) %>%
-  mutate(title_id = as.numeric(as.factor(projecttitle_lower))) 
+  filter(language_title == lang2analyse) ##??? to solve later
 
-df_crs_backup <- df_crs
+# df_crs_backup <- df_crs
 
-
-df_crs <- df_crs %>%
-  select(title_id, projecttitle_lower) %>%
-  filter(!duplicated(title_id)) 
+# df_crs <- df_crs %>%
+#   select(title_id, projecttitle_lower) %>%
+#   filter(!duplicated(title_id)) 
 
 # beep(4)
 list_keywords <- readLines(paste0("data/statistics_reduced_", lang2analyse, ".txt")

@@ -5,7 +5,7 @@ source("code/00.1 functions.R")
 print_time_diff <- function(start_time) {
   difftime(Sys.time(),start_time, units = "sec") %>% print
 }
-job_specific_suffix <- ""
+
 job_specific_suffix <- "_utf8_full"
 crs_path <- paste0("./Data/intermediate/crs02", job_specific_suffix, ".rds")
 crs_path_new <- paste0("./Data/intermediate/crs03", job_specific_suffix, ".rds")
@@ -14,21 +14,21 @@ df_crs_full <- readRDS(crs_path)
 print("Load file:")
 print_time_diff(start)
 
-# we used to make the project with same description as 1 as long as one of the same description is marked as 1
-# it is wrong because some projects with the same name will have different purpose codes
+### we used to make the project with same description as 1 as long as one of the same description is marked as 1
+### it is wrong because some projects with the same name will have different purpose codes
 
+## 1. split projects by language delimiters "." and " / "
 
-
-## 1.c. split projects by language delimiters "." and " / "
-
-# df_crs$desc_2mine = iconv(df_crs$desc_2mine,"WINDOWS-1252","UTF-8")
-
-# crs$desc_2mine = NULL
 # names(crs)
 # crs <- cSplit(crs, "toDetect", ".", "long")
 # crs <- cSplit(crs, "toDetect", " / ", "long")
-# save(crs, file = "crs_2020_clean1_splitToDetect.RData")
 
+df_crs <- df_crs_full %>%
+  mutate(projecttitle_lower = tolower(projecttitle)) %>%
+  mutate(title_id = as.numeric(as.factor(projecttitle_lower))) %>%
+  select(title_id, projecttitle_lower) %>%
+  filter(!duplicated(title_id)) 
+  
 
 langs = c("en"
           # , "de"
