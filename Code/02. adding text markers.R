@@ -15,11 +15,16 @@ crs_path <- paste0("./Data/intermediate/crs01_1", job_specific_suffix, ".rds")
 crs_path_new <- paste0("./Data/intermediate/crs02", job_specific_suffix, ".rds")
 start <- Sys.time()
 
+
+## load the data file
 df_crs_raw <- readRDS(crs_path)
 print("Loading document:")
 print_time_diff(start)
 
+## select columns
+# every step, we try to use a subset of the data to make the process quicker
 rm(crs_path)
+# checking all the column names
 names(df_crs_raw)
 cols_needed <- c("process_id",
                  "projecttitle",
@@ -30,21 +35,12 @@ cols_needed <- c("process_id",
                  "gender", 
                  "channelcode")
 
-
-# every step, we try to use a subset of the data to make the process quicker
 df_crs_raw <- df_crs_raw %>%
   select(all_of(cols_needed))
 beep()
-# only needed when working on a Mac. Also not working well becausee it will convert utf8 to NA
 
-# if(!skip_icov) {df_crs_raw = df_crs_raw %>%
-#   mutate(projecttitle = iconv(projecttitle, "WINDOWS-1252", "UTF-8"),
-#          shortdescription = iconv(shortdescription, "WINDOWS-1252", "UTF-8"),
-#          longdescription= iconv(longdescription, "WINDOWS-1252", "UTF-8"))}
-
-
+## setting up a function to clean text
 # adopting JA's function
-
 clean_titles <- function(title){
   title <- title %>%
     removeNumbers %>%
@@ -53,57 +49,62 @@ clean_titles <- function(title){
   return(title)
 }
 
-
-
+## if there is no long description, usee short description instead. 
 df_crs_raw <- df_crs_raw %>% 
   mutate(longdescription = ifelse(is.na(longdescription), shortdescription, 
                                   ifelse(longdescription == "", shortdescription, 
                                          longdescription)))
 
-max_string_dist <- 10
+## clean text columns
 df_crs <- df_crs_raw %>%
   mutate(projecttitle = clean_titles(projecttitle),
          shortdescription = clean_titles(shortdescription),
          longdescription = clean_titles(longdescription))
 print("Cleaning 3 text columns")
-
-# saveRDS(df_crs, "./Data/intermediate/crs02_de_cleaned.rds")
-
 print_time_diff(start)
 gc()
+beep()
 # for the whole crs data:
 # Time difference of 148.8021 secs
 
-# TO REVIVE afterwards
-# df_crs <- df_crs %>%
-#   mutate(desc_2mine = ifelse(stringdist(projecttitle, longdescription)< max_string_dist, NA, longdescription)) %>%
-#   mutate(text_id = as.numeric(as.factor(desc_2mine)))
 
-df_crs <- df_crs %>%
+## TO REVIVE afterwards
+## if the long description is too similar to project title, remove it. 
+max_string_dist <- 10
+
+# first no need to detect if the character length difference is already large
+# we only detect a subset of the data
+df_crs_2detect4diff <- df_crs %>%
+  filter((nchar(projecttitle) - nchar(longdescription) )^2 < 100) 
+
+df_crs_2detect4diff <- df_crs_2detect4diff %>% 
+  mutate(ldesc_id_tmp = as.numeric(as.factor(paste(projecttitle, longdescription))))
+
+df_crs_2detect4diff_shorten <- df_crs_2detect4diff %>% 
+  filter(!duplicated(ldesc_id_tmp))
+
+# replace the longdesc with NA if it is too similar to project title. 
+df_crs_2detect4diff_shorten <- df_crs_2detect4diff_shorten %>%
+  mutate(desc_2mine = ifelse(stringdist(projecttitle, longdescription)< max_string_dist, NA, longdescription))
+
+df_crs_2detect4diff_shorten <- df_crs_2detect4diff_shorten %>% 
+  select(ldesc_id_tmp, desc_2mine)
+
+df_crs_2detect4diff <- df_crs_2detect4diff %>% 
+  left_join(df_crs_2detect4diff_shorten) %>% 
+  select(-ldesc_id_tmp)
+
+rm(df_crs_2detect4diff_shorten)
+
+df_crs <- df_crs %>% 
+  filter(!process_id %in% df_crs_2detect4diff$process_id) %>%
   mutate(desc_2mine = longdescription) %>%
+  rbind(df_crs_2detect4diff) %>%
   mutate(text_id = as.numeric(as.factor(desc_2mine)))
 
-
-# saveRDS(df_crs, "./Data/intermediate/crs02_de_desc.rds")
 gc()
 print("find the best text for desc_2mine")
 print_time_diff(start)
-
-
-# mutate(desc_2mine = ifelse(stringdist(projecttitle, shortdescription) < max_string_dist,
-#                                  projecttitle,
-#                                  paste(projecttitle, shortdescription, sep = ". "))) %>%
-# mutate(desc_2mine = ifelse(stringdist(desc_2mine, longdescription) < max_string_dist,
-#                                  desc_2mine,
-#                                  paste(desc_2mine, longdescription, sep = ". "))) %>%
-# mutate(string_dist_title_short = stringdist(tolower(projecttitle), tolower(shortdescription))) %>%
-# mutate(text_id = as.numeric(as.factor(desc_2mine)))
-
-
-# df_crs$desc_2mine[140:150]
-# df_crs_raw$longdescription[145]
-# a$longdescription[145]
-# df_crs_raw$longdescription[145]
 
 
 df_crs <- df_crs %>%
@@ -118,7 +119,6 @@ df_crs <- df_crs %>%
          gen_marker2 =( gender ==2)
   ) %>%
   select(-cols_needed[which(!cols_needed %in% c("process_id", "longdescription"))])
-
 
 df_crs_lang <- df_crs %>%
   select(text_id, desc_2mine) %>%
@@ -159,9 +159,6 @@ which(is.na(df_crs$desc_2mine)|df_crs$desc_2mine == "") %>% length %>% print()
 # which(df_crs$desc_2mine == "") %>% print
 table(df_crs$language) %>% print
 names(df_crs)
-
-
-
 
 
 #Output::
