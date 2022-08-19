@@ -3,15 +3,16 @@ rm(list = ls())
 # lists merged: 
 # gender, small arm, statistics reduced
 
-file1 <- "data/keywords/gender_en.txt"
-file2 <- "data/keywords/gender_en_ja.txt"
-file_output <- "data/keywords/gender_en_final.txt"
+file1 <- "data/keywords/statistics_reduced_acronyms_en.txt"
+file2 <- "data/keywords/statistics_reduced_acronyms_en_ja.txt"
+file_output <- "data/keywords/statistics_reduced_acronyms_en_final.txt"
 myDict = readLines(file1)
 myDict = c(myDict, readLines(file2))
 rm(file2, file1)
 myDict = myDict %>% 
   trimws %>% 
   unique
+keywords <- myDict
 
 
 keywords_matrix = sapply(myDict, FUN = function(y) {grepl(patter = y, x = myDict)}  )
