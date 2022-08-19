@@ -107,4 +107,3 @@ print_time_diff(start)
 #   filter(text_detection_wo_mining_w_scb, text_detection_gender # |gen_marker2
 #          ) %>%
 #   nrow
-# adding one line to resolve issues
