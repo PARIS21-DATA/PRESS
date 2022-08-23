@@ -1,5 +1,5 @@
 rm(list = ls())
-
+source("code/00. boot.R")
 source("code/00.1 functions.R")
 
 print_time_diff <- function(start_time) {
@@ -102,6 +102,7 @@ names(df_crs)
 write_rds(df_crs,file = crs_path_new)
 
 print_time_diff(start)
+# Time difference of 134.7109 secs
 # write.csv(df_crs, file = "data/intermediate/crs_filter_results.csv", row.names = F)
 # df_crs %>%
 #   filter(text_detection_wo_mining_w_scb, text_detection_gender # |gen_marker2
