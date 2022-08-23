@@ -37,7 +37,12 @@ preprocessing1V <- function(x, language){
 # Function 2
 ## --------------
 
+
 preprocessingV <- function(x, language){
+  ## This function is used to do the following:
+  # turn tesxt to Vcorpuus
+  # remove punctuation, number, to lower, remove stopwords, then stem and remove white spaces. 
+  ## ??? what is the stemmer here? Is it compatible with tidy()?
   
   ## language is one of: "english", "french", "spanish"
   
