@@ -1,15 +1,19 @@
 rm(list = ls())
+# for now (20220823), we skip this part. It does not working at the moment. 
+# was it designed originally for the Canadian bi-lingual projects? 
+
 print_time_diff <- function(start_time) {
   difftime(Sys.time(),start_time, units = "sec") %>% print
 }
-job_specific_suffix <- ""
-job_specific_suffix <- "_de"
+
+job_specific_suffix <- "_utf8_full"
+
 crs_path <- paste0("./Data/intermediate/crs03", job_specific_suffix, ".rds")
 crs_path_new <- paste0("./Data/intermediate/crs03_1", job_specific_suffix, ".rds")
 start <- Sys.time()
 
-df_crs <- readRDS(crs_path)
-df_crs_original <- df_crs
+df_crs_original <- readRDS(crs_path)
+
 
 df_crs <- df_crs_original %>%
   select(text_id, desc_2mine, stats_filter = text_detection_wo_mining_w_scb)
