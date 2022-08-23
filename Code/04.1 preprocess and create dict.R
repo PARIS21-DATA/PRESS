@@ -39,6 +39,7 @@ save(eligible_words_in_doc_1,
        freq_all1,
      file = "./Data/intermediate/crs04.1_crs1_utf8_full.rdata")
 
+write_rds(corpus_crs_1, file = "./Data/intermediate/crs04.1_corpus_crs_1_utf8_full.rds")
 # myDict = unique(c(myDict, dict_lang))
 
 ## (3.c. english language only)

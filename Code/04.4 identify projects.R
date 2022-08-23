@@ -1,16 +1,15 @@
-# # inspect(corpus_crs_0)
-nwords0 <- tidy(corpus_crs_0) %>%
-  select(text, document = id) %>%
-  mutate(total = str_count(string = text, pattern = "\\S+") ) %>%
-  select(-text)
-# Time difference of 1049.166 secs
-
-write_rds(nwords0, file = "data/Intermediate/crs04.3_nwords0_utf8_full.rds")
-
-print_time_diff(start)
-
 ## ??? This is used before but should I correct after changing 00.4? 
 # source("Code/00.4 refining keywords.R")
+rm(list = ls())
+source("code/00. boot.R")
+myDict <- read_rds("data/Intermediate/crs04.2_mydict_utf8_full.rds")
+corpus_crs_1 <- read_rds("./Data/intermediate/crs04.1_corpus_crs_1_utf8_full.rds")
+nwords0 <- read_rds("data/Intermediate/crs04.3_nwords0_utf8_full.rds")
+dtm_crs_0 <- read_rds("Data/Intermediate/crs04.3_dtm_crs_0_utf8_full.rds")
+df_crs_0 <- read_rds("./Data/intermediate/crs04_crs0_utf8_full.rds")
+source("code/00.3 functions_yu.R")
+source("code/00.2 functions_thilo.R")
+
 start <- Sys.time()
 freq <- DTM(corpus_crs_1, dict =myDict) %>%
   tidy %>%
@@ -25,7 +24,6 @@ nwords1 <- tidy(corpus_crs_1) %>%
   select(-text)
 print_time_diff(start)
 
-
 nwords1 <- nwords1 %>%
   left_join(freq) %>%
   filter(total != 0) %>%
@@ -33,7 +31,7 @@ nwords1 <- nwords1 %>%
   mutate(percentage = count/total) 
 beep()
 
-threshold = nwords1 %>%
+threshold <- nwords1 %>%
   filter(count > 0) %>%
   .$percentage %>%
   mean
@@ -44,18 +42,6 @@ mean(nwords1$percentage, na.rm = T) %>% print()
 print("median:")
 median(nwords1$percentage, na.rm = T) %>% print()
 
-# x = freq %>% row_sums()
-# x1 = freq$i
-# x2 = freq$j
-# x3 = freq$v
-# x4 = freq$nrow
-# x5 = freq$ncol
-# x6_1 = freq$dimnames$Docs
-# x6_2 = freq$dimnames$Terms
-
-start <- Sys.time()
-dtm_crs_0 <- DTM(corpus_crs_0, dict=myDict)
-print_time_diff(start)
 
 list_identified <- tidy(dtm_crs_0) %>%
   group_by(document) %>%
@@ -87,7 +73,9 @@ df_crs_0 %>% filter(text_id %in% positive_text_id) %>% .$description %>% print
 #   filter(is.na(description.x)|is.na(description.y))
 # c$description.x
 
-# write_rds(positive_text_id, file = crs_path_new)
+write_rds(positive_text_id, file = "data/Intermediate/crs04.4_positive_id_utf8_full.rds")
 
-print_time_diff()
+print_time_diff(start)
+rm(list = ls())
+gc()
 # time spent for 1/40 of projects: 1.416996 mins

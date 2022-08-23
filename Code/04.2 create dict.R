@@ -57,3 +57,5 @@ freq_all_1_0 %>%
 #   summarise(count = sum(count))
 
 save(dict_tf_idf, common_words, myDict, file = "data/Intermediate/crs04.2_dicts_utf8_full.rdata")
+
+write_rds(myDict,file = "data/Intermediate/crs04.2_mydict_utf8_full.rds" )
