@@ -28,7 +28,7 @@ df_crs_descs = df_crs_descs %>%
 
 desc_splited =  df_crs_descs %>%
   .$desc_2mine %>%
-  str_split( pattern = "/|[.]", simplify = T) %>%
+  str_split(pattern = "[/]|[.]", simplify = T) %>%
   as.data.frame() %>%
   mutate(ref = 1:nrow(df_crs_descs))
 

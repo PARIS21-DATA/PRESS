@@ -2,18 +2,26 @@ rm(list = ls())
 print_time_diff <- function(start_time) {
   difftime(Sys.time(),start_time, units = "sec") %>% print
 }
-job_specific_suffix <- ""
-job_specific_suffix <- "_de"
-crs_path <- paste0("./Data/intermediate/crs03_1", job_specific_suffix, ".rds")
+
+job_specific_suffix <- "_utf8_full"
+start <- Sys.time()
+
+crs_path <- paste0("./Data/intermediate/crs03", job_specific_suffix, ".rds")
+# crs_path <- paste0("./Data/intermediate/crs03_1", job_specific_suffix, ".rds")
 crs_path_new <- paste0("./Data/intermediate/positive_text_id", job_specific_suffix, ".rds")
 start <- Sys.time()
 
 lang <-  "en"
 language <- "english"
-df_crs <- readRDS(crs_path)
-df_crs_original <- df_crs
+df_crs_original <- read_rds(crs_path)
+print_time_diff(start)
 
-start_time = Sys.time()
+df_crs <- df_crs_original
+
+
+df_crs <- df_crs %>% 
+  rename(stats_filter = text_detection_wo_mining_w_scb)
+
 source("code/00.2 functions_thilo.R")
 source("code/00.3 functions_yu.R")
 
@@ -21,12 +29,10 @@ source("code/00.3 functions_yu.R")
 # frthreshold = 5
 # esthreshold = 1
 
-dict_lang <- wlistV(lang) %>% as.character()
+## Whitelist is no longer being used
+# Create the white list 
+# dict_lang <- wlistV(lang) %>% as.character()
 
-# Split into to two groups
-# 
-# df_crs <- df_crs %>%
-#   mutate(description = gsub("[.]", "", ))
 
 df_crs_1 <- df_crs %>%
   filter( stats_filter 
@@ -38,24 +44,28 @@ df_crs_0 <- df_crs %>%
           # , language==lang
           )
 # which(df_crs_0$text_id %in% df_crs_1$text_id)
-## 3.b. merge back by projectID to reverse previous split of project by language
 
+
+## 3.b. merge back by projectID to reverse previous split of project by language
 df_crs_1 <- df_crs_1 %>% 
-  group_by(text_id) %>% 
-  summarise(description = paste(text, collapse=". ")) %>%
-  data.frame
+  filter(!duplicated(text_id)) %>%
+  select(description = desc_2mine, text_id)
+  # group_by(text_id) %>% 
+  # summarise(description = desc_2mine) %>%
+  # data.frame
+
 df_crs_0 <- df_crs_0 %>% 
-  group_by(text_id) %>% 
-  summarise(description = paste(text, collapse=". ")) %>%
-  data.frame
+  filter(!duplicated(text_id))%>%
+  select(description = desc_2mine, text_id)
+  # group_by(text_id) %>% 
+  # summarise(description = paste(text, collapse=". ")) %>%
+  # data.frame
 # 
 # Warning messages:
 #   1: In get(object, envir = currentEnv, inherits = TRUE) :
 #   restarting interrupted promise evaluation
 # 2: In doTryCatch(return(expr), name, parentenv, handler) :
 #   restarting interrupted promise evaluation
-
-## (3.b. english language only)
 
 
 
@@ -68,7 +78,6 @@ Min.0 <- 0.1
 
 corpus_crs_1 <- preprocessingV(df_crs_1$description, language=language)
 dtm_crs_1 <- DTM(corpus_crs_1, Min=Min.1, Max=1)
-
 
 corpus_crs_1_simpleDTM <- DTM(corpus_crs_1)
 
@@ -87,8 +96,10 @@ eligible_words_in_doc_1 <- corpus_crs_1_simpleDTM %>%
   group_by(term) %>% 
   summarise(cnt = n()) %>%
   arrange(desc(cnt)) %>%
-  filter(cnt > (length(corpus_crs_1)/100)) %>%
+  filter(cnt > (length(corpus_crs_1)/100)) %>% # filter by frequency
   .$term
+
+print_time_diff(start)
 
 # myDict = unique(c(myDict, dict_lang))
 
@@ -112,6 +123,8 @@ freq_all0 <- corpus_crs_0_simpleDTM %>%
 freq_all_1_0 = right_join(freq_all0, freq_all1, by = "term") %>%
   mutate(odds = freq.x/freq.y) %>%
   arrange(desc(odds), desc(freq.y))
+
+print_time_diff(start)
 
 ### filter standards
 # freq_1 cut off
@@ -150,6 +163,7 @@ common_words <- freq_all_1_0 %>%
   # filter(freq.y > cutoff_freq1) %>% 
   filter(odds > 10, odds < 5) %>%
   .$term
+print_time_diff(start)
 
 myDict <- dtm_crs_1$dimnames$Terms 
 dict_tf_idf %in% myDict
@@ -157,7 +171,6 @@ dict_tf_idf %in% common_words
 myDict <- unique(c(myDict, dict_tf_idf))
 myDict <- myDict[!(myDict %in% common_words)]
 myDict <- unique(dict_tf_idf)
-# myDict <- unique(dict_tf_idf_reduced)
 
 freq_all_1_0 %>% 
   filter(term %in% myDict) %>%
@@ -167,51 +180,27 @@ freq_all_1_0 %>%
 #   tidy %>%
 #   group_by(document) %>%
 #   summarise(count = sum(count))
-# 
+
 # # inspect(corpus_crs_0)
 nwords0 = tidy(corpus_crs_0) %>%
   select(text, document = id) %>%
   mutate(total = str_count(string = text, pattern = "\\S+") ) %>%
   select(-text)
 
+print_time_diff(start)
 
-# nwords[which(nwords != nwords0 )] 
-# nwords0[which(nwords != nwords0 )]
-# dtm_crs_0 <- DTM(corpus_crs_0, dict = myDict)
-# list_high_freq_words_0 <- DTM(corpus_crs_0 , dict = dict_lang)
-# a <- tidy(list_high_freq_words_0)
-# a <- list_high_freq_words_0$dimnames$Docs
-
-
-# no longer filtering for high frequency words
-# list_high_freq_words_0 <- DTM(corpus_crs_0 , Min=Min.0, Max=1)$dimnames$Terms %>% unique
-# myDict = myDict[!(myDict %in% list_high_freq_words_0)]
-
-# freq_all_1_0 %>%  
-#   filter(term %in% list_high_freq_words_0) 
-
-# myDict = unique(c(myDict, dict_lang))
-
-source("Code/00.4 refining keywords.R")
+## ??? This is used before but should I correct after changing 00.4? 
+# source("Code/00.4 refining keywords.R")
 
 freq = DTM(corpus_crs_1, dict =myDict) %>%
   tidy %>%
   group_by(document) %>%
   summarise(count = sum(count))
-# 
-# freq = DTM(corpus_crs_1, dict =keywords) %>%
-#   tidy %>%
-#   group_by(document) %>%
-#   summarise(count = sum(count))
 
 nwords1 = tidy(corpus_crs_1) %>%
   select(text, document = id) %>%
   mutate(total = str_count(string = text, pattern = "\\S+") ) %>%
   select(-text)
-
-# gsub("[.]", "", "household budget survey. household budget survey. to assist the design and implementation of the albania household budget survey. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ") %>% trimws
-# 
-# str_count("household budget survey. household budget survey. to assist the design and implementation of the albania household budget survey. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ", patter = "\\S+")
 
 nwords1 = nwords1 %>%
   left_join(freq) %>%
@@ -283,7 +272,7 @@ df_crs_0 %>% filter(text_id %in% positive_text_id) %>% .$description %>% print
 # c$description.x
 positive_text_id <- positive_text_id[c(2:4, 6)]
 
-saveRDS(positive_text_id, file = crs_path_new)
+# write_rds(positive_text_id, file = crs_path_new)
 
-print(Sys.time() - start_time)
+print_time_diff()
 # time spent for 1/40 of projects: 1.416996 mins
