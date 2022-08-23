@@ -37,4 +37,7 @@ setwd(getwd())
 # if(Sys.info()[1]=="Darwin") Sys.setlocale("LC_ALL", "C")
 
 # source("data/functions.R")
+print_time_diff <- function(start_time) {
+  difftime(Sys.time(),start_time, units = "sec") %>% print
+}
 
