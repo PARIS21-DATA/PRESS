@@ -1,28 +1,25 @@
-rm(list = ls())
-print_time_diff <- function(start_time) {
-  difftime(Sys.time(),start_time, units = "sec") %>% print
-}
+source("code/00. boot.R")
+pkgload:::unload("tidytext") # the stemmer in tidy text might be problematic for our steps here. 
+
+source("code/00.2 functions_thilo.R")
+source("code/00.3 functions_yu.R")
 
 job_specific_suffix <- "_utf8_full"
+load("data/intermediate/crs04_lang.rdata")
 
 crs_path <- paste0("./Data/intermediate/crs03", job_specific_suffix, ".rds")
 # crs_path <- paste0("./Data/intermediate/crs03_1", job_specific_suffix, ".rds")
-crs_path_new <- paste0("./Data/intermediate/positive_text_id", job_specific_suffix, ".rds")
+crs_path_new_1 <- paste0("./Data/intermediate/crs04_crs1_", lang,  "_", job_specific_suffix, ".rds")
+crs_path_new_0 <- paste0("./Data/intermediate/crs04_crs0_", lang,"_" , job_specific_suffix, ".rds")
 start <- Sys.time()
 
-lang <-  "en"
-language <- "english"
-df_crs_original <- read_rds(crs_path)
+df_crs <- read_rds(crs_path)
 print_time_diff(start)
-
-df_crs <- df_crs_original
 
 
 df_crs <- df_crs %>% 
   rename(stats_filter = text_detection_wo_mining_w_scb)
 
-source("code/00.2 functions_thilo.R")
-source("code/00.3 functions_yu.R")
 
 # enthreshold = 30
 # frthreshold = 5

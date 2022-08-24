@@ -60,7 +60,7 @@ positive_text_id <- df_crs_0 %>%
   .$text_id 
 beep()
 
-df_crs_0 %>% filter(text_id %in% positive_text_id) %>% .$description %>% print
+df_crs_0 %>% filter(text_id %in% positive_text_id) %>% .$description %>% head(20) %>%  print 
 # a = df_crs_0 %>% 
 #   select(text_id, description) %>% 
 #   filter(text_id %in% positive_text_id)
