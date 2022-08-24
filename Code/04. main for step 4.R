@@ -31,6 +31,23 @@ for (i in 1:nrow(df_lang)) {
   print(i)
 }
 beep()
-source("code/00. boot.R")
-start <- read_rds("data/intermediate/crs04_start_time_utf8_full.rds")
-print_time_diff(start)
+
+
+df_lang <- read_rds("data/intermediate/crs04_df_lang_utf8_full.rds")
+list_path_ids <- paste0("./Data/intermediate/crs04.4_positive_id_",c(df_lang$lang,"en") , job_specific_suffix, ".rds") %>% unique
+
+list_id <- c()
+for (i in list_path_ids) {
+  id_temp <- read_rds(i)
+  print(length(id_temp))
+  print(i)
+  list_id <- c(list_id, id_temp)
+}
+
+
+list_id <- unique(list_id)
+
+crs_path_new <- paste0("./Data/intermediate/crs04_positive_id", job_specific_suffix, ".rds")
+
+write_rds(list_id, file = crs_path_new)
+
