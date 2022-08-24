@@ -20,6 +20,7 @@ data/raw/IATI
 output/
 YTreviewtemp/
 *full.rds
+*full.rdata
 data/raw/crs/archive
 *rapp.history
 data/raw/crs/crs_full1.rds
