@@ -1,7 +1,9 @@
 rm(list = ls())
 
-df_lang <- data.frame(lang = c("en","fr","es"), 
-                      language = c("en", "french", "spanish"), 
+df_lang <- data.frame(lang = c(#"en",
+                               "fr","es"), 
+                      language = c(#"english", 
+                                   "french", "spanish"), 
                       stringsAsFactors = F)
 i = 1
 for (i in 1:nrow(df_lang)) {

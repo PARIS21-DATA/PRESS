@@ -2,10 +2,6 @@ rm(list = ls())
 source("code/00. boot.R")
 source("code/00.1 functions.R")
 
-print_time_diff <- function(start_time) {
-  difftime(Sys.time(),start_time, units = "sec") %>% print
-}
-
 job_specific_suffix <- "_utf8_full"
 crs_path <- paste0("./Data/intermediate/crs02", job_specific_suffix, ".rds")
 crs_path_new <- paste0("./Data/intermediate/crs03", job_specific_suffix, ".rds")
@@ -35,15 +31,19 @@ df_crs_reduced <- df_crs_full %>%
   
 
 langs = c("en"
+          , "fr"
+          , "es"
           # , "de"
           )
-
+lang2analyse <- "fr"
 for (lang2analyse in langs) {
   source(file = "Code/03.2 detecting for each language.R")
 }
 
 df_crs <- rbind(df_crs_en 
-                # ,df_crs_de
+                ,df_crs_fr
+                , df_crs_es
+                # , df_crs_de
                 ) #!!! fix here
 # df_crs <- df_crs_full %>%
 #   filter(!language_title %in% langs) %>%

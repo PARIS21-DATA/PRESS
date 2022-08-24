@@ -7,7 +7,9 @@ source("code/00.3 functions_yu.R")
 job_specific_suffix <- "_utf8_full"
 load("data/intermediate/crs04_lang.rdata")
 
-crs_path <- paste0("./Data/intermediate/crs03", lang, "_", job_specific_suffix, ".rds")
+crs_path <- paste0("./Data/intermediate/crs03", 
+                   # lang, "_",
+                   job_specific_suffix, ".rds")
 # crs_path <- paste0("./Data/intermediate/crs03_1", job_specific_suffix, ".rds")
 crs_path_new_1 <- paste0("./Data/intermediate/crs04.0_crs1_", lang,  "_", job_specific_suffix, ".rds")
 crs_path_new_0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang,"_" , job_specific_suffix, ".rds")
@@ -31,14 +33,14 @@ df_crs <- df_crs %>%
 
 df_crs_1 <- df_crs %>%
   filter( stats_filter 
-          # , language==lang
+          , language==lang
           ) %>% 
   filter(!duplicated(text_id)) %>%
   select(description = desc_2mine, text_id)
 
 df_crs_0 <- df_crs %>%
   filter( !stats_filter 
-          # , language==lang
+          , language==lang
           ) %>% 
   filter(!duplicated(text_id)) %>%
   select(description = desc_2mine, text_id)
