@@ -30,24 +30,22 @@ df_crs_reduced <- df_crs_full %>%
   filter(!duplicated(title_id)) 
   
 
-langs = c("en"
-          , "fr"
+langs = c("en",
+           "fr"
           , "es"
-          # , "de"
+          , "de"
           )
-lang2analyse <- "fr"
-for (lang2analyse in langs) {
+print_time_diff(start)
+# lang2analyse <- "fr"
+list_df_crs <- list()
+for (i in 1:length(langs)) {
+  lang2analyse <- langs[i]
   source(file = "Code/03.2 detecting for each language.R")
+  list_df_crs[[i]] <- df_crs
 }
 
-df_crs <- rbind(df_crs_en 
-                ,df_crs_fr
-                , df_crs_es
-                # , df_crs_de
-                ) #!!! fix here
-# df_crs <- df_crs_full %>%
-#   filter(!language_title %in% langs) %>%
-#   bind_rows(df_crs)
+df_crs <- bind_rows(list_df_crs)
+
 
 df_crs <- df_crs_full %>% 
   right_join(df_crs) %>%
