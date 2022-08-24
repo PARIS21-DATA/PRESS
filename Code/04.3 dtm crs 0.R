@@ -2,10 +2,14 @@ rm(list = ls())
 source("code/00. boot.R")
 pkgload:::unload("tidytext")
 myDict <- read_rds("data/Intermediate/crs04.2_mydict_utf8_full.rds")
-
+corpus_crs_0 <- read_rds("Data/Intermediate/crs04.1_corpus_crs_0_utf8_full.rds")
 source("code/00.3 functions_yu.R")
 source("code/00.2 functions_thilo.R")
 
+length(corpus_crs_0)
+
+
+start <- Sys.time()
 # # inspect(corpus_crs_0)
 nwords0 <- tidytext::tidy(corpus_crs_0) %>%
   select(text, document = id) %>%

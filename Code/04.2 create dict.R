@@ -1,5 +1,16 @@
+rm(list = ls())
+source("code/00. boot.R")
+source("code/00.2 functions_thilo.R")
+source("code/00.3 functions_yu.R")
+
+pkgload:::unload("tidytext") # the stemmer in tidy text might be problematic for our steps here. 
+job_specific_suffix <- "_utf8_full"
+load("./Data/intermediate/crs04.1_freq10_eligibleWords_utf8_crs1dtm_full.rdata")
+
+
 ### filter standards
 # freq_1 cut off
+
 cutoff_freq1 = 0.0005 # is there a median we can take?
 cutoff_odds = 10^(-1.5)
 

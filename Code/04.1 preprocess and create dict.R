@@ -94,6 +94,15 @@ save(# eligible_words_in_doc_0,
      freq_all0,
      freq_all_1_0, 
      file = "./Data/intermediate/crs04.1_crs0_utf8_full.rdata")
+
+
+save(freq_all_1_0,
+     eligible_words_in_doc_1,
+     dtm_crs_1,
+     file = "./Data/intermediate/crs04.1_freq10_eligibleWords_utf8_crs1dtm_full.rdata")
+
+write_rds(corpus_crs_0, file = "Data/Intermediate/crs04.1_corpus_crs_0_utf8_full.rds")
+
 print_time_diff(start)
 
 beep()
