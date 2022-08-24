@@ -4,11 +4,11 @@ source("code/00.2 functions_thilo.R")
 source("code/00.3 functions_yu.R")
 pkgload:::unload("tidytext") # the stemmer in tidy text might be problematic for our steps here. 
 job_specific_suffix <- "_utf8_full"
-load("data/intermediate/crs04_lang.rdata")
+load("data/intermediate/crs04_lang_utf8_full.rdata")
 
-crs_path <- paste0("./Data/intermediate/crs04.1_freq10_eligibleWords_", lang, "_", job_specific_suffix, ".rds")
-crs_path_new_rdata <- paste0("./Data/intermediate/crs04.2_dicts_", lang, "_" ,job_specific_suffix, ".rdata")
-crs_path_new_rds <- paste0("./Data/intermediate/crs04.2_mydict_", lang, "_", job_specific_suffix, ".rds")
+crs_path <- paste0("./Data/intermediate/crs04.1_freq10_eligibleWords_", lang, job_specific_suffix, ".rdata")
+crs_path_new_rdata <- paste0("./Data/intermediate/crs04.2_dicts_", lang ,job_specific_suffix, ".rdata")
+crs_path_new_rds <- paste0("./Data/intermediate/crs04.2_mydict_", lang, job_specific_suffix, ".rds")
 
 load(crs_path)
 

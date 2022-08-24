@@ -4,13 +4,13 @@ pkgload:::unload("tidytext")
 source("code/00.3 functions_yu.R")
 source("code/00.2 functions_thilo.R")
 job_specific_suffix <- "_utf8_full"
-load("data/intermediate/crs04_lang.rdata")
+load("data/intermediate/crs04_lang_utf8_full.rdata")
 
 
-crs_path_dict <- paste0("./Data/intermediate/crs04.2_mydict_", lang, "_", job_specific_suffix, ".rds")
-crs_path_corpus <- paste0("./Data/intermediate/crs04.1_corpus_crs_0_", lang, "_", job_specific_suffix, ".rds")
-crs_path_new_nwords <- paste0("./Data/intermediate/crs04.3_nwords0_", lang, "_" ,job_specific_suffix, ".rds")
-crs_path_new_dtm <- paste0("./Data/intermediate/crs04.3_dtm_crs_0_", lang, "_", job_specific_suffix, ".rds")
+crs_path_dict <- paste0("./Data/intermediate/crs04.2_mydict_", lang, job_specific_suffix, ".rds")
+crs_path_corpus <- paste0("./Data/intermediate/crs04.1_crs0_", lang, job_specific_suffix, ".rds")
+crs_path_new_nwords <- paste0("./Data/intermediate/crs04.3_nwords0_", lang, job_specific_suffix, ".rds")
+crs_path_new_dtm <- paste0("./Data/intermediate/crs04.3_dtm_crs_0_", lang, job_specific_suffix, ".rds")
 
 myDict <- read_rds(crs_path_dict)
 corpus_crs_0 <- read_rds(crs_path_corpus)

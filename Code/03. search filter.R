@@ -43,7 +43,7 @@ for (i in 1:length(langs)) {
   source(file = "Code/03.2 detecting for each language.R")
   list_df_crs[[i]] <- df_crs
 }
-
+print_time_diff(start)
 df_crs <- bind_rows(list_df_crs)
 
 
@@ -71,6 +71,9 @@ print_time_diff(start)
 df_crs <- df_crs %>%
   mutate(text_filter_gender = gen_donor|gen_ppcode|text_detection_gender| gen_marker2
   )
+
+df_crs <- df_crs %>%
+  rename(stats_filter = text_detection_wo_mining_w_scb)
 
 a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, text_detection_gender) %>% unique %>% nrow
 b = df_crs %>% select(text_id) %>% unique %>% nrow

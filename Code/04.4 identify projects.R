@@ -6,14 +6,14 @@ pkgload:::unload("tidytext")
 source("code/00.3 functions_yu.R")
 source("code/00.2 functions_thilo.R")
 job_specific_suffix <- "_utf8_full"
-load("data/intermediate/crs04_lang.rdata")
+load("data/intermediate/crs04_lang_utf8_full.rdata")
 
-crs_path_dict <- paste0("./Data/intermediate/crs04.2_mydict_", lang, "_", job_specific_suffix, ".rds")
-crs_path_corpus1 <- paste0("./Data/intermediate/crs04.1_corpus_crs_1_", lang, "_", job_specific_suffix, ".rds")
-crs_path_nwords0 <- paste0("./Data/intermediate/crs04.3_nwords0_", lang, "_" ,job_specific_suffix, ".rds")
-crs_path_dtm0 <- paste0("./Data/intermediate/crs04.3_dtm_crs_0_", lang, "_", job_specific_suffix, ".rds")
-crs_path_crs0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang,"_" , job_specific_suffix, ".rds")
-crs_path_new <- paste0("./Data/intermediate/crs04.4_positive_id_", lang,"_" , job_specific_suffix, ".rds")
+crs_path_dict <- paste0("./Data/intermediate/crs04.2_mydict_", lang,  job_specific_suffix, ".rds")
+crs_path_corpus1 <- paste0("./Data/intermediate/crs04.1_crs1_", lang,  job_specific_suffix, ".rds")
+crs_path_nwords0 <- paste0("./Data/intermediate/crs04.3_nwords0_", lang,job_specific_suffix, ".rds")
+crs_path_dtm0 <- paste0("./Data/intermediate/crs04.3_dtm_crs_0_", lang,  job_specific_suffix, ".rds")
+crs_path_crs0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang , job_specific_suffix, ".rds")
+crs_path_new <- paste0("./Data/intermediate/crs04.4_positive_id_", lang, job_specific_suffix, ".rds")
 
 myDict <- read_rds(crs_path_dict)
 corpus_crs_1 <- read_rds(crs_path_corpus1)
@@ -23,13 +23,13 @@ df_crs_0 <- read_rds(crs_path_crs0)
 
 start <- Sys.time()
 freq <- DTM(corpus_crs_1, dict =myDict) %>%
-  tidy %>%
+  tidytext::tidy() %>%
   group_by(document) %>%
   summarise(count = sum(count))
 print_time_diff(start)
 # Time difference of 10.85936 secs
 
-nwords1 <- tidy(corpus_crs_1) %>%
+nwords1 <- tidytext::tidy(corpus_crs_1) %>%
   select(text, document = id) %>%
   mutate(total = str_count(string = text, pattern = "\\S+") ) %>%
   select(-text)
@@ -54,7 +54,7 @@ print("median:")
 median(nwords1$percentage, na.rm = T) %>% print()
 
 
-list_identified <- tidy(dtm_crs_0) %>%
+list_identified <- tidytext::tidy(dtm_crs_0) %>%
   group_by(document) %>%
   summarise(count = sum(count)) %>%
   inner_join(nwords0) %>%
@@ -87,6 +87,6 @@ df_crs_0 %>% filter(text_id %in% positive_text_id) %>% .$description %>% head(20
 write_rds(positive_text_id, file = crs_path_new)
 
 print_time_diff(start)
-rm(list = ls())
+# rm(list = ls())
 gc()
 # time spent for 1/40 of projects: 1.416996 mins

@@ -5,22 +5,16 @@ source("code/00.2 functions_thilo.R")
 source("code/00.3 functions_yu.R")
 
 job_specific_suffix <- "_utf8_full"
-load("data/intermediate/crs04_lang.rdata")
+load("data/intermediate/crs04_lang_utf8_full.rdata")
 
-crs_path <- paste0("./Data/intermediate/crs03", 
-                   # lang, "_",
+crs_path <- paste0("./Data/intermediate/crs03",
                    job_specific_suffix, ".rds")
-# crs_path <- paste0("./Data/intermediate/crs03_1", job_specific_suffix, ".rds")
-crs_path_new_1 <- paste0("./Data/intermediate/crs04.0_crs1_", lang,  "_", job_specific_suffix, ".rds")
-crs_path_new_0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang,"_" , job_specific_suffix, ".rds")
+crs_path_new_1 <- paste0("./Data/intermediate/crs04.0_crs1_", lang,job_specific_suffix, ".rds")
+crs_path_new_0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang,job_specific_suffix, ".rds")
 start <- Sys.time()
 
 df_crs <- read_rds(crs_path)
 print_time_diff(start)
-
-
-df_crs <- df_crs %>% 
-  rename(stats_filter = text_detection_wo_mining_w_scb)
 
 
 # enthreshold = 30
