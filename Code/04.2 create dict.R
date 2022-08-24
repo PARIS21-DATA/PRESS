@@ -2,11 +2,15 @@ rm(list = ls())
 source("code/00. boot.R")
 source("code/00.2 functions_thilo.R")
 source("code/00.3 functions_yu.R")
-
 pkgload:::unload("tidytext") # the stemmer in tidy text might be problematic for our steps here. 
 job_specific_suffix <- "_utf8_full"
-load("./Data/intermediate/crs04.1_freq10_eligibleWords_utf8_crs1dtm_full.rdata")
+load("data/intermediate/crs04_lang.rdata")
 
+crs_path <- paste0("./Data/intermediate/crs04.1_freq10_eligibleWords_", lang, "_", job_specific_suffix, ".rds")
+crs_path_new_rdata <- paste0("./Data/intermediate/crs04.2_dicts_", lang, "_" ,job_specific_suffix, ".rdata")
+crs_path_new_rds <- paste0("./Data/intermediate/crs04.2_mydict_", lang, "_", job_specific_suffix, ".rds")
+
+load(crs_path)
 
 ### filter standards
 # freq_1 cut off
@@ -67,6 +71,6 @@ freq_all_1_0 %>%
 #   group_by(document) %>%
 #   summarise(count = sum(count))
 
-save(dict_tf_idf, common_words, myDict, file = "data/Intermediate/crs04.2_dicts_utf8_full.rdata")
+save(dict_tf_idf, common_words, myDict, file = crs_path_new_rdata)
 
-write_rds(myDict,file = "data/Intermediate/crs04.2_mydict_utf8_full.rds" )
+write_rds(myDict,file = crs_path_new_rds)

@@ -2,13 +2,24 @@
 # source("Code/00.4 refining keywords.R")
 rm(list = ls())
 source("code/00. boot.R")
-myDict <- read_rds("data/Intermediate/crs04.2_mydict_utf8_full.rds")
-corpus_crs_1 <- read_rds("./Data/intermediate/crs04.1_corpus_crs_1_utf8_full.rds")
-nwords0 <- read_rds("data/Intermediate/crs04.3_nwords0_utf8_full.rds")
-dtm_crs_0 <- read_rds("Data/Intermediate/crs04.3_dtm_crs_0_utf8_full.rds")
-df_crs_0 <- read_rds("./Data/intermediate/crs04_crs0_utf8_full.rds")
+pkgload:::unload("tidytext")
 source("code/00.3 functions_yu.R")
 source("code/00.2 functions_thilo.R")
+job_specific_suffix <- "_utf8_full"
+load("data/intermediate/crs04_lang.rdata")
+
+crs_path_dict <- paste0("./Data/intermediate/crs04.2_mydict_", lang, "_", job_specific_suffix, ".rds")
+crs_path_corpus1 <- paste0("./Data/intermediate/crs04.1_corpus_crs_1_", lang, "_", job_specific_suffix, ".rds")
+crs_path_nwords0 <- paste0("./Data/intermediate/crs04.3_nwords0_", lang, "_" ,job_specific_suffix, ".rds")
+crs_path_dtm0 <- paste0("./Data/intermediate/crs04.3_dtm_crs_0_", lang, "_", job_specific_suffix, ".rds")
+crs_path_crs0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang,"_" , job_specific_suffix, ".rds")
+crs_path_new <- paste0("./Data/intermediate/crs04.4_positive_id_", lang,"_" , job_specific_suffix, ".rds")
+
+myDict <- read_rds(crs_path_dict)
+corpus_crs_1 <- read_rds(crs_path_corpus1)
+nwords0 <- read_rds(crs_path_nwords0)
+dtm_crs_0 <- read_rds(crs_path_dtm0)
+df_crs_0 <- read_rds(crs_path_crs0)
 
 start <- Sys.time()
 freq <- DTM(corpus_crs_1, dict =myDict) %>%
@@ -73,7 +84,7 @@ df_crs_0 %>% filter(text_id %in% positive_text_id) %>% .$description %>% head(20
 #   filter(is.na(description.x)|is.na(description.y))
 # c$description.x
 
-write_rds(positive_text_id, file = "data/Intermediate/crs04.4_positive_id_utf8_full.rds")
+write_rds(positive_text_id, file = crs_path_new)
 
 print_time_diff(start)
 rm(list = ls())

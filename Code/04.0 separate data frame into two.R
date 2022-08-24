@@ -7,10 +7,10 @@ source("code/00.3 functions_yu.R")
 job_specific_suffix <- "_utf8_full"
 load("data/intermediate/crs04_lang.rdata")
 
-crs_path <- paste0("./Data/intermediate/crs03", job_specific_suffix, ".rds")
+crs_path <- paste0("./Data/intermediate/crs03", lang, "_", job_specific_suffix, ".rds")
 # crs_path <- paste0("./Data/intermediate/crs03_1", job_specific_suffix, ".rds")
-crs_path_new_1 <- paste0("./Data/intermediate/crs04_crs1_", lang,  "_", job_specific_suffix, ".rds")
-crs_path_new_0 <- paste0("./Data/intermediate/crs04_crs0_", lang,"_" , job_specific_suffix, ".rds")
+crs_path_new_1 <- paste0("./Data/intermediate/crs04.0_crs1_", lang,  "_", job_specific_suffix, ".rds")
+crs_path_new_0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang,"_" , job_specific_suffix, ".rds")
 start <- Sys.time()
 
 df_crs <- read_rds(crs_path)
@@ -44,8 +44,8 @@ df_crs_0 <- df_crs %>%
   select(description = desc_2mine, text_id)
 print_time_diff(start)
 
-write_rds(df_crs_0, file = "./Data/intermediate/crs04_crs0_utf8_full.rds")
-write_rds(df_crs_1, file = "./Data/intermediate/crs04_crs1_utf8_full.rds")
+write_rds(df_crs_0, file = crs_path_new_0)
+write_rds(df_crs_1, file = crs_path_new_1)
 
 
 # which(df_crs_0$text_id %in% df_crs_1$text_id)
