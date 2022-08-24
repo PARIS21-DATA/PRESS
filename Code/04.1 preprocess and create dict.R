@@ -1,8 +1,22 @@
+rm(list = ls())
+source("code/00. boot.R")
+source("code/00.2 functions_thilo.R")
+source("code/00.3 functions_yu.R")
 
-detach(tidytext) # the stemmer in tidy text might be problematic for our steps here. 
+pkgload:::unload("tidytext") # the stemmer in tidy text might be problematic for our steps here. 
+job_specific_suffix <- "_utf8_full"
+
+# crs_path <- paste0("./Data/intermediate/crs03", job_specific_suffix, ".rds")
+# crs_path <- paste0("./Data/intermediate/crs03_1", job_specific_suffix, ".rds")
+# crs_path_new <- paste0("./Data/intermediate/positive_text_id", job_specific_suffix, ".rds")
+df_crs_1 <- read_rds("./Data/intermediate/crs04_crs1_utf8_full.rds")
+df_crs_0 <- read_rds("./Data/intermediate/crs04_crs0_utf8_full.rds")
+
 start <- Sys.time()
 Min.1 <- 0.1 ## only consider words that are in more than 10% of statistical projects
 Min.0 <- 0.1
+lang <-  "en"
+language <- "english"
 
 corpus_crs_1 <- preprocessingV(df_crs_1$description, language=language)
 print_time_diff(start)
@@ -74,14 +88,13 @@ freq_all_1_0 = right_join(freq_all0, freq_all1, by = "term") %>%
   arrange(desc(odds), desc(freq.y))
 
 save(# eligible_words_in_doc_0,
-     corpus_crs_1,
+     corpus_crs_0,
      # dtm_crs_1,
-     corpus_crs_1_simpleDTM,
+     corpus_crs_0_simpleDTM,
      freq_all0,
      freq_all_1_0, 
      file = "./Data/intermediate/crs04.1_crs0_utf8_full.rdata")
 print_time_diff(start)
-
 
 beep()
 
