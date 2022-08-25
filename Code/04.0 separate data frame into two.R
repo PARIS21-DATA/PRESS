@@ -3,12 +3,15 @@ pkgload:::unload("tidytext") # the stemmer in tidy text might be problematic for
 
 source("code/00.2 functions_thilo.R")
 source("code/00.3 functions_yu.R")
-
+job <- read_rds("data/Intermediate/crs04_job_utf8_full.rds")
 job_specific_suffix <- "_utf8_full"
-load("data/intermediate/crs04_lang_utf8_full.rdata")
-
 crs_path <- paste0("./Data/intermediate/crs03",
                    job_specific_suffix, ".rds")
+
+if(job == "gen") job_specific_suffix <- "_gen_utf8_full"
+
+load("data/intermediate/crs04_lang_utf8_full.rdata")
+
 crs_path_new_1 <- paste0("./Data/intermediate/crs04.0_crs1_", lang,job_specific_suffix, ".rds")
 crs_path_new_0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang,job_specific_suffix, ".rds")
 start <- Sys.time()
@@ -25,20 +28,43 @@ print_time_diff(start)
 # Create the white list 
 # dict_lang <- wlistV(lang) %>% as.character()
 
-df_crs_1 <- df_crs %>%
-  filter( stats_filter 
-          , language==lang
-          ) %>% 
-  filter(!duplicated(text_id)) %>%
-  select(description = desc_2mine, text_id)
 
-df_crs_0 <- df_crs %>%
-  filter( !stats_filter 
-          , language==lang
-          ) %>% 
-  filter(!duplicated(text_id)) %>%
-  select(description = desc_2mine, text_id)
-print_time_diff(start)
+if(job == "gen") {
+  df_crs_1 <- df_crs %>% 
+    filter( text_filter_gender_narrower
+            , language==lang
+    ) %>% 
+    filter(!duplicated(text_id)) %>%
+    select(description = desc_2mine, text_id)
+  
+  df_crs_0 <- df_crs %>%
+    filter(!text_filter_gender_narrower 
+            , language==lang
+    ) %>% 
+    filter(!duplicated(text_id)) %>%
+    select(description = desc_2mine, text_id)
+  print_time_diff(start)
+} else {
+  
+  df_crs_1 <- df_crs %>%
+    filter( stats_filter 
+            , language==lang
+    ) %>% 
+    filter(!duplicated(text_id)) %>%
+    select(description = desc_2mine, text_id)
+  
+  df_crs_0 <- df_crs %>%
+    filter( !stats_filter 
+            , language==lang
+    ) %>% 
+    filter(!duplicated(text_id)) %>%
+    select(description = desc_2mine, text_id)
+  print_time_diff(start)
+  
+}
+
+
+
 
 write_rds(df_crs_0, file = crs_path_new_0)
 write_rds(df_crs_1, file = crs_path_new_1)

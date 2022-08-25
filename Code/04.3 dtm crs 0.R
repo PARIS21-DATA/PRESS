@@ -3,7 +3,9 @@ source("code/00. boot.R")
 pkgload:::unload("tidytext")
 source("code/00.3 functions_yu.R")
 source("code/00.2 functions_thilo.R")
+job <- read_rds("data/Intermediate/crs04_job_utf8_full.rds")
 job_specific_suffix <- "_utf8_full"
+if(job == "gen") job_specific_suffix <- "_gen_utf8_full"
 load("data/intermediate/crs04_lang_utf8_full.rdata")
 
 
