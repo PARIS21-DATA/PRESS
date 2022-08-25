@@ -6,11 +6,11 @@ job <- "gen"
 write_rds(job, file ="data/intermediate/crs04_job_utf8_full.rds" )
 
 ## setting up and save languages
-df_lang <- data.frame(lang = c(#"en",
-                               # "fr",
+df_lang <- data.frame(lang = c("en",
+                               "fr",
                                "es", "de"), 
-                      language = c(#"english", 
-                                   # "french", 
+                      language = c("english", 
+                                   "french", 
                                    "spanish", "german"), 
                       stringsAsFactors = F)
 write_rds(df_lang, file = "data/intermediate/crs04_df_lang_utf8_full.rds")
@@ -54,6 +54,9 @@ beep()
 
 
 df_lang <- read_rds("data/intermediate/crs04_df_lang_utf8_full.rds")
+job <- read_rds("data/Intermediate/crs04_job_utf8_full.rds")
+job_specific_suffix <- "_utf8_full"
+if(job == "gen") job_specific_suffix <- "_gen_utf8_full"
 list_path_ids <- paste0("./Data/intermediate/crs04.4_positive_id_",c(df_lang$lang,"en") , job_specific_suffix, ".rds") %>% unique
 
 list_id <- c()
