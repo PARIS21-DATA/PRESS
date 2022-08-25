@@ -70,7 +70,11 @@ print_time_diff(start)
 
 df_crs <- df_crs %>%
   mutate(text_filter_gender = gen_donor|gen_ppcode|text_detection_gender| gen_marker2
-  )
+  )  %>%
+  mutate(text_filter_gender_narrower = gen_ppcode|text_detection_gender|gen_donor
+         # | gen_marker2
+  ) %>% 
+  mutate(text_filter_gender_narrower = ifelse(is.na(text_filter_gender_narrower), F, text_filter_gender_narrower))
 
 df_crs <- df_crs %>%
   rename(stats_filter = text_detection_wo_mining_w_scb)
