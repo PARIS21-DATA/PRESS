@@ -50,7 +50,7 @@ for (i in 1:nrow(df_lang)) {
   i <- read_rds("data/Intermediate/crs04_i_utf8_full.rds")
   print(i)
 }
-beep()
+beep(3)
 
 
 df_lang <- read_rds("data/intermediate/crs04_df_lang_utf8_full.rds")
