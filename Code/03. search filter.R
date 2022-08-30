@@ -46,9 +46,9 @@ for (i in 1:length(langs)) {
 print_time_diff(start)
 df_crs <- bind_rows(list_df_crs)
 
-
+## joining the filtering results back with the full version of data
 df_crs <- df_crs_full %>% 
-  right_join(df_crs) %>%
+  left_join(df_crs) %>%
   select(-projecttitle_lower)
 
 df_crs <- df_crs %>%
@@ -79,7 +79,7 @@ df_crs <- df_crs %>%
 df_crs <- df_crs %>%
   rename(stats_filter = text_detection_wo_mining_w_scb)
 
-a = df_crs %>% select(text_id, text_detection_wo_mining_w_scb, text_detection_gender) %>% unique %>% nrow
+a = df_crs %>% select(text_id,stats_filter, text_detection_gender) %>% unique %>% nrow
 b = df_crs %>% select(text_id) %>% unique %>% nrow
 print_time_diff(start)
 # list = df_crs %>% 
