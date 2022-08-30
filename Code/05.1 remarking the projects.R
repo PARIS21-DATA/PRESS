@@ -25,4 +25,19 @@ df_crs <- df_crs %>%
 
 write_rds(df_crs, file = "Data/Intermediate/crs05_utf8_full.rds")
 
+df_crs <- read_rds("Data/Intermediate/crs05_utf8_full.rds")
 
+job_specific_suffix <- "_gen_utf8_full"
+# load("data/intermediate/crs04_lang_utf8_full.rdata")
+
+crs_path_ids <- paste0("./Data/intermediate/crs04_positive_id",
+                       job_specific_suffix, ".rds")
+
+ls_ids <- read_rds(crs_path_ids)
+
+df_crs <- df_crs %>% 
+  mutate(gender_filter_desc = ifelse(text_id %in% ls_ids, T, F)) %>% 
+  mutate(gender_filter_both  = gender_filter_desc|text_filter_gender)
+
+
+write_rds(df_crs, file = "Data/Intermediate/crs05_utf8_full.rds")
