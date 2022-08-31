@@ -51,6 +51,24 @@ df_crs <- df_crs_full %>%
   left_join(df_crs) %>%
   select(-projecttitle_lower)
 
+
+# remive NAs in each column, it seems that the results for gender identification changed a log while the results for data & stats didn't. 
+df_crs <- df_crs %>% 
+  mutate(text_detection = replace_na(text_detection, F), 
+         text_detection_gender = replace_na(text_detection_gender, F), # previously made a mistake here. should be very careful with the suffix. 
+         mining = replace_na(mining, F), 
+         gen_ppcode = replace_na(gen_ppcode, F),
+         gen_donor = replace_na(gen_donor, F),
+         gen_marker = replace_na(gen_marker, F), 
+         gen_marker1 = replace_na(gen_marker1, F), 
+         gen_marker2 = replace_na(gen_marker2, F), 
+         scb = replace_na(scb, 0), 
+         pop = replace_na(pop, 0)
+  ) %>% 
+  mutate(scb = (scb == 1), 
+         pop = (pop == 1))
+
+
 df_crs <- df_crs %>%
   mutate(text_detection_wo_mining = text_detection & !mining
   )
@@ -62,22 +80,22 @@ df_crs <- df_crs %>%
 #   mutate(language = ifelse(language %in% langues, language, "other") )
 
 df_crs <- df_crs %>%
-  mutate(text_detection_wo_mining_w_scb = text_detection_wo_mining | scb)
+  mutate(stats_filter = text_detection_wo_mining | scb)
 table(df_crs$text_detection_wo_mining) %>% print
-table(df_crs$text_detection_wo_mining_w_scb) %>% print
+table(df_crs$stats_filter) %>% print
 # which(is.na(df_crs$text_detection_wo_mining_w_scb))
 print_time_diff(start)
 
 df_crs <- df_crs %>%
-  mutate(text_filter_gender = gen_donor|gen_ppcode|text_detection_gender| gen_marker2
+  mutate(text_filter_gender = gen_donor|gen_ppcode|text_detection_gender|gen_marker2
   )  %>%
   mutate(text_filter_gender_narrower = gen_ppcode|text_detection_gender|gen_donor
          # | gen_marker2
   ) %>% 
   mutate(text_filter_gender_narrower = ifelse(is.na(text_filter_gender_narrower), F, text_filter_gender_narrower))
 
-df_crs <- df_crs %>%
-  rename(stats_filter = text_detection_wo_mining_w_scb)
+# df_crs <- df_crs %>%
+#   rename(stats_filter = text_detection_wo_mining_w_scb)
 
 a = df_crs %>% select(text_id,stats_filter, text_detection_gender) %>% unique %>% nrow
 b = df_crs %>% select(text_id) %>% unique %>% nrow
