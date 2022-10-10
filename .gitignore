@@ -30,6 +30,10 @@ data/intermediate/crs01_1all.rds
 *full_win.rds
 *_full.rdata
 
+# analyisis are for desk research purposes
+data/analysis
+
+
 *de.rds
 !data/raw/crs/crs_de.rds
 
