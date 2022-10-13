@@ -2,6 +2,39 @@
 
 # This script cannot be run because all variables are not loaded
 
+
+# a <-  df_survey_recipients %>% 
+#   select(recipientname, isocode) %>% 
+#   unique
+# 
+# a[!(a$isocode %in% df_regions$isocode), ]
+
+# names(df_regions)
+# names(df_survey)
+# 
+# 
+# 
+# df_survey <- df_survey %>% 
+#   left_join(df_regions)
+# 
+# df_survey$regionid %>% table 
+# df_survey$regionname %>% table 
+# df_survey$regionid %>% is.na() %>% which 
+# 
+# df_survey$recipientname %>% head(20)
+# a <-  apply(df_survey_recipients, split_recipients, 2) 
+# 
+# split_recipients <- function(z) {
+#   x = z$recipientname
+#   y = z$db_ref
+#   x = str_split(x, pattern = ", ")
+#   df_x = data.frame(recipientname = x)
+#   df_x$db_ref = y
+#   return(df_x)
+#   }
+
+
+
 # df_regions <- df_regions %>%
 #   rename(dac_recipientcode  = recipientcode)
 # write_rds(df_regions, file = "data/auxiliary/regions.rds")
@@ -66,6 +99,27 @@ regions2regions_larger <- read_csv("data/Analysis/regions_larger.csv")
 df_regions <- df_regions %>% 
   select(-regionname_larger, -regionid_larger) %>% 
   inner_join(regions2regions_larger) 
+
+df_regions <- df_regions %>% 
+  rename(regioncode = regionid, 
+         regioncode_larger = regionid_larger)
+
+
+
+df_crs_noReg <- df_crs %>% 
+  filter(is.na(regionname)) %>% 
+  select(recipientname, dac_recipientcode) %>% 
+  unique 
+
+write_csv(df_crs_noReg, file = "data/analysis/new_recipients_in_2022_data.csv")
+
+
+
+df_regions_2022new <- read_csv("data/Analysis/new_recipients_in_2022_adding_to_regions.csv")
+df_regions <- rbind(df_regions, df_regions_2022new) %>% unique
+
+
+
 
 write_rds(df_regions, "Data/auxiliary/regions.rds")
 

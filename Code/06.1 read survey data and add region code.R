@@ -82,19 +82,19 @@ df_survey_recipients_regions <- df_survey_recipients %>%
 
 
 df_regions %>% 
-  select(regionid, regionname) %>% 
+  select(regioncode, regionname) %>% 
   unique
 
 # df_survey_recipients_regions[1069,]
 df_survey_recipients_regions %>% 
-  filter(is.na(regionid)) %>% 
+  filter(is.na(regioncode)) %>% 
   select(recipientname) %>% 
   unique
 
 df_survey_recipients_regions %>% names()
 
 df_survey_tab_by_reg <- df_survey_recipients_regions %>% 
-  group_by(db_ref, regionname, regionid) %>% 
+  group_by(db_ref, regionname, regioncode) %>% 
   summarise(cnt = n()) %>% 
   group_by(db_ref) %>% 
   mutate(cnt_regions = n())
@@ -109,13 +109,13 @@ df_survey_tab_multiple_reg <- df_survey_tab_by_reg %>%
   left_join(df_survey_recipients_regions) %>% 
   select(db_ref, 
          regionname = regionname_larger, 
-         regionid = regionid_larger) %>% 
+         regioncode = regioncode_larger) %>% 
   unique %>% 
   group_by(db_ref) %>% 
   mutate(cnt = n()) %>% 
   mutate(regionname = ifelse(cnt >1, "Multilateral unallocated", regionname), 
-         regionid = ifelse(cnt>1, 1500, regionid)) %>% 
-  select(db_ref, regionname, regionid) %>% 
+         regioncode = ifelse(cnt>1, 1500, regioncode)) %>% 
+  select(db_ref, regionname, regioncode) %>% 
   unique
 
 df_survey_reg <- rbind(df_survey_tab_single_reg, df_survey_tab_multiple_reg) 
@@ -152,51 +152,41 @@ rm(df_survey_recipients_regions_unique.country,
 
 
 
-# a <-  df_survey_recipients %>% 
-#   select(recipientname, isocode) %>% 
-#   unique
-# 
-# a[!(a$isocode %in% df_regions$isocode), ]
-
-# names(df_regions)
-# names(df_survey)
-# 
-# 
-# 
-# df_survey <- df_survey %>% 
-#   left_join(df_regions)
-# 
-# df_survey$regionid %>% table 
-# df_survey$regionname %>% table 
-# df_survey$regionid %>% is.na() %>% which 
-# 
-# df_survey$recipientname %>% head(20)
-
-
 df_survey_reg_rec_code <-  df_survey_reg_rec_code  %>%
   rename(donorname = donor) %>% 
   filter(donorname!="",!is.na(donorname))
 
-# a <-  apply(df_survey_recipients, split_recipients, 2) 
-# 
-# split_recipients <- function(z) {
-#   x = z$recipientname
-#   y = z$db_ref
-#   x = str_split(x, pattern = ", ")
-#   df_x = data.frame(recipientname = x)
-#   df_x$db_ref = y
-#   return(df_x)
-#   }
+df_survey <- df_survey_reg_rec_code
 
 names(df_survey)
 
-df_crs <- read_rds("Data/Intermediate/crs05.3_onlystats_utf8_full.rds")
+df_crs <- read_rds("Data/Intermediate/crs05.3_onlystats_utf8_full.rds") 
+
+df_crs %>% 
+  select(regionname, regioncode) %>% 
+  unique
+
+df_regions %>% 
+  select(regionname, regioncode) %>% 
+  unique
 
 df_crs = df_crs %>%
-  dplyr::rename(db_original_id = crsid)
+  dplyr::rename(db_original_id = crsid) %>% 
+  rename(dac_regionname = regionname, 
+         dac_regionncode = regioncode, 
+         dac_recipientcode = recipientcode
+         )
 
-df_crs = df_crs %>%
-  join(regions, by = "recipientcode")
+df_crs <- df_regions %>% 
+  select(-regioncode_larger, -regionname_larger, -recipientname) %>% 
+  right_join(df_crs) 
 
-save(press, df_crs, regions, reporters, regions_notes, file = "./analysis/CRS_PRESS_before_merging_2021.RData")
+
+df_crs %>% filter(is.na(regionname)) %>% nrow()
+
+
+# save(press, df_crs, regions, reporters, regions_notes, file = "./analysis/CRS_PRESS_before_merging_2021.RData")
+
+
+save(df_survey, df_crs, file = "data/Intermediate/06.1 crs and press with region and country code.rdata")
 
