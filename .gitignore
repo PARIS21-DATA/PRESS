@@ -30,6 +30,10 @@ data/intermediate/crs01_1all.rds
 *full_win.rds
 *_full.rdata
 
+# analyisis are for desk research purposes
+data/analysis
+
+
 *de.rds
 !data/raw/crs/crs_de.rds
 
@@ -40,4 +44,14 @@ data/raw/crs/archive/**
 ~$*
 
 output/gender markers and analysis.csv
+
+
+output/data2022_20221012.rds
+output/press2021*
+output/press2022*
+
+data/intermediate/99.01*
+data/intermediate/99.02*
+data/intermediate/99.03*
+
 
