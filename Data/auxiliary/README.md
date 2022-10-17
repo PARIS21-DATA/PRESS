@@ -3,6 +3,7 @@ reporters in the PRESS reporter list:
 - ReporterName: used to merge with survey
 - donorname: fully compatible with CRS
 
+```
   which(!df_reporters_press$donorname_unified  %in% df_reporters$ReporterName )
   which(!df_reporters_press$donorname_unified  %in% df_reporters$crs_name_en )
   which(!df_reporters_press$donorname_unified  %in% df_reporters$ch_name)
@@ -17,8 +18,12 @@ reporters in the PRESS reporter list:
   which(!df_reporters_press$ReporterName   %in% df_reporters$crs_name_en )
   which(!df_reporters_press$ReporterName   %in% df_reporters$ch_name)
   which(!df_reporters_press$ReporterName   %in% df_reporters$name_modification)
+```
 
 - ReporterId: seems to be the CH id (TBC)
+- donorcode is Reporter code in crs list 
+- donorcode i
+
 
 however, not every Reporter Name have a donor name
 We only focus on the ones that are used in merging
