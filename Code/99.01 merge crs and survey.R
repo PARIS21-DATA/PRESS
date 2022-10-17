@@ -2,54 +2,45 @@
 # setwd("~/Dropbox/PARIS21/PRESS/2021/")
 rm(list = ls())
 load("./data/Intermediate/06.1 crs and press with region and country code.rdata")
+df_reporters2 <- read_rds("data/auxiliary/reporters.rds")
+names(df_reporters2)
+df_reporters <- read_csv("data/auxiliary/donor_codes_and_classifications.csv")
 
-load("./data/auxiliary/reporters_2021.rdata")
+df_reporters1 <- df_reporters %>% 
+  select(ReporterId, ReporterName, 
+         crs_name_en, crs_code, 
+         name_modification, ch_name,
+         dac_member, dac_bi_member, mult_donor, mult_donor_and_eu, private_donor, non_dac_donor)  %>% 
+  unique
 
+df_reporters1 <- df_reporters1 %>% 
+  mutate(total = rowSums( df_reporters1[,7:12], na.rm = T)) %>% 
+  filter(total  != 0)
 
+df_crs <- df_crs %>% 
+  filter(stats_wo_infoSys)
 df_crs$usd_commitment = df_crs$usd_commitment *1000000
 df_crs$usd_disbursement = df_crs$usd_disbursement *1000000
 df_crs$usd_commitment_defl = df_crs$usd_commitment_defl *1000000
 df_crs$usd_disbursement_defl = df_crs$usd_disbursement_defl *1000000
 df_crs$commitmentdate = df_crs$commitmentyear
 
-
-df_crs <- df_crs %>% 
-  filter(stats_wo_infoSys)
-  # filter(text_detection_wo_infoSys)
-print(nrow(df_crs))
-
 df_survey$year = df_survey$startyear
 
-names(reporters)
-# new_reporter= data.frame(ReporterId = NA, ReporterName = NA, donorname = "Bloomberg Family Foundation", press = 0, crs = 1, donorcode = 1640, donor_type = "private", donorname_unified = "Bloomberg Family Foundation" )
-# reporters = rbind(reporters, new_reporter) 
-# save(reporters, file = "./analysis/reporters_2021.rdata")
-# rm(new_reporter)
 
 
-
-# crspress = crspress[,order(names(crspress))]
-# press = press[,order(names(press))]
-# 
-# names(press)
-# names(crspress)
-
-# crspress$donorname[which(!(crspress$donorcode %in% reporters$donorcode))]
-# crspress$donorcode[which(!(crspress$donorcode %in% reporters$donorcode))]
-# which(!(crspress$donorcode %in% reporters$donorcode))
-# press$donorname[which(!(press$donorname %in% reporters$donorname_unified))] %>% unique 
-# press$donorname[which(!(press$donorname %in% reporters$ReporterName))] %>% unique
-
-
-df_crs <- df_crs %>% 
-  select(-donorname)
-
-
-df_crs <-  reporters  %>%
-  filter(crs == 1) %>% # do not forget this step
-  select(donorcode,donorname = donorname_unified) %>%
+df_crs <-  df_reporters1  %>%
+  # filter(crs == 1) %>% # do not forget this step
+  select(ch_name, donorcode = crs_code) %>%
+  # select(donorcode,donorname = donorname_unified) %>%
   unique %>%
   right_join(df_crs) 
+
+df_crs$ch_name %>% is.na %>% which
+
+
+a <-  df_crs$ch_name %>% is.na %>% which
+df_crs$donorname[a]
 
 
 df_reporters_press = reporters %>%
