@@ -1,44 +1,30 @@
+rm(list = ls())
 
+##### 
+# 1 loading data
+#@ load project data
+load("./data/Intermediate/06.1 crs and press with region and country code.rdata")
+## load reporter data
+# df_reporters_press <- read_rds("data/auxiliary/reporters.rds")
+df_reporters_survey <- read_rds("data/auxiliary/reporters_survey_2022.rds")
+df_reporters_crs <- read_rds("data/auxiliary/reporters_crs_2022.rds")
 
-source("code/99.01 merge crs and survey.R")
-#####
-# 2.0. clean PRESS donor list 
-df_reporters_press$ReporterName[df_reporters_press$ReporterName %>% duplicated]
+df_reporters_survey <- df_reporters_survey %>% 
+  select(donorname_survey , ReporterId = ReporterId_survey, ch_name)
 
-#there is duplicates for WB, AfDB and IMF, so before merging:
+df_reporters_crs <- df_reporters_crs %>% 
+  select(crs_code, ReporterId = ReporterId_chlist, ch_name)
 
-df_reporters_press_4merge <- df_reporters_press %>%
-  filter(!is.na(ReporterName)) %>% #!! not sure if this is the best way. But working so far in the script 
-  group_by(#ReporterName, 
-    donorname_unified) %>%
-  mutate(donorcode_unified = min(donorcode))
-
-# remerging the simplified list with the original list
-# df_reporters_press_4merge <- df_reporters_press %>% 
-#   select(donorcode, ReporterId, donorname, donor_type,ReporterName) %>% 
-#   unique %>% 
-#   right_join(df_reporters_press_4merge)
-
-names(df_reporters_press_4merge)
-names(df_reporters_press)
-
-
-######
-# 2.5 create a donor list from PRESS donors
 
 df_survey <- df_survey %>% 
   rename(donorname_survey = donorname)
 
 df_survey <- df_survey %>%
-  left_join(df_reporters_press_4merge, 
-            by = c("donorname_survey" = "ReporterName"))   
+  left_join(df_reporters_survey)   
 
-# %>%
-#   mutate(donorname = donorname_unified) %>%
-#   select(-donorname_unified) 
 
 # check if there are unsuccessful merge
-var_crs_merge_quality <- df_survey %>% select(donorcode) %>% is.na %>% which
+var_crs_merge_quality <- df_survey %>% select(ReporterId) %>% is.na %>% which
 
 # df_survey$survey_donorname[var_crs_merge_quality] %>% unique
 if(length(var_crs_merge_quality) == 0) {
@@ -51,10 +37,10 @@ rm(var_crs_merge_quality)
 
 # source("code/X99.01-1a examine merged survey data.R")
 
-df_reporters_crs_4merge <- df_reporters %>%
+df_reporters_crs_4merge <- df_reporters_crs %>%
   # select(ch_name, donorcode = crs_code) %>%
   rename(donorcode = crs_code) %>% 
-  filter(!is.na(donorcode)) %>% 
+  filter(!is.na(donorcode)) %>%
   # select(donorcode,donorname = donorname_unified) %>%
   unique
 
@@ -82,15 +68,6 @@ rm(var_crs_merge_quality)
 # df_crs %>% select(donorname, donorcode) %>% slice(a) %>% unique %>% write_csv("Data/Analysis/reporters_not_in_list.csv")
 # fixed by adding the additional ones
 
-
-df_survey_reporters <- df_survey %>% 
-  select(donorcode, donorname, donorname_unified, donorcode_unified ,
-         ReporterId, donorname_survey) %>% 
-  unique
-
-df_survey_reporters$donorname_unified 
-
-# source("Code/X99.01-1c check matching between two provider list.R")
 
 
 

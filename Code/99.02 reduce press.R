@@ -68,8 +68,8 @@ overview_fixed = overview_fixed %>%
 
 press_full %>% group_by(commitmentdate) %>% dplyr::summarise(total = sum(usd_commitment_defl, na.rm = T), sum(usd_disbursement, na.rm = T)) 
 
-names(overview_fixed)
-press$source %>% table
+# names(overview_fixed)
+# press$source %>% table
 press_to_drop = press_full %>%
   inner_join(overview_fixed, by = c("donorname", "commitmentdate","source"))
 
