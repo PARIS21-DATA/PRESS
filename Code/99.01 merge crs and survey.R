@@ -38,17 +38,12 @@ df_reporters <- df_reporters %>%
 #######
 # 2.3 
 # reduce the press reporter dataset to only survey ones
-names(df_reporters_press)
-vec_survey_reporters <- df_survey %>% 
-  .$donorname %>% 
-  unique
-df_reporters_press <- df_reporters_press %>%
-  # filter(!is.na(ReporterName)
-         # , ReporterName %in% vec_survey_reporters
-         # ) %>%
-  select(-crs, -press) %>%
-  # rename(donorname_inlist = donorname, 
-  #        donorname = ReporterName) %>%  
-  unique
+# names(df_reporters_press)
+# vec_survey_reporters <- df_survey %>% 
+#   .$donorname %>% 
+#   unique
+# df_reporters_press <- df_reporters_press %>%
+#   select(-crs, -press) %>%
+#   unique
 
-rm(vec_survey_reporters)
+# rm(vec_survey_reporters)

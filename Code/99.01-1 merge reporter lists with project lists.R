@@ -54,7 +54,7 @@ df_survey_reporters <- df_survey %>%
          ReporterId, donorname_survey) %>% 
   unique
 
-source("code/X99.01-1a examine merged survey data.R")
+# source("code/X99.01-1a examine merged survey data.R")
 
 df_reporters_crs_4merge <- df_reporters %>%
   # select(ch_name, donorcode = crs_code) %>%
@@ -85,6 +85,8 @@ rm(var_crs_merge_quality)
 # a <-  df_crs$ch_name %>% is.na %>% which
 # df_crs %>% select(donorname, donorcode) %>% slice(a) %>% unique %>% write_csv("Data/Analysis/reporters_not_in_list.csv")
 # fixed by adding the additional ones
+
+source("Code/X99.01-1c check matching between two provider list.R")
 
 
 
