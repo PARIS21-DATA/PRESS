@@ -1,0 +1,39 @@
+﻿sectorcode,sectorname,COFOG_first_code,COFOG_first_description
+111,"I.1.a. Education, Level Unspecified",9,Education
+112,I.1.b. Basic Education,9,Education
+113,I.1.c. Secondary Education,9,Education
+114,I.1.d. Post-Secondary Education,9,Education
+121,"I.2.a. Health, General",7,Health
+122,I.2.b. Basic Health,7,Health
+123,I.2.c. Non-communicable diseases (NCDs),7,Health
+130,I.3. Population Policies/Programmes & Reproductive Health,7,Health
+140,I.4. Water Supply & Sanitation,6,Housing and community amenities
+151,I.5.a. Government & Civil Society-general,1,General public services
+152,"I.5.b. Conflict, Peace & Security",3,Public order and safety
+160,I.6. Other Social Infrastructure & Services,10,Social protection
+210,II.1. Transport & Storage,4,Economic affairs
+220,II.2. Communications,4,Economic affairs
+231,II.3.a. Energy Policy,4,Economic affairs
+232,"II.3.b. Energy generation, renewable sources",4,Economic affairs
+235,II.3.e. Nuclear energy plants,4,Economic affairs
+236,II.3.f. Energy distribution,4,Economic affairs
+240,II.4. Banking & Financial Services,4,Economic affairs
+250,II.5. Business & Other Services,4,Economic affairs
+311,III.1.a. Agriculture,4,Economic affairs
+312,III.1.b. Forestry,4,Economic affairs
+313,III.1.c. Fishing,4,Economic affairs
+321,III.2.a. Industry,4,Economic affairs
+322,III.2.b. Mineral Resources & Mining,4,Economic affairs
+323,III.2.c. Construction,4,Economic affairs
+331,III.3.a. Trade Policies & Regulations,4,Economic affairs
+332,III.3.b. Tourism,4,Economic affairs
+410,IV.1. General Environment Protection,5,Environmental protection
+430,IV.2. Other Multisector,1,General public services
+510,VI.1. General Budget Support,1,General public services
+520,VI.2. Development Food Assistance,1,General public services
+530,VI.3. Other Commodity Assistance,1,General public services
+720,VIII.1. Emergency Response,1,General public services
+730,VIII.2. Reconstruction Relief & Rehabilitation,1,General public services
+740,VIII.3. Disaster Prevention & Preparedness,10,Social protection
+910,Administrative Costs of Donors,1,General public services
+998,IX. Unallocated / Unspecified,,
