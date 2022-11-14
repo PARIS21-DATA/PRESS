@@ -1,12 +1,38 @@
-### ---------------
-# start data cleaning 
-### 
+################################################################################
+#
+# Assigning df refference to each project
+# Author: Yu Tian, Johannes Abele
+# Date: 05/10/2022
+#
+# Objective: 
+#            
+# 
+# input files: - /Data/Raw/CRS/crs_sample.rds
+#              
+#
+# output file: - /Data/Intermediate/crs01_1_full.rds"
+#
+#
+################################################################################
+
+
+# ------------------------------- Preparation ----------------------------------
+
 rm(list = ls())
-crs_path <- "./Data/Raw/CRS/crs_sample.rds"
-crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" , ".rds")
+
+# Load packages
+source("./Code/00. boot.R")
+
+# Set all paths 
+crs_path <- "./Data/Raw/CRS/crs_utf8_full.rds"
+crs_path_lang <- "./Data/Raw/CRS/df_crs_de.rds"
+crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" , "_full.rds")
 df_crs_raw <- readRDS(crs_path)
 
 
+# ------------------------------- Create db ref --------------------------------
+
+# Subset necessary information
 df_crs <- df_crs_raw %>%
   select(
     process_id, 
@@ -15,15 +41,18 @@ df_crs <- df_crs_raw %>%
     longdescription, 
     crsid,
     donorcode, 
-    year ,
+    year,
     usd_commitment, 
     purposecode, 
     usd_disbursement, 
     recipientcode , 
-    usd_received
+    usd_received, 
+    sectorname,
+    sectorcode
   )
 
-
+# Create unique identifier db_ref for each project transforming a joined sting of 
+# all project information first into factor and then into numeric
 df_crs$db_ref <- with(df_crs, 
                       paste(
                         crsid,
@@ -37,20 +66,24 @@ df_crs$db_ref <- with(df_crs,
                         usd_disbursement, 
                         recipientcode , 
                         usd_received, # this is a new addition in 2022
-                        sep="_"
+                        sep = "_"
                       )
 ) %>%
   as.factor %>%
   as.numeric
 
+# Test uniqueness of the project identifier db_ref
 source("code/01.2 check uniqueness of db_ref.r")
 
-df_crs$db_ref = paste0("df_", source, df_crs$db_ref) %>% as.factor
+# Transform identifiers to format "df_source_#####" 
+df_crs$db_ref = paste0("df_", df_crs$source, df_crs$db_ref) %>% as.factor
 
+# Add project identifiers to raw data set
 df_crs <- df_crs %>%
   select(db_ref, process_id) %>%
-  inner_join(df_crs_raw)
+  inner_join(df_crs_raw, by = "process_id")
 rm(df_crs_raw)
-gc()
 
 saveRDS(df_crs, file  = crs_path_new)
+
+gc()

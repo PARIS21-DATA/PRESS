@@ -1,11 +1,19 @@
-# library(reshape2) #??? is it necessary?
-# library(splitstackshape)
-# library(plyr)
-# only one of the packages are needed
-# library(cldr)
-# library(cld2)
-# library(cld3)
-# library(slam)
+################################################################################
+#
+# Boot file for PRESS 
+# Author: Yu Tian, Johannes Abele
+# Date: 05/10/2022
+#
+# Objective: Load all packages necessary for PRESS methodology
+#            
+# 
+# input files: -
+#              
+#
+# output file: - 
+#
+#
+################################################################################
 
 
 # Load required libraries
@@ -21,17 +29,44 @@ packages <-
     "cld2", 
     "koRpus", 
     "SnowballC", 
-    "tidytext"
+    "tidytext",
+    "text2vec",
+    "tm",
+    "textstem",
+    "textcat",
+    "textclean",
+    "lexicon",
+    "quanteda",
+    "deeplr",
+    "stringdist",
+    "tidyverse",
+    "e1071",
+    "caTools",
+    "caret",
+    "tm",
+    "tidytext",
+    "mgsub",
+    "wordcloud",
+    "text2vec",
+    "xgboost",
+    "rlist",
+    "remotes",
+    "ParBayesianOptimization",
+    "mlr",
+    "DiagrammeR",
+    "digest"
   )
+
 # Install uninstalled packages
-lapply(packages[!(packages %in% installed.packages())], install.packages)
+#lapply(packages[!(packages %in% installed.packages())], install.packages)
 lapply(packages, library, character.only = TRUE)
 rm(packages)
 
 # Set wd
 setwd(getwd())
 
-
+# Clean up memory
+gc()
 
 # source("data/functions.R")
 
