@@ -16,3 +16,6 @@ data/raw/IATI
 # !data/intermediate/crs03.rds
 
 ytreviewtemp/
+
+data/intermediate/crs02.rds
+data/intermediate/crs03.rds
