@@ -41,25 +41,25 @@ df_crs <- readRDS(crs_path)
 # df_crs_raw <- df_crs
 # df_crs <- df_crs_raw
 
+
+################################################################################
+# Set filters for classification: 
+# use "gender" for gender classification, "stat" for statistical classification
+# set lang to either en, fr, es, de
+
+lang <- "fr"
+class_type <- "stat"
+################################################################################
+
+
 # Set specific language
-lang <- "en"
 df_crs <- df_crs %>%
-  filter(title_language %in% c(lang, NA) & long_language %in% c(lang,NA)) %>%
-  filter(!is.na(title_language) | !is.na(long_language))
+  filter(long_language == lang) #%>%
+  #filter(!is.na(title_language) | !is.na(long_language))
 
 # Set languages for stemming and lemmatization
 stem_languages <- c("de", "fr", "es")
 lemma_languages <- c("en")
-
-
-################################################################################
-# Set filter for classification: 
-# use "gender" for gender classification, "stat" for statistical classification
-
-class_type <- "gender"
-################################################################################
-
-
 
 # Reduce data set to variables important for prediction
 df_crs_original <- df_crs 
@@ -86,7 +86,7 @@ if (class_type == "gender"){
     ungroup() %>%
     as.data.frame
 }
-rm(df_crs_original, man_verified)  
+if (lang == "en") rm(df_crs_original, man_verified) # remove df_original to free memory
 
 # Test duplicated long descriptions 
 # freq_long <- as.data.frame(table(df_crs_original %>% pull(descr2mine)))
@@ -102,14 +102,14 @@ rm(df_crs_original, man_verified)
 #iteration <- TRUE              # Set to FALSE to rerun the whole classification with adjusted learning set (negatively marked as ones with low probability in 0th iteration)
 print_importance_matrix <- TRUE   # Set to TRUE to plot most important words
 n_gram <- 1                       # Set to higher integers to use longer ngrams
-full_learning_percent <- 0.4       # take only x% of full learning set size is too large for RAM
+full_learning_percent <- 1       # take only x% of full learning set size is too large for RAM
 neg_sample_fraction <- 1          # Fraction of negatively marked to positively marked in learning set
 plot_results <- TRUE             # Set to TRUE to visualize results
 frac_pred_set <- 1             # use only 5% of full prediction set to speed up for testing
-save_fit_xgb <- TRUE              # Set to TRUE to save fitted xgb model
-load_fit_xgb <- FALSE             # load previously fitted model
-split_pred <- TRUE                # use to split up pred data into two data frames to handle large pred sets
-n_pred_sets <- 30                 # number of splitted data prediction sets
+save_fit_xgb <- FALSE              # Set to TRUE to save fitted xgb model
+load_fit_xgb <- TRUE             # load previously fitted model
+split_pred <- FALSE                # use to split up pred data into two data frames to handle large pred sets
+n_pred_sets <- 10                 # number of splitted data prediction sets
 
 
 #!!!WARNING: Whole process starts from here
@@ -226,36 +226,8 @@ if (n_gram == 1) {
                             weighting = function(x) { weightTf(x) })
 }
 # Creating document-feature-matrix for training data and for total data
-total_data_dtm <- df$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
+#total_data_dtm <- df$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
 train_data_dtm <- train_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
-
-# Creating document-feature-matrix for test data. Here we have to keep two things in mind:
-# 1. We have to exclude words that do not appear in the training data. The model does not know these and breaks.
-# 2. We have to include words (although with a 0) that appear in the training data but not in the test data. Otherwise the model gets confused as well.
-# See here for a detailed discussion: https://stackoverflow.com/questions/16630627/how-to-recreate-same-documenttermmatrix-with-new-test-data 
-if (n_gram == 1) {
-  control_list_ngram <- list(weighting = weightTf, dictionary=Terms(train_data_dtm))
-} else {
-  control_list_ngram = list(tokenize = NLP_tokenizer,
-                            removePunctuation = TRUE,
-                            removeNumbers = TRUE, 
-                            stopwords = stopwords(lang), 
-                            tolower = T, 
-                            lemmatization = T, 
-                            weighting = function(x) { weightTf(x) },
-                            dictionary=Terms(train_data_dtm))
-}
-test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
-
-print("Start to create pred DTM")
-if (split_pred) {
-  pred_splitted <- suppressWarnings(split(pred, (0:nrow(pred) %/% ceiling(nrow(pred)/(n_pred_sets)))))
-  pred_splitted <- lapply(pred_splitted, function(y) {y %>% pull(text_cleaned) %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)})
-  print("Pred DTM finished")
-} else {
-  prediction_data_dtm <- pred$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
-  print("Pred DTM finished")
-}
 
 # Train the model for one statistical domain - parameters taken from SDG lab code. These might benefit from tuning
 eta_par <- 0.1
@@ -281,6 +253,42 @@ if (!file.exists(xgb.filename) & iteration & save_fit_xgb){
   saveRDS(fit.xgb, xgb.filename)
 }
 
+# Creating document-feature-matrix for test data. Here we have to keep two things in mind:
+# 1. We have to exclude words that do not appear in the training data. The model does not know these and breaks.
+# 2. We have to include words (although with a 0) that appear in the training data but not in the test data. Otherwise the model gets confused as well.
+# See here for a detailed discussion: https://stackoverflow.com/questions/16630627/how-to-recreate-same-documenttermmatrix-with-new-test-data 
+if (load_fit_xgb) {
+  dictionary_dtm <- fit.xgb$feature_names
+} else {
+  dictionary_dtm <- Terms(train_data_dtm)
+}
+
+if (n_gram == 1) {
+  control_list_ngram <- list(weighting = weightTf, dictionary = dictionary_dtm)
+} else {
+  control_list_ngram = list(tokenize = NLP_tokenizer,
+                            removePunctuation = TRUE,
+                            removeNumbers = TRUE, 
+                            stopwords = stopwords(lang), 
+                            tolower = T, 
+                            lemmatization = T, 
+                            weighting = function(x) { weightTf(x) },
+                            dictionary = dictionary_dtm)
+}
+
+
+# Create prediction DTM
+print("Start to create test and pred DTM")
+if (split_pred) {
+  test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
+  pred_splitted <- suppressWarnings(split(pred, (0:nrow(pred) %/% ceiling(nrow(pred)/(n_pred_sets)))))
+  pred_splitted <- lapply(pred_splitted, function(y) {y %>% pull(text_cleaned) %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)})
+  print("Test and pred DTM finished")
+} else {
+  test_data_dtm <- test_data$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
+  prediction_data_dtm <- pred$text_cleaned %>% VectorSource() %>% VCorpus() %>% DocumentTermMatrix(control = control_list_ngram)
+  print("Test and pred DTM finished")
+}
 
 
 # Check which words have a high importance for the prediction
@@ -348,8 +356,8 @@ df_crs_final <- df_crs_original %>%
 names(df_crs_final)[names(df_crs_final) == "text_mining"] <- paste0("text_mining_", class_type)
 
 # Save prediction results
-saveRDS(df_crs_final, file = paste0("./Output/", class_type, "/", lang, "_classification_results.rds"))
-write.xlsx(df_crs_final, file = paste0("./Output/", class_type, "/", lang, "_classification_results.xlsx"), rowNames = FALSE)
+saveRDS(df_crs_final, file = paste0("./Output/", class_type, "/", lang, "_classification_results_long.rds"))
+write.xlsx(df_crs_final, file = paste0("./Output/", class_type, "/", lang, "_classification_results_long.xlsx"), rowNames = FALSE)
 
 
 #---------------------------- Visualization  -----------------------------------
