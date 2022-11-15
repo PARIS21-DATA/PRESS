@@ -15,8 +15,23 @@ data/raw/IATI
 # !data/intermediate/crs02.rds
 # !data/intermediate/crs03.rds
 
+
 # some additional lines added during the review process
 code/YTnewcodes
 data/data_sub
 data/intermediate/crs_filter_results.csv
 YTreviewtemp
+
+# adding a few lines just to ignore YT's local files
+# will be deleted in the final version
+output/
+YTreviewtemp/
+*full.rds
+*full.rdata
+data/raw/crs/archive
+*rapp.history
+data/raw/crs/crs_full1.rds
+data/raw/crs/crs_full_win.rds
+data/intermediate/*_de.rds
+data/intermediate/*all.rds
+data/*de.rds
