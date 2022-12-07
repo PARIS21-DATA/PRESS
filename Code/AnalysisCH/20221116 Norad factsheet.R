@@ -12,7 +12,7 @@ df_crs <- df_ch_names %>%
   select(-ReporterId) %>% 
   right_join(df_crs) %>% 
   mutate(ch_name = ifelse(is.na(short_names),ch_name, short_names))
-
+rm(df_ch_names, df_shortnames)
 
 df_crs <- df_crs %>% 
   mutate(ch_name = ifelse(ch_name == "Bill and Melinda Gates Foundation" , 
@@ -83,7 +83,8 @@ df_matrix_norwayVothers <- df_norad_keycountries %>%
 
 df_matrix_norwayVothers <- df_matrix_norwayVothers[c(which(df_matrix_norwayVothers$ch_name == "Norway"), 1:nrow(df_matrix_norwayVothers)),] %>% unique
 
-write_csv(df_matrix_norwayVothers, file = "YTreviewtemp/norad_matrix.csv", na = "")
+# no longer needed
+# write_csv(df_matrix_norwayVothers, file = "YTreviewtemp/norad_matrix.csv", na = "")
 
 
 
@@ -105,8 +106,8 @@ df_other_donors %>%
   group_by(isocode) %>% 
   mutate(rnk = row_number(), 
          rnk = paste0("Top ", rnk)) %>% 
-  spread(key = rnk , value = ch_name) %>% 
-  write_csv(file = "YTreviewtemp//top5donors_norad.csv")
+  spread(key = rnk , value = ch_name) #%>% 
+  # write_csv(file = "YTreviewtemp//top5donors_norad.csv")
 
 
 
