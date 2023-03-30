@@ -4,6 +4,8 @@
 # source("Code/00. boot.R")
 rm(list = ls())
 gc()
+Sys.sleep(10)
+
 print_time_diff <- function(start_time) {
   difftime(Sys.time(),start_time, units = "sec") %>% print
 }
@@ -12,6 +14,7 @@ skip_icov <- T
 # job_specific_suffix <- ""
 job_specific_suffix <- "_full_"
 crs_path <- paste0("./Data/intermediate/crs01_1", job_specific_suffix,year(Sys.Date()),  ".rds")
+crs_path_intermediate_after_cleaning <- paste0("./Data/intermediate/crs02_int_clean_titles", job_specific_suffix,year(Sys.Date()),  ".rds")
 crs_path_new <- paste0("./Data/intermediate/crs02", job_specific_suffix,year(Sys.Date()), ".rds")
 start <- Sys.time()
 
@@ -20,6 +23,7 @@ start <- Sys.time()
 df_crs_raw <- readRDS(crs_path)
 print("Loading document:")
 print_time_diff(start)
+# Time difference of 44.57935 secs
 
 ## select columns
 # every step, we try to use a subset of the data to make the process quicker
@@ -33,7 +37,8 @@ cols_needed <- c("process_id",
                  "purposecode",
                  "donorname",
                  "gender", 
-                 "channelcode")
+                 "channelcode",
+                 "rmnch")
 
 df_crs_raw <- df_crs_raw %>%
   select(all_of(cols_needed))
@@ -60,6 +65,8 @@ df_crs <- df_crs_raw %>%
   mutate(projecttitle = clean_titles(projecttitle),
          shortdescription = clean_titles(shortdescription),
          longdescription = clean_titles(longdescription))
+df_crs %>% 
+  write_rds(crs_path_intermediate_after_cleaning )
 print("Cleaning 3 text columns")
 print_time_diff(start)
 gc()
@@ -73,9 +80,9 @@ beep()
 max_string_dist <- 10
 
 # first no need to detect if the character length difference is already large
-# we only detect a subset of the data
+# we only detect the string distance of a subset of the data
 df_crs_2detect4diff <- df_crs %>%
-  filter((nchar(projecttitle) - nchar(longdescription) )^2 < 100) 
+  filter((nchar(projecttitle) - nchar(longdescription) )^2 < 900) 
 
 df_crs_2detect4diff <- df_crs_2detect4diff %>% 
   mutate(ldesc_id_tmp = as.numeric(as.factor(paste(projecttitle, longdescription))))
@@ -85,7 +92,7 @@ df_crs_2detect4diff_shorten <- df_crs_2detect4diff %>%
 
 # replace the longdesc with NA if it is too similar to project title. 
 df_crs_2detect4diff_shorten <- df_crs_2detect4diff_shorten %>%
-  mutate(desc_2mine = ifelse(stringdist(projecttitle, longdescription)< max_string_dist, NA, longdescription))
+  mutate(desc_2mine = ifelse(stringdist(projecttitle, longdescription)< max_string_dist, NA, longdescription))  
 
 df_crs_2detect4diff_shorten <- df_crs_2detect4diff_shorten %>% 
   select(ldesc_id_tmp, desc_2mine)
@@ -102,11 +109,14 @@ df_crs <- df_crs %>%
   rbind(df_crs_2detect4diff) %>%
   mutate(text_id = as.numeric(as.factor(desc_2mine)))
 
+
 gc()
 print("find the best text for desc_2mine")
 print_time_diff(start)
 
 
+
+start <- Sys.time()
 df_crs <- df_crs %>%
   # mutate(text_id = as.numeric(as.factor(desc_2mine))) %>%
   ## add SCB identifier
@@ -116,7 +126,10 @@ df_crs <- df_crs %>%
          gen_donor = (channelcode == 41146),
          gen_marker = (gender %in% c(1, 2) & (!is.na(gender))), 
          gen_marker1 = (gender == 1), 
-         gen_marker2 =( gender ==2)
+         gen_marker2 =( gender ==2), 
+         gen_rmnch = (rmnch ==1)|(rmnch==2), 
+         gen_rmnch1 = (rmnch == 1), 
+         gen_rmnch2 = (rmnch == 2)
   ) %>%
   select(-cols_needed[which(!cols_needed %in% c("process_id", "longdescription"))])
 
@@ -152,7 +165,8 @@ rm(df_crs_lang)
 rm(df_crs_raw)
 print("rest of the analysis")
 print_time_diff(start)
-
+gc()
+Sys.sleep(10)
 
 print("NAs in desc_2mine")
 which(is.na(df_crs$desc_2mine)|df_crs$desc_2mine == "") %>% length %>% print()
