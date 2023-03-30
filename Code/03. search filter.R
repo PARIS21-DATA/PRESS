@@ -2,13 +2,15 @@ rm(list = ls())
 source("code/00. boot.R")
 source("code/00.1 functions.R")
 
-job_specific_suffix <- "_utf8_full"
-crs_path <- paste0("./Data/intermediate/crs02", job_specific_suffix, ".rds")
-crs_path_new <- paste0("./Data/intermediate/crs03", job_specific_suffix, ".rds")
+job_specific_suffix <- "_full_"
+crs_path <- paste0("./Data/intermediate/crs02", job_specific_suffix, year(Sys.Date()), ".rds")
+crs_path_new <- paste0("./Data/intermediate/crs03", job_specific_suffix, year(Sys.Date()), ".rds")
 start <- Sys.time()
 df_crs_full <- readRDS(crs_path)
 print("Load file:")
 print_time_diff(start)
+# Time difference of 24.98078 secs
+
 
 
 df_crs_full <- df_crs_full %>%
@@ -36,7 +38,10 @@ langs = c("en",
           , "de"
           )
 print_time_diff(start)
+# Time difference of 56.87824 secs
+
 # lang2analyse <- "fr"
+start <- Sys.time()
 list_df_crs <- list()
 for (i in 1:length(langs)) {
   lang2analyse <- langs[i]
@@ -45,12 +50,13 @@ for (i in 1:length(langs)) {
 }
 print_time_diff(start)
 df_crs <- bind_rows(list_df_crs)
+rm(list_df_crs)
+print_time_diff(start)
 
 ## joining the filtering results back with the full version of data
 df_crs <- df_crs_full %>% 
   left_join(df_crs) %>%
   select(-projecttitle_lower)
-
 
 # remive NAs in each column, it seems that the results for gender identification changed a log while the results for data & stats didn't. 
 df_crs <- df_crs %>% 
@@ -68,10 +74,16 @@ df_crs <- df_crs %>%
   mutate(scb = (scb == 1), 
          pop = (pop == 1))
 
+attributes(df_crs$text_detection)$description = "title contains keywords for statistics"
+attributes(df_crs$text_detection_gender)$description = "title contains keywords for gender"
+attributes(df_crs$gen_marker1)$description = "gender marker equals 1"
+attributes(df_crs$gen_marker2)$description = "gender marker equals 2"
+attributes(df_crs$gen_marker)$description = "gender marker equals 1 or 2"
 
 df_crs <- df_crs %>%
   mutate(text_detection_wo_mining = text_detection & !mining
   )
+attributes(df_crs$text_detection_wo_mining)$description = "title contains keywords for statistics, but not keywords for demining and small arms"
 
 
 # langues <- c("en","fr","es")
@@ -81,6 +93,9 @@ df_crs <- df_crs %>%
 
 df_crs <- df_crs %>%
   mutate(stats_filter = text_detection_wo_mining | scb)
+
+attributes(df_crs$stats_filter)$description = "title contains keywords for statistics or purposecode 16062, but not keywords for demining and small arms"
+
 table(df_crs$text_detection_wo_mining) %>% print
 table(df_crs$stats_filter) %>% print
 # which(is.na(df_crs$text_detection_wo_mining_w_scb))
@@ -92,19 +107,16 @@ df_crs <- df_crs %>%
   mutate(text_filter_gender_narrower = gen_ppcode|text_detection_gender|gen_donor
          # | gen_marker2
   ) %>% 
-  mutate(text_filter_gender_narrower = ifelse(is.na(text_filter_gender_narrower), F, text_filter_gender_narrower))
+  mutate(text_filter_gender_narrower = ifelse(is.na(text_filter_gender_narrower), F, text_filter_gender_narrower)) %>% 
+  mutate(text_filter_gender = ifelse(is.na(text_filter_gender), F, text_filter_gender))
 
-# df_crs <- df_crs %>%
-#   rename(stats_filter = text_detection_wo_mining_w_scb)
+attributes(df_crs$text_filter_gender)$description = "identified as a gender project before text mining, use gender marker ==2 only. This is different from text_detection_gender!!"
+attributes(df_crs$text_filter_gender_narrower)$description = "identified as a gender project before text mining, do not use gender marker at all. This is different from text_detection_gender!!"
 
 a = df_crs %>% select(text_id,stats_filter, text_detection_gender) %>% unique %>% nrow
 b = df_crs %>% select(text_id) %>% unique %>% nrow
 print_time_diff(start)
-# list = df_crs %>% 
-#   filter(text_detection_wo_mining_w_scb) %>%
-#   select(text_id, projecttitle) %>%
-#   unique
-# saveRDS(list, file = "data/list_by_P21.rds")
+
 
 print(paste0("There are ", a-b, " projects with same names but different purpose code"))
 
