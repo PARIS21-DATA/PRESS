@@ -1,7 +1,7 @@
 rm(list = ls())
 source("code/00.1 functions.R")
-crs_path_new <- "./Data/intermediate/crs03.rds"
-crs_path <- "./Data/intermediate/crs02.rds"
+crs_path_new <- "./Data/intermediate/crs03_full_2023.rds"
+crs_path <- "./Data/intermediate/crs02_full_2023.rds"
 df_crs <- readRDS(crs_path)
 
 # we used to make the project with same description as 1 as long as one of the same description is marked as 1
@@ -103,4 +103,4 @@ names(df_crs)
 
 saveRDS(df_crs,file = crs_path_new)
 
-write.csv(df_crs, file = "data/intermediate/crs_filter_results.csv", row.names = F)
+# write.csv(df_crs, file = "data/intermediate/crs_filter_results.csv", row.names = F)
