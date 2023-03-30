@@ -1,14 +1,15 @@
 rm(list = ls())
 gc()
-df_crs_raw <- readRDS("Data/Raw/CRS/crs_full.rds")
+path_data <- paste0("Data/Raw/CRS/crs_full_", year(Sys.Date()),".rds")
+df_crs_raw <- readRDS(path_data)
 df_crs <- df_crs_raw
-
 beep()
 
 # df_crs %>% select(projecttitle) %>% head(10)
-infoRDS("Data/Raw/CRS/crs_full.rds")
+infoRDS(path_data)
 # iconv(df_crs$agencyname,from = "CP1252", to = "UTF-8") %>% unique
-enc2utf8(df_crs$projecttitle) %>% head(10)
+enc2utf8(df_crs$projecttitle) %>% unique %>% head(10)
+df_crs$projecttitle %>% head(10)
 
 convert_char_win2utf <- function(x) {
   # if(is.character(x)) {x <- iconv( x, from = "CP1252" , to = "utf-8")  }

@@ -11,6 +11,7 @@ data/raw/crs/crs_full.rds
 data/raw/CRS/zip/**
 data/raw/CRS/Other crs/**
 data/raw/IATI
+
 # data/data_sub
 # !data/intermediate
 # data/intermediate/*
@@ -29,6 +30,7 @@ data/intermediate/crs01_1all.rds
 *_full.rds
 *full_win.rds
 *_full.rdata
+*_full_2023.rds
 
 # analyisis are for desk research purposes
 data/analysis
@@ -54,6 +56,7 @@ data/intermediate/99.01*
 data/intermediate/99.02*
 data/intermediate/99.03*
 
+
 code/9*
 code/X*
 
@@ -66,6 +69,7 @@ data/auxiliary/r*
 tmp/
 
 data/raw/crs/df_crs_fr.rds
+
 
 
 

@@ -12,11 +12,11 @@ print_time_diff <- function(start_time) {
 }
 
 # job_specific_suffix <- ""
-job_specific_suffix <- "_utf8_full"
+job_specific_suffix <- "_full_"
 start <- Sys.time()
-crs_path <- paste0("./Data/Raw/CRS/crs", job_specific_suffix, ".rds")
+crs_path <- paste0("./Data/Raw/CRS/crs", job_specific_suffix, year(Sys.Date()),".rds")
 crs_path_new <- paste0("./Data/Intermediate/crs", "01_1" ,
-                       job_specific_suffix, 
+                       job_specific_suffix, year(Sys.Date()),
                        ".rds")
 
 
@@ -28,6 +28,7 @@ df_crs_raw <- readRDS(crs_path)
 print_time_diff(start)
 beep()
 # Time difference of 57.99225 secs
+# MAC: 33.78785 secs
 
 
 ### --- 
@@ -92,7 +93,8 @@ df_crs <- df_crs %>%
 rm(df_crs_raw)
 gc()
 print_time_diff(start)
-# Time difference of 39.46608 secs
+# Time difference of 42.49567 secs
+
 
 write_rds(df_crs, file  = crs_path_new)
 print_time_diff(start)

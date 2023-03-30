@@ -9,10 +9,10 @@ print_time_diff <- function(start_time) {
 }
 source <- "crs"
 skip_icov <- T
-job_specific_suffix <- ""
-job_specific_suffix <- "_utf8_full"
-crs_path <- paste0("./Data/intermediate/crs01_1", job_specific_suffix, ".rds")
-crs_path_new <- paste0("./Data/intermediate/crs02", job_specific_suffix, ".rds")
+# job_specific_suffix <- ""
+job_specific_suffix <- "_full_"
+crs_path <- paste0("./Data/intermediate/crs01_1", job_specific_suffix,year(Sys.Date()),  ".rds")
+crs_path_new <- paste0("./Data/intermediate/crs02", job_specific_suffix,year(Sys.Date()), ".rds")
 start <- Sys.time()
 
 
@@ -159,13 +159,17 @@ which(is.na(df_crs$desc_2mine)|df_crs$desc_2mine == "") %>% length %>% print()
 # which(df_crs$desc_2mine == "") %>% print
 table(df_crs$language) %>% print
 names(df_crs)
+print_time_diff(start)
+#Time difference of 283.4721 secs
+
 
 
 #Output::
+start <- Sys.time()
 # saveRDS(df_crs, file=crs_path_new)
 write_rds(df_crs, file=crs_path_new)
-
 print("Save file:")
 print_time_diff(start)
+beep()
+# Time difference of 14.25521 secs
 
-beep(3)
