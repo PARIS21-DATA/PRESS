@@ -2,8 +2,8 @@ rm(list = ls())
 source("code/00. boot.R")
 
 ## setting up the job type
-# job <- "gen"
-job <- "stat"
+job <- "gen"
+# job <- "stat"
 write_rds(job, file ="data/intermediate/crs04_job_utf8_full.rds" )
 
 ## setting up and save languages
@@ -25,7 +25,7 @@ write_rds(df_lang, file = "data/intermediate/crs04_df_lang_utf8_full.rds")
 
 
 
-for (i in 2:nrow(df_lang)) {
+for (i in 1:nrow(df_lang)) {
   # save sequence number
   write_rds(i, file = "data/Intermediate/crs04_i_utf8_full.rds")
   # save language 
@@ -52,6 +52,9 @@ for (i in 2:nrow(df_lang)) {
   print(i)
 }
 beep(3)
+
+# something to consider later 
+# logistique système dinformation immobilier  logistique et système di  entretien \u008cuvre art
 
 
 df_lang <- read_rds("data/intermediate/crs04_df_lang_utf8_full.rds")
