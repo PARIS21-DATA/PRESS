@@ -1,4 +1,6 @@
 rm(list = ls())
+gc()
+Sys.sleep(10)
 source("code/00. boot.R")
 source("code/00.1 functions.R")
 
@@ -57,22 +59,15 @@ print_time_diff(start)
 df_crs <- df_crs_full %>% 
   left_join(df_crs) %>%
   select(-projecttitle_lower)
+beep()
 
-# remive NAs in each column, it seems that the results for gender identification changed a log while the results for data & stats didn't. 
+# remive NAs in each column, it seems that the results for gender identification changed a lot while the results for data & stats didn't. 
+names(df_crs)
 df_crs <- df_crs %>% 
-  mutate(text_detection = replace_na(text_detection, F), 
-         text_detection_gender = replace_na(text_detection_gender, F), # previously made a mistake here. should be very careful with the suffix. 
-         mining = replace_na(mining, F), 
-         gen_ppcode = replace_na(gen_ppcode, F),
-         gen_donor = replace_na(gen_donor, F),
-         gen_marker = replace_na(gen_marker, F), 
-         gen_marker1 = replace_na(gen_marker1, F), 
-         gen_marker2 = replace_na(gen_marker2, F), 
-         scb = replace_na(scb, 0), 
-         pop = replace_na(pop, 0)
-  ) %>% 
   mutate(scb = (scb == 1), 
-         pop = (pop == 1))
+         pop = (pop == 1)) %>% 
+  mutate(across(scb:gen_rmnch2,  ~ replace_na(.x, F))) %>% 
+  mutate(across(text_detection:text_detection_gender, ~ replace_na(.x, F) ))
 
 attributes(df_crs$text_detection)$description = "title contains keywords for statistics"
 attributes(df_crs$text_detection_gender)$description = "title contains keywords for gender"
@@ -106,9 +101,8 @@ df_crs <- df_crs %>%
   )  %>%
   mutate(text_filter_gender_narrower = gen_ppcode|text_detection_gender|gen_donor
          # | gen_marker2
-  ) %>% 
-  mutate(text_filter_gender_narrower = ifelse(is.na(text_filter_gender_narrower), F, text_filter_gender_narrower)) %>% 
-  mutate(text_filter_gender = ifelse(is.na(text_filter_gender), F, text_filter_gender))
+  ) 
+table(df_crs$text_filter_gender_narrower)
 
 attributes(df_crs$text_filter_gender)$description = "identified as a gender project before text mining, use gender marker ==2 only. This is different from text_detection_gender!!"
 attributes(df_crs$text_filter_gender_narrower)$description = "identified as a gender project before text mining, do not use gender marker at all. This is different from text_detection_gender!!"
