@@ -2,7 +2,8 @@ rm(list = ls())
 source("code/00. boot.R")
 
 ## setting up the job type
-job <- "gen"
+# job <- "gen"
+job <- "stat"
 write_rds(job, file ="data/intermediate/crs04_job_utf8_full.rds" )
 
 ## setting up and save languages
@@ -24,7 +25,7 @@ write_rds(df_lang, file = "data/intermediate/crs04_df_lang_utf8_full.rds")
 
 
 
-for (i in 1:nrow(df_lang)) {
+for (i in 2:nrow(df_lang)) {
   # save sequence number
   write_rds(i, file = "data/Intermediate/crs04_i_utf8_full.rds")
   # save language 
@@ -55,9 +56,9 @@ beep(3)
 
 df_lang <- read_rds("data/intermediate/crs04_df_lang_utf8_full.rds")
 job <- read_rds("data/Intermediate/crs04_job_utf8_full.rds")
-job_specific_suffix <- "_utf8_full"
-if(job == "gen") job_specific_suffix <- "_gen_utf8_full"
-list_path_ids <- paste0("./Data/intermediate/crs04.4_positive_id_",c(df_lang$lang,"en") , job_specific_suffix, ".rds") %>% unique
+job_specific_suffix <- "_full_"
+if(job == "gen") job_specific_suffix <- "_gen_full_"
+list_path_ids <- paste0("./Data/intermediate/crs04.4_positive_id_",c(df_lang$lang,"en") , job_specific_suffix, year(Sys.Date()), ".rds") %>% unique
 
 list_id <- c()
 for (i in list_path_ids) {
@@ -70,7 +71,7 @@ for (i in list_path_ids) {
 
 list_id <- unique(list_id)
 
-crs_path_new <- paste0("./Data/intermediate/crs04_positive_id", job_specific_suffix, ".rds")
+crs_path_new <- paste0("./Data/intermediate/crs04_positive_id", job_specific_suffix, year(Sys.Date()), ".rds")
 
 write_rds(list_id, file = crs_path_new)
 

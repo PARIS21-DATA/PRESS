@@ -5,18 +5,18 @@ source("code/00.3 functions_yu.R")
 
 pkgload:::unload("tidytext") # the stemmer in tidy text might be problematic for our steps here. 
 job <- read_rds("data/Intermediate/crs04_job_utf8_full.rds")
-job_specific_suffix <- "_utf8_full"
-if(job == "gen") job_specific_suffix <- "_gen_utf8_full"
+job_specific_suffix <- "_full_"
+if(job == "gen") job_specific_suffix <- "_gen_full_"
 
 load("data/intermediate/crs04_lang_utf8_full.rdata")
 
-crs_path_0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang,job_specific_suffix, ".rds")
-crs_path_1 <- paste0("./Data/intermediate/crs04.0_crs1_", lang,  job_specific_suffix, ".rds")
-crs_path_new_1_rdata <- paste0("./Data/intermediate/crs04.1_crs1_", lang, job_specific_suffix, ".rdata")
-crs_path_new_1_rds <- paste0("./Data/intermediate/crs04.1_crs1_", lang, job_specific_suffix, ".rds")
-crs_path_new_0_rdata <- paste0("./Data/intermediate/crs04.1_crs0_", lang, job_specific_suffix, ".rds")
-crs_path_new_0_rds <- paste0("./Data/intermediate/crs04.1_crs0_", lang,  job_specific_suffix, ".rds")
-crs_path_new_rdata <- paste0("./Data/intermediate/crs04.1_freq10_eligibleWords_", lang,  job_specific_suffix, ".rdata")
+crs_path_0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang, job_specific_suffix, year(Sys.Date()), ".rds")
+crs_path_1 <- paste0("./Data/intermediate/crs04.0_crs1_", lang,  job_specific_suffix, year(Sys.Date()), ".rds")
+crs_path_new_1_rdata <- paste0("./Data/intermediate/crs04.1_crs1_", lang, job_specific_suffix, year(Sys.Date()), ".rdata")
+crs_path_new_1_rds <- paste0("./Data/intermediate/crs04.1_crs1_", lang, job_specific_suffix, year(Sys.Date()), ".rds")
+crs_path_new_0_rdata <- paste0("./Data/intermediate/crs04.1_crs0_", lang, job_specific_suffix, year(Sys.Date()), ".rds")
+crs_path_new_0_rds <- paste0("./Data/intermediate/crs04.1_crs0_", lang,  job_specific_suffix, year(Sys.Date()), ".rds")
+crs_path_new_rdata <- paste0("./Data/intermediate/crs04.1_freq10_eligibleWords_", lang,  job_specific_suffix, year(Sys.Date()), ".rdata")
 
 
 

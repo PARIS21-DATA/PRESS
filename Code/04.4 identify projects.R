@@ -6,16 +6,16 @@ pkgload:::unload("tidytext")
 source("code/00.3 functions_yu.R")
 source("code/00.2 functions_thilo.R")
 job <- read_rds("data/Intermediate/crs04_job_utf8_full.rds")
-job_specific_suffix <- "_utf8_full"
-if(job == "gen") job_specific_suffix <- "_gen_utf8_full"
+job_specific_suffix <- "_full_"
+if(job == "gen") job_specific_suffix <- "_gen_full_"
 load("data/intermediate/crs04_lang_utf8_full.rdata")
 
-crs_path_dict <- paste0("./Data/intermediate/crs04.2_mydict_", lang,  job_specific_suffix, ".rds")
-crs_path_corpus1 <- paste0("./Data/intermediate/crs04.1_crs1_", lang,  job_specific_suffix, ".rds")
-crs_path_nwords0 <- paste0("./Data/intermediate/crs04.3_nwords0_", lang,job_specific_suffix, ".rds")
-crs_path_dtm0 <- paste0("./Data/intermediate/crs04.3_dtm_crs_0_", lang,  job_specific_suffix, ".rds")
-crs_path_crs0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang , job_specific_suffix, ".rds")
-crs_path_new <- paste0("./Data/intermediate/crs04.4_positive_id_", lang, job_specific_suffix, ".rds")
+crs_path_dict <- paste0("./Data/intermediate/crs04.2_mydict_", lang,  job_specific_suffix, year(Sys.Date()), ".rds")
+crs_path_corpus1 <- paste0("./Data/intermediate/crs04.1_crs1_", lang,  job_specific_suffix, year(Sys.Date()), ".rds")
+crs_path_nwords0 <- paste0("./Data/intermediate/crs04.3_nwords0_", lang,job_specific_suffix, year(Sys.Date()), ".rds")
+crs_path_dtm0 <- paste0("./Data/intermediate/crs04.3_dtm_crs_0_", lang,  job_specific_suffix, year(Sys.Date()), ".rds")
+crs_path_crs0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang , job_specific_suffix, year(Sys.Date()), ".rds")
+crs_path_new <- paste0("./Data/intermediate/crs04.4_positive_id_", lang, job_specific_suffix, year(Sys.Date()), ".rds")
 
 myDict <- read_rds(crs_path_dict)
 corpus_crs_1 <- read_rds(crs_path_corpus1)
