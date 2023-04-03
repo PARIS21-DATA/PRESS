@@ -71,6 +71,10 @@ tmp/
 
 data/raw/crs/df_crs_fr.rds
 
+# temp ignore for March 2023 SRH request
+data/intermediate/crs05.2_full_20232023.rds
+data/intermediate/crs05_full_20232023.rds
+
 
 
 
