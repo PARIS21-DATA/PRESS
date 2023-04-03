@@ -13,11 +13,6 @@ path_input <- paste0("data/Intermediate/06.1a survey data cleaned 1st step_",
                      year(Sys.Date())
                      ,".rds")
 
-
-path_input_crs_filtered <- paste0("Data/Intermediate/crs05.3_onlystats_full_", 
-                                  year(Sys.Date())
-                                  ,".rds")
-
 path_output_db_and_recs <- paste0("Data/Intermediate/06.1b survey corrected recipient and regions_", 
                                   year(Sys.Date())
                                   ,".rds")
