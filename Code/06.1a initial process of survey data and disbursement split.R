@@ -9,10 +9,22 @@ source("code/00.1 functions.R")
 
 #Input::
 
-df_survey <- read_rds("data/Raw/Survey/PRESS_survey_2021.rds")
+path_input <- paste0("data/Raw/Survey/PRESS_survey_2021.rds")
+path_output_survey_data <- paste0("data/Intermediate/06.1a survey data cleaned 1st step_", 
+                                  year(Sys.Date())
+                                  ,".rds")
+path_output_disb_data <- paste0("data/Intermediate/06.1a survey data disbursement info_", 
+                                  year(Sys.Date())
+                                  ,".rds")
+
+df_survey <- read_rds(path_input)
 df_survey <- df_survey %>% 
   mutate(db_ref = paste0("survey_", pressid)) %>%
   dplyr::rename(db_original_id = pressid) 
+
+df_survey <-  df_survey  %>%
+  rename(donorname = donor) %>% 
+  filter(donorname!="",!is.na(donorname))
 
 
 df_survey$disbursement %>% head
@@ -114,6 +126,6 @@ df_survey_disb %>%
   table
 
 
-saveRDS(df_survey, file = "data/Intermediate/06.1a survey data cleaned 1st step.rds")
-saveRDS(df_survey_disb, file = "data/Intermediate/06.1a survey data disbursement info.rds")
+saveRDS(df_survey, file = path_output_survey_data)
+saveRDS(df_survey_disb, file = path_output_disb_data)
 
