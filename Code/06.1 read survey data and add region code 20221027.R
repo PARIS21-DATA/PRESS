@@ -9,7 +9,6 @@ source("code/00.1 functions.R")
 
 #Input::
 
-
 df_survey <- read_rds("data/Raw/Survey/PRESS_survey_2021.rds")
 
 df_survey$disbursement %>% head
