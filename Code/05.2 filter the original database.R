@@ -4,14 +4,19 @@ start <- Sys.time()
 ### start merging filtered results to data
 ### load filtered results
 job_specific_suffix <- "_full_"
-crs_path <- crs_path_new <- paste0("Data/Intermediate/crs05", 
+crs_path <- paste0("Data/Intermediate/crs05", 
                                    job_specific_suffix, 
                                    year(Sys.Date()), 
-                                   "2023.rds")
-crs_path_new <- crs_path_new <- paste0("data/intermediate/crs05.2", 
+                                   ".rds")
+crs_path_new <- paste0("data/intermediate/crs05.2", 
                                    job_specific_suffix, 
                                    year(Sys.Date()), 
-                                   "2023.rds")
+                                   ".rds")
+
+crs_path_01_1 <- paste0("data/intermediate/crs01_1", 
+                      job_specific_suffix, 
+                      year(Sys.Date()), 
+                      ".rds")
 
 df_crs_wFilters <- read_rds(crs_path)
 ### load data with process ids 
@@ -54,7 +59,7 @@ gc()
 
 # now merging with crs01. The very raw data
 
-df_crs01 <- read_rds("data/Intermediate/crs01_1_full_2023.rds")
+df_crs01 <- read_rds(crs_path_01_1)
 
 names(df_crs_wFilters)
 names(df_crs01)
