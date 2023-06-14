@@ -51,6 +51,10 @@ rm(ls_survey_recipients, ls_survey_recipients_unlist,
 ## 2.1 correct recipient names
 #### each year it might be different because there will be new illegal names entered. In that case path_aux_country_correction may needs to be updated
 df_survey_recipients_name_correction <- read_rds(path_aux_country_correction)
+
+df_survey_recipients %>% 
+  filter(is.na(recipientname))
+
 df_survey_recipients <- df_survey_recipients %>% 
   rename(recipientname_old = recipientname) %>% 
   left_join(df_survey_recipients_name_correction) %>% 
@@ -65,6 +69,10 @@ rm(df_survey_recipients_name_correction)
 ## 2.2 attach region table
 
 df_regions <- read_rds(path_aux_region)
+#### somehow kosovo had two rows and one of them had dac code 67
+# df_regions <- df_regions %>% 
+#   filter(dac_recipientcode!=67)
+# saveRDS(df_regions, path_aux_region)
 names(df_regions)
 
 df_survey_recipients_regions <- df_survey_recipients %>% 
@@ -78,7 +86,7 @@ df_regions %>%
 
 df_survey_recipients_regions %>% 
   filter(is.na(regioncode)) %>% 
-  select(recipientname) %>% 
+  select(recipientname) %>%
   unique
 
 ## 2.3 save the df of db_ref, recipient name and region names
@@ -138,15 +146,17 @@ rm(df_survey_reg,
 # 4. assign a single recipient code to each project
 
 ## 4.1 assign the iso and iso numeric code to the ones with only one recipient
-df_survey_recipients_regions_unique.country <- df_survey_recipients_regions %>% 
+df_survey_recipients_regions_unique.country <- df_survey_recipients_regions %>%
   select(db_ref, isocode, iso3n
          # , recipientname
          ) %>%
   unique %>% 
+  # filter(!is.na(isocode)|!is.na(iso3n)) %>% 
   group_by(db_ref) %>% 
   mutate(cnt_isos = n()) %>% 
   filter(cnt_isos <= 1) %>% 
-  select(-cnt_isos)
+  select(-cnt_isos) %>% 
+  filter(!is.na(isocode)|!is.na(iso3n))
 ## 4.2 assign the dac recipient code to the ones with only one recipient
 
 df_survey_recipients_regions_unique.dac.code <- df_survey_recipients_regions %>% 
@@ -157,9 +167,31 @@ df_survey_recipients_regions_unique.dac.code <- df_survey_recipients_regions %>%
   group_by(db_ref) %>% 
   mutate(cnt_isos = n()) %>% 
   filter(cnt_isos <= 1) %>% 
-  select(-cnt_isos)
+  select(-cnt_isos) %>% 
+  filter(!is.na(dac_recipientcode))
 
 #### could be important to check if there are same number of rows here
+
+df_survey_recipients_regions_unique.country %>% 
+  inner_join(df_survey_recipients_regions_unique.dac.code) %>% 
+  nrow
+
+df_survey_recipients_regions_unique.country %>% 
+  left_join(df_survey_recipients_regions_unique.dac.code) %>% 
+  filter(is.na(dac_recipientcode))
+
+df_survey_recipients_regions_unique.country %>% 
+  right_join(df_survey_recipients_regions_unique.dac.code) %>% 
+  filter(is.na(iso3n)|is.na(isocode)) 
+
+df_survey_recipients_regions_unique.country %>% 
+  right_join(df_survey_recipients_regions_unique.dac.code) %>% 
+  filter(is.na(iso3n)|is.na(isocode)) %>% 
+  ungroup() %>% 
+  select(dac_recipientcode) %>% 
+  unique() %>% 
+  left_join(df_regions) %>% 
+  .$recipientname
 
 ## 4.3 merge them with the original survey data
 df_survey_reg_rec_code <- df_survey_regions %>% 
@@ -171,8 +203,10 @@ rm(df_survey_recipients_regions_unique.country,
    df_survey_recipients_regions, 
    df_survey_regions)
 
-## 4.4 some testing data to be removed from the survey data
+setdiff(names(df_survey_reg_rec_code), 
+        names(df_survey))
 
+## 4.4 some testing data to be removed from the survey data
 df_survey <- df_survey_reg_rec_code
 
 names(df_survey)
