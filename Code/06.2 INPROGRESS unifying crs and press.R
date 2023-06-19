@@ -29,7 +29,7 @@ df_crs %>%
   select(regionname, regioncode) %>% 
   unique
 
-df_regions %>% 
+<- df_regions %>% 
   select(regionname, regioncode) %>% 
   unique
 
