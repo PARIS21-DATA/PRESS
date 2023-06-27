@@ -24,7 +24,8 @@ packages <-
     "tidytext", 
     "stringdist",
     "tm", 
-    "data.table"
+    "data.table", 
+    "feather" # for quick save and read of files
   )
 # Install uninstalled packages
 lapply(packages[!(packages %in% installed.packages())], install.packages)
