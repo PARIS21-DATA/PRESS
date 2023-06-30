@@ -1,15 +1,24 @@
 rm(list = ls())
+source("code/00. boot.R")
+source("code/00.1 functions.R")
+
+# reading in the data from the survey 
+####################################
+## --- PRESS Data Preparation --- ##
+####################################
+
+# 0 Input::
+
+# 1 load data::
 
 df_reporters_crs <- read_rds(file = "data/auxiliary/reporters_crs_2022.rds")
-df_reporters_crs <- df_reporters_crs %>% 
-  mutate(ch_name = ifelse(crs_code == 1618, 
-                          "David and Lucile Packard Foundation", 
-                          ch_name))
 
 df_reporters_survey <- read_rds(file = "data/auxiliary/reporters_survey_2022.rds")
+
 df_reporters_crs <- df_reporters_crs %>% 
   select(ch_name, ReporterId = ReporterId_chlist) %>% 
   unique
+
 df_reporters_survey <- df_reporters_survey %>% 
   select(ch_name,ReporterId =  ReporterId_survey) %>% 
   unique
@@ -22,16 +31,15 @@ df_reporters %>% select(ReporterId) %>% duplicated() %>% which
 
 
 df_reporters_types <- read_rds("data/auxiliary/reporters_types_2022.rds") %>% unique
+# df_reporters_types <- df_reporters_types %>% 
+#   add_row(ReporterName = "Liechtenstein", ReporterId = 70, 
+#           ReporterType = "non-DAC")
+# saveRDS(df_reporters_types, "data/auxiliary/reporters_types_2022.rds")
+
 df_reporters_short <- read_rds("data/auxiliary/reporters_shorten_2022.rds") %>% unique
 
-df_reporters_short <- df_reporters_short %>% 
-  filter(short_names != "UNESCWA", 
-         short_names != "UNECLAC")
-df_reporters_short <- add_row(df_reporters_short, ReporterId = 909, short_names = "IADB") %>% unique
-write_rds(df_reporters_short, file = "data/auxiliary/reporters_shorten_2022.rds")
-
 df_reporters <- df_reporters %>% 
-  left_join(select(df_reporters_types, -ReporterName)) %>% 
+  left_join(select(df_reporters_types, -ReporterName) ) %>% 
   left_join(df_reporters_short) %>% 
   unique
 
