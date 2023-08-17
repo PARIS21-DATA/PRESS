@@ -7,11 +7,13 @@ path_output_imf <- paste0("Data/Intermediate/06.4 imf with regions and rec code_
                                            year(Sys.Date())
                                            ,".feather")
 path_survey_4ref <- "data/Intermediate/06.3 survey with donor code_2023.feather"
+path_crs_4ref <- "data/Intermediate/06.3 crs with donor code_2023.feather"
 
 path_aux_rec_codes <- "data/auxiliary/new_regions_2023.feather"
 
 # 1. loading data
 df_imf <- read_feather(path_input_imf)
+df_crs <- read_feather(path_crs_4ref)
 df_survey <- read_feather(path_survey_4ref)
 df_recipient_code <- read_feather(path_aux_rec_codes)
 
@@ -63,9 +65,28 @@ df_imf <- df_imf %>%
   mutate(identified_by = "survey") %>% 
   mutate(source = "imf")
 
-rm(df_survey)
+
+## 3.4 donor codes
+df_donors <- readRDS("data/auxiliary/reporters_final_2022.rds")
+
+df_imf <- df_imf %>% 
+  select(-donorname_survey) %>% 
+  mutate(ReporterName = "IMF - International Monetary Fund") %>% 
+  left_join(df_donors )
+
+setdiff(names(df_survey), names(df_imf))
+
+## 3.5 add columns to be more similar to survey data
+## !! there are some assumptions made here
+df_imf <- df_imf %>% 
+  mutate(uniqueIdentifier = db_original_id) %>% 
+  mutate(startyear = reported_year,
+         endyear = reported_year) %>% 
+  mutate(grant_loan = "Grant") # %>% 
+  # mutate(genmul = NA, genmul_per = NA, genmul_topic = NA)
 
 # 4. save imf data
+
 df_imf %>% 
   write_feather(path = path_output_imf)
 
