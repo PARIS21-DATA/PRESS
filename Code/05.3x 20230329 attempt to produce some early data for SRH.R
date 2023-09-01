@@ -1,6 +1,9 @@
-
+path_crs_4ref <- "data/Intermediate/06.3 crs with donor code_2023.feather"
 df_crs <- df_crs_01_filtered %>% 
   filter(year>2009)
+
+
+
 
 df_crs %>% 
   filter(stats2) %>% 
@@ -14,7 +17,7 @@ df_crs %>%
 
 
 df_crs %>% 
-  filter(stats) %>% 
+  # filter(stats) %>% 
   # filter(gender_filter_both) %>% 
   filter(text_filter_gender_narrower|gender_filter_desc) %>% 
   group_by(year) %>% 
@@ -68,7 +71,7 @@ df_crs_summary <- df_crs %>%
   inner_join(df_crs_woIDA)
 
 df_gender_woIDA <- df_crs %>%
-  filter(stats) %>% 
+  # filter(stats) %>% 
   # filter(gender_filter_both|gen_rmnch2) %>% 
   filter(gender_filter_both) %>% 
   group_by(year) %>% 
@@ -94,22 +97,49 @@ write_csv(df_gender, file = "Output/press/20230331 gender summary.csv")
 
 
 df_crs %>%
-  filter(stats) %>% 
+  # filter(stats) %>% 
   # filter(gender_filter_both|gen_rmnch2) %>% 
-  # filter(gender_filter_desc|text_filter_gender_narrower) %>% 
+  # filter(gender_filter_desc|text_filter_gender_narrower) %>%
+  filter(gender_filter_both) %>% 
   # group_by(year) %>% 
-  filter(
-    donorname == "International Development Association"
-  ) %>%
-  filter(year == 2021) %>% 
-  group_by(projecttitle) %>% 
+  # filter(
+  #   donorname == "International Development Association"
+  # ) %>%
+  filter(ch_name == "The World Bank") %>% 
+  # filter(year > 2018) %>%
+  # group_by(projecttitle) %>% 
   # arrange(desc(usd_disbursement_defl)) %>% 
-  summarise(sum = sum(usd_disbursement_defl, na.rm = T)) %>% 
-  arrange(desc(sum)) %>% 
-  select(projecttitle, sum) %>% 
-  head(10) %>% 
-  write_csv(file = "output/press/wb2023.csv")
+  # summarise(sum = sum(usd_disbursement_defl, na.rm = T)) %>% 
+  # arrange(desc(sum)) %>% 
+  arrange(desc(usd_disbursement_defl)) %>% 
+  select(year, projecttitle, recipientname, 
+         usd_disbursement_defl, usd_commitment_defl, 
+         db_original_id, 
+         # commitment_national, disbursement_national,
+         # usd_amounttied, 
+         donorname_dac, 
+         # finance_t, 
+         # grantequiv, 
+         flowname) %>% # what is the insane internet story
+  arrange(db_original_id, projecttitle, recipientname, usd_disbursement_defl) %>% 
+  rename(crs_id = db_original_id, 
+         reported_year = year) %>% 
+  # head(50) %>% 
+  as.data.frame %>%
+  write_csv(file = "output/press/wb_gender_projects.csv")
+  
 
+df_crs %>% 
+  group_by(year, flowname) %>% 
+  summarise(total = sum(usd_disbursement_defl, na.rm = T)) %>% 
+  spread(key = flowname, value = total)
+
+
+df_crs %>% 
+  filter(gender_filter_both) %>% 
+  group_by(year, flowname) %>% 
+  summarise(total = sum(usd_disbursement_defl, na.rm = T)) %>% 
+  spread(key = flowname, value = total)
 
 df_crs %>%
   filter(stats) %>% 
@@ -126,6 +156,6 @@ df_crs %>%
   summarise(sum = sum(usd_disbursement_defl, na.rm = T)) %>% 
   arrange(desc(sum)) %>% 
   select(projecttitle, sum) %>% 
-  head(10) %>% 
+  head(10) %>% # 
   write_csv(file = "output/press/wb2023 gender.csv")
 
