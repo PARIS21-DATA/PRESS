@@ -8,6 +8,9 @@ crs_path <- paste0("Data/Intermediate/crs05.2",
                    job_specific_suffix, 
                    year(Sys.Date()), 
                    ".rds")
+d4d_whitelist_path <- "data/Intermediate/07.3a d4d manual additions.feather"
+d4d_blacklist_path <- "data/Intermediate/07.3b d4d manual blacklist.feather"
+
 crs_path_new <- paste0("data/intermediate/crs05.3_onlystats", 
                        job_specific_suffix, 
                        year(Sys.Date()), 
@@ -18,9 +21,17 @@ df_crs <- read_rds(crs_path)
 print_time_diff(start)
 gc()
 
+df_white_list <- read_feather(d4d_whitelist_path)
+df_black_list <- read_feather(d4d_blacklist_path)
+
+df_crs_whitelist <- df_crs %>% 
+  filter(db_ref %in% df_white_list$db_ref)
+
 
 df_crs_stats <- df_crs %>% 
-  filter(stats)
+  filter(stats) %>% 
+  rbind(df_crs_whitelist) %>% 
+  filter(!db_ref %in% df_black_list$db_ref)
 
 # df_crs_o <- df_crs
 
