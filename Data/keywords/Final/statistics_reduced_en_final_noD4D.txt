@@ -73,14 +73,3 @@ civil register
 land register
 birth register
 business register
-birth registration
-data innovation
-data center
-immigration data
-spatial data
-data compilation
-compile data
-data driven
-openstreetmap
-satellite data
-peacebuilding data

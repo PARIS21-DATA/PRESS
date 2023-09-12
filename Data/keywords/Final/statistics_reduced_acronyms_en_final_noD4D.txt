@@ -11,9 +11,3 @@ nsds
 afristat
 ckan
 lfs questionnaire
-d4d
-data4development
-50X2030
-50 by 2023
-lfs
-ophi
