@@ -14,6 +14,7 @@ d4d_blacklist_path <- "data/Intermediate/07.3b d4d manual blacklist.feather"
 crs_path_new <- paste0("data/intermediate/crs05.3_onlystats", 
                        job_specific_suffix, 
                        year(Sys.Date()), 
+                       "_temp_",
                        ".rds")
 
 
@@ -29,9 +30,15 @@ df_crs_whitelist <- df_crs %>%
 
 
 df_crs_stats <- df_crs %>% 
-  filter(stats) %>% 
-  rbind(df_crs_whitelist) %>% 
+  filter(stats) %>%
+  mutate(d4d_addition_search = F)
+
+df_crs_stats <- df_crs_whitelist %>%
+  filter(!(db_ref %in% df_crs_stats$db_ref)) %>%
+  mutate(d4d_addition_search = T) %>%
+  rbind(df_crs_stats) %>% 
   filter(!db_ref %in% df_black_list$db_ref)
+
 
 # df_crs_o <- df_crs
 
