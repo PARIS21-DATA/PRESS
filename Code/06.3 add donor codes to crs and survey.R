@@ -21,7 +21,7 @@ path_output_survey <- paste0("Data/Intermediate/06.3 survey with donor code_",
                           year(Sys.Date())
                           ,".feather")
 
-path_donors_crs <- "data/auxiliary/reporters_crs_2022.rds"
+path_donors_crs <- "data/auxiliary/reporters_crs_2023.rds"
 path_donors_survey <- "data/auxiliary/reporters_survey_2022.rds"
 
 

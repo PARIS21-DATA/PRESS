@@ -25,24 +25,29 @@ gc()
 df_white_list <- read_feather(d4d_whitelist_path)
 df_black_list <- read_feather(d4d_blacklist_path)
 
-df_crs_whitelist <- df_crs %>% 
-  filter(db_ref %in% df_white_list$db_ref)
-
+df_crs_whitelist <- df_white_list %>% 
+  select(db_ref) %>%
+  distinct %>% 
+  # distinct %>% 
+  inner_join(df_crs) 
 
 df_crs_stats <- df_crs %>% 
   filter(stats) %>%
   mutate(d4d_addition_search = F)
 
+rm(df_crs)
+
+df_crs_whitelist <- df_crs_whitelist %>% 
+  anti_join(select(df_crs_stats, db_ref)) %>% 
+  mutate(d4d_addition_search = T) 
+
 df_crs_stats <- df_crs_whitelist %>%
-  filter(!(db_ref %in% df_crs_stats$db_ref)) %>%
-  mutate(d4d_addition_search = T) %>%
   rbind(df_crs_stats) %>% 
-  filter(!db_ref %in% df_black_list$db_ref)
+  anti_join(select(df_black_list, db_ref))
 
-
-# df_crs_o <- df_crs
+df_crs_stats$d4d_addition_search %>% table
 
 saveRDS(df_crs_stats, crs_path_new)
-rm(df_crs)
+
 gc()
 print_time_diff(start)

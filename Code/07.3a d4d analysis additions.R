@@ -1,25 +1,38 @@
-source("code/00. boot.R")
 rm(list = ls())
+source("code/00. boot.R")
+start_time <- Sys.time()
+
 # df <-readRDS("data/intermediate/crs01_1_full_2023.rds")
 # gc()
 # names(df)
 # df_full <- df
-# df <- df %>% 
-#   select(db_ref, 
-#          longdescription, 
-#          channelreportedname, 
-#          purposecode, 
-#          donorname, 
-#          agencyname, 
-#          crsid, 
-#          projecttitle)
-# df <- df %>% 
-#   mutate(across(c("longdescription", 
-#                   "projecttitle", 
+# df <- df %>%
+#   select(db_ref,
+#          year,
+#          longdescription,
+#          channelreportedname,
+#          purposecode,
+#          donorname,
+#          agencyname,
+#          crsid,
+#          projecttitle,
+#          usd_disbursement_defl)
+# df <- df %>%
+#   mutate(across(c("longdescription",
+#                   "projecttitle",
 #                   "channelreportedname"), ~ tolower(.x)))
+# path_donors <- "data/d4d/d4d donors.txt"
+# vec_d4d_donors <- readLines(path_donors)
+# df <- df %>% 
+#   filter(donorname %in% vec_d4d_donors)
+# df %>% select(donorname) %>% distinct
 # write_feather(df,  "data/intermediate/07.3 d4d analysis.feather")
+# print_time_diff(start_time)
+# rm(df_full)
+
 path_input <- "data/intermediate/07.3 d4d analysis.feather"
 path_output <- "data/intermediate/07.3a d4d manual additions.feather"
+
 
 df <- read_feather(path_input)
 
@@ -33,9 +46,18 @@ search_terms <- c("statist", "institute of statistics", "mathematical and statis
                   "statistics canada", "fiscal and monetary statistics", "statistical production of ine",
                   "danmarks statistik", "istat")
 
+d4d_donors <- c()
+
 for(term in search_terms) {
   df <- df %>% mutate(other_stats = ifelse(str_detect(channelreportedname, term) & purposecode != 16062, 1, other_stats))
 }
+
+df %>% 
+  filter(other_stats ==1) %>%
+  arrange(desc(usd_disbursement_defl)) %>% 
+  select(#donorname,
+         # projecttitle, usd_disbursement_defl, 
+         channelreportedname)
 
 df <- df %>% mutate(other_stats = ifelse(str_detect(channelreportedname, "istat") & purposecode != 16062 & donorname == "Italy", 1, other_stats))
 
@@ -77,6 +99,7 @@ crsid_values <- list(c("2010003915", "2010009939", "2010009940"),
                      c("2017002362", "2017004638", "2017011443", "2015127466", "2018003466"),
                      c("2018007639", "2018001985"), 
                      c("2015127466", "2015127466", "2019003811", "2015127466"))
+crsid_values <- unlist(crsid_values)
 
 for(values in crsid_values) {
   df <- df %>% mutate(other_stats = ifelse(donorname == "Germany" & crsid %in% values, 1, other_stats))
@@ -95,11 +118,24 @@ df <- df %>% mutate(other_stats = ifelse(donorname == "France" &
 crsid_switzerland <- c("2016003165", "2016003166", "2016003339", "2016003340", "2016003341")
 df <- df %>% mutate(other_stats = ifelse(donorname == "Switzerland" & crsid %in% crsid_switzerland, 1, other_stats))
 
+print_time_diff(start_time)
 
-df <- df %>% 
-  select(db_ref, other_stats) %>% 
-  filter(other_stats == 1)
+beepr::beep()
 
 df %>% 
+  filter(other_stats ==1) %>%
+  arrange(desc(usd_disbursement_defl)) %>% 
+  select(donorname, projecttitle, usd_disbursement_defl)
+
+df %>% 
+  filter(other_stats == 1) %>% 
+  group_by(year) %>% 
+  summarise(total = sum(usd_disbursement_defl, na.rm = T))
+
+df <- df %>% 
+  filter(other_stats ==1)
+
+df %>%
+  select(db_ref, other_stats) %>%
   write_feather(path_output)
 

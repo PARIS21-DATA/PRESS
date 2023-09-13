@@ -8,14 +8,11 @@ df <- read_feather(path_input)
 df <- df %>% 
   mutate(other_stats = 1)
 
-
 df <- df %>%
   # Belgium
   mutate(other_stats = if_else(crsid == "20180C2918", 0, other_stats)) %>%
-  
   # CaDB
   mutate(other_stats = if_else(str_detect(projecttitle, "contamination survey") & purposecode != 16062, 0, other_stats)) %>%
-  
   # Czech Republic
   mutate(other_stats = if_else(str_detect(projecttitle, "hydrogeological survey") & purposecode != 16062, 0, other_stats)) %>%
   
@@ -36,7 +33,6 @@ df <- df %>%
 
 
 df <- df %>%
-  
   # Germany
   mutate(other_stats = if_else(
     str_detect(projecttitle, "database to document human rights violations") & purposecode != 16062,
@@ -309,13 +305,11 @@ df <- df %>%
     str_detect(projecttitle, "information system related to the comp") & purposecode != 16062,
     0, other_stats
   )) %>%
-  
   # Individual Projects
   mutate(other_stats = if_else(crsid %in% c(
     "2011000041", "2016000008", "2010000119", "2011000448", "2012000002",
     "2013021796", "2012000094", "2012000093", "2011000180", "2013000005"), 0, other_stats
   )) %>%
-  
   # Exclusion based on purpose codes
   mutate(other_stats = if_else(purposecode == 15250, 0, other_stats))
 
