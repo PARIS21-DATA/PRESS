@@ -52,6 +52,10 @@ df_crs$idenfied_by_stat %>% table
 df_crs <- df_crs %>% 
   mutate(infosys = grepl("infosys|info sys|information sys|système d'information|system info", projecttitle, ignore.case = T))
 
+df_crs <- df_crs %>% 
+  rename(dac_donorcode = donorcode_dac, 
+         dac_donorname = donorname_dac)
+
 write_feather(df_crs,path_crs_output)
 saveRDS(df_crs, path_crs_output_RDS)
 
