@@ -1,0 +1,176 @@
+rm(list =ls())
+
+# 1. set up parameters and constant variables
+path_input_sdg_markers <- paste0("data/intermediate/09.1 sdg markers ", 
+                      year(Sys.Date()), 
+                      ".feather")
+path_output_just_climate_xlsx <- paste0("output/press/", 
+                                        Sys.Date(), 
+                                        " climate data projects 2018-2021",
+                                        # year(Sys.Date()), 
+                                        ".xlsx")
+
+# 2. load data
+df_crs <- read_feather("output/ch/2023-09-15 PRESS 2023 data.feather")
+
+df_climate_filters_agency <- read.xlsx("data/auxiliary/Climate filters.xlsx", 
+                                       sheet = 1) %>% 
+  filter(Climate == 1)
+
+df_climate_filters_donor <- read.xlsx("data/auxiliary/Climate filters.xlsx", 
+                                      sheet = 2) 
+
+df_climate_filters_channel <- read.xlsx("data/auxiliary/Climate filters.xlsx", 
+                                      sheet = 3) %>% 
+  filter(Climate == 1)
+
+df_sdgs <- read_feather(path_input_sdg_markers)
+rm(path_input_sdg_markers)
+
+# 3. adapt and implify data to be ready for analysis 
+names(df_climate_filters_agency) <- tolower(names(df_climate_filters_agency))
+names(df_climate_filters_channel) <- tolower(names(df_climate_filters_channel))
+names(df_climate_filters_donor) <- tolower(names(df_climate_filters_donor))
+
+df_climate_filters_agency <- df_climate_filters_agency %>% 
+  select(dac_donorcode = donorcode, 
+         # dac_donorname = donornamee, 
+         agencycode, 
+         # agencynamee, 
+         climate_agency = climate) %>% 
+  mutate(climate_agency = climate_agency == 1)
+
+df_climate_filters_channel <- df_climate_filters_channel %>% 
+  select(channelcode = channel.id, 
+         climate_channel = climate) %>% 
+  mutate(climate_channel = climate_channel == 1)
+
+df_climate_filters_donor <- df_climate_filters_donor %>% 
+  select(dac_donorcode = donor.code
+         # ,dac_donorname = `donor.name.(en)`
+         ) %>% 
+  mutate(climate_donor = T)
+
+
+# 4 analysis 
+# 4.1 merge filter data with the main dataset
+
+df_crs <- df_crs %>% 
+  left_join(df_climate_filters_agency) %>% 
+  left_join(df_climate_filters_channel) %>% 
+  left_join(df_climate_filters_donor)
+
+rm(df_climate_filters_agency, 
+   df_climate_filters_channel, 
+   df_climate_filters_donor)
+
+# 4.2 adding other filters
+
+df_crs <- df_crs %>% 
+  mutate(climate_marker = climateadaptation == 2|climatemitigation==2) 
+
+tmp_df_goal_per_proj <- df_sdgs %>% 
+  select(db_ref, sdg_goal) %>% 
+  distinct 
+
+vec_only_sdg13 <- tmp_df_goal_per_proj %>% 
+  group_by(db_ref) %>% 
+  summarise(cnt = n()) %>% 
+  filter(cnt == 1) %>% 
+  select(db_ref) %>% 
+  inner_join(tmp_df_goal_per_proj) %>% 
+  filter(sdg_goal == 13) %>% 
+  .$db_ref
+
+rm(tmp_df_goal_per_proj)
+rm(df_sdgs)
+
+df_crs <- df_crs %>% 
+  mutate(climate_sdg_marker = db_ref %in% vec_only_sdg13)
+rm(vec_only_sdg13)
+
+df_crs <- df_crs %>% 
+  mutate(climate_title = grepl("climat|carbon", projecttitle, ignore.case = T))
+
+# 4.3 fill the NAs in the filter columns
+df_crs <- df_crs %>% 
+  mutate(across(c("climate_donor", 
+                  "climate_agency",
+                  "climate_channel", 
+                  "climate_marker", 
+                  "climate_sdg_marker", 
+                  "climate_title"), 
+                ~ifelse(is.na(.x), F, .x)))
+
+# 4.4 create the unified filter and add identified_by column
+df_crs <- df_crs %>% 
+  mutate(climate = climate_donor|climate_agency|climate_channel|climate_marker|
+           climate_sdg_marker|climate_title)
+
+
+df_climate_filter_order <- tibble(markers = c("climate_donor", 
+                                              "climate_agency",
+                                              "climate_marker",
+                                              "climate_sdg_marker", 
+                                              "climate_channel", 
+                                              "climate_title"), 
+                                  order = c(1:6))
+
+tmp_df_climate_key_filter <- df_crs %>% 
+  filter(climate) %>% 
+  select(db_ref, starts_with("climate_")) %>% 
+  gather(-db_ref, key  = "markers", value = "value") 
+
+tmp_df_climate_key_filter <- tmp_df_climate_key_filter %>% 
+  filter(value) %>% 
+  left_join(df_climate_filter_order) %>% 
+  arrange(db_ref, order) %>% 
+  group_by(db_ref) %>% 
+  filter(row_number() == 1) %>% 
+  mutate(identified_by_climate = str_replace(markers, "climate_", "")) %>% 
+  select(db_ref, identified_by_climate)
+
+
+df_crs <- df_crs %>% 
+  left_join(tmp_df_climate_key_filter) %>% 
+  mutate(identified_by_climate = replace_na(identified_by_climate, "not climate"))
+rm(df_climate_filter_order, tmp_df_climate_key_filter)
+
+# 5. calculations
+
+df_crs %>% 
+  filter(climate) %>%
+  select(identified_by_climate) %>% 
+  table
+
+
+df_crs %>% 
+  filter(climate) %>% 
+  # filter(year > 2015) %>% 
+  group_by(year) %>% 
+  summarise(total_disb = sum(usd_disbursement_defl, na.rm = T), 
+            total_commit = sum(usd_commitment_defl, na.rm = T),
+            cnt = n())
+
+
+df_crs %>% 
+  filter(climate) %>% 
+  filter(year > 2017) %>% 
+  arrange(desc(year), desc(usd_disbursement_defl)) %>% 
+  select(projecttitle,
+         longdescription, 
+         donorname = ch_name, 
+         recipientname, 
+         disbursement_year = year, 
+         usd_disbursement_defl, 
+         identified_as_climate_because = identified_by_climate, 
+         channelname, 
+         agencyname, 
+         sdgfocus, 
+         climatemitigation, 
+         climateadaptation, 
+         usd_commitment, 
+         commitmentdate) %>% 
+  write.xlsx(path_output_just_climate_xlsx)
+
+
