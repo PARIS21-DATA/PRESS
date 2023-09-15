@@ -1,0 +1,15 @@
+
+When working with excels necessary to always keep the db_ref until the end 
+Also it is important to keep the functions in the cells until the end. 
+
+What we did during the excel manual simplification: 
+remove africa regional projects
+remove projects committed before 2018 because they also ended before that
+
+it is possible to merge projects with same project numbers. For multilaterals who didn't provide project numbers, it is possible to look at project names and do the merging. 
+
+
+Took me almost 4 hours. For countries with more projects, it could take longer. 
+Data analysis only took one hour, it's the filling that took longer time. 
+Therefore, it also makes sense to develop some code to do the calculation. 
+Also, the structure of the excel was too long, another reason to have code for this work. 
