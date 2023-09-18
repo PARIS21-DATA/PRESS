@@ -4,13 +4,21 @@ rm(list = ls())
 source("Code/00. boot.R")
 path_crs_4ref <- "data/Intermediate/06.3 crs with donor code_2023.feather"
 
+path_crs_output_constant <- paste0("Output/CH/", 
+                          "current", 
+                          " PRESS 2023 data.feather")
+
 path_crs_output <- paste0("Output/CH/", 
                           Sys.Date(), 
                           " PRESS 2023 data.feather")
+
 path_crs_output_RDS <- paste0("Output/CH/", 
                               Sys.Date(), 
                               " PRESS 2023 data.RDS")
 
+path_projects_2remove <- paste0("data/intermediate/07.1b_b social protection projects 2 remove ",
+                                year(Sys.Date()),
+                                ".rds")
 
 df_crs <- read_feather(path_crs_4ref)
 
@@ -56,6 +64,7 @@ df_crs <- df_crs %>%
   rename(dac_donorcode = donorcode_dac, 
          dac_donorname = donorname_dac)
 
+write_feather(df_crs, path_crs_output_constant)
 write_feather(df_crs,path_crs_output)
 saveRDS(df_crs, path_crs_output_RDS)
 

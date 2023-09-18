@@ -1,5 +1,6 @@
 rm(list =ls())
-
+source("code/00. boot.R")
+start_time <- Sys.time()
 # 1. set up parameters and constant variables
 path_input_sdg_markers <- paste0("data/intermediate/09.1 sdg markers UNIQUE goals ", 
                                  year(Sys.Date()), 
@@ -10,8 +11,20 @@ path_output_just_climate_xlsx <- paste0("output/press/",
                                         # year(Sys.Date()), 
                                         ".xlsx")
 
+path_output_just_climate_all_xlsx <- paste0("output/press/", 
+                                        Sys.Date(), 
+                                        " climate data projects 2010-2021",
+                                        # year(Sys.Date()), 
+                                        ".xlsx")
+
+path_output_press_xlsx <- paste0("output/press/", 
+                                        Sys.Date(), 
+                                        " press 2023 data full",
+                                        # year(Sys.Date()), 
+                                        ".xlsx")
+
 # 2. load data
-df_crs <- read_feather("output/ch/2023-09-15 PRESS 2023 data.feather")
+df_crs <- read_feather("output/ch/current PRESS 2023 data.feather")
 
 df_climate_filters_agency <- read.xlsx("data/auxiliary/Climate filters.xlsx", 
                                        sheet = 1) %>% 
@@ -78,9 +91,9 @@ rm(df_sdgs)
 df_crs <- df_crs %>% 
   mutate(climate_sdg_marker = db_ref %in% vec_only_sdg13)
 rm(vec_only_sdg13)
-
+# climat|carbon
 df_crs <- df_crs %>% 
-  mutate(climate_title = grepl("climat|carbon", projecttitle, ignore.case = T))
+  mutate(climate_title = grepl("climat|carbon|climát|calentamiento|invernadero|réchauffement|rechauffement|effet de serre|global warm|kohlenstoff|gewächshaus|gewachshaus|klima|global erwärmung|global erwarmung|treibhäus", projecttitle, ignore.case = T))
 
 # 4.3 fill the NAs in the filter columns
 df_crs <- df_crs %>% 
@@ -143,6 +156,8 @@ df_crs %>%
             cnt = n())
 
 
+
+
 df_crs %>% 
   filter(climate) %>% 
   filter(year > 2017) %>% 
@@ -162,5 +177,50 @@ df_crs %>%
          usd_commitment, 
          commitmentdate) %>% 
   write.xlsx(path_output_just_climate_xlsx)
+
+
+df_crs %>% 
+  select(reported_year = year, 
+         projecttitle,
+         longdescription, 
+         donorname = ch_name, 
+         recipientname, 
+         disbursement_year = year, 
+         usd_disbursement_defl, 
+         identified_as_climate_because = identified_by_climate, 
+         channelname, 
+         agencyname, 
+         sdgfocus, 
+         climatemitigation, 
+         climateadaptation, 
+         usd_commitment, 
+         commitmentdate, 
+         identified_as_data_because = idenfied_by_stat
+  ) %>% 
+  write.xlsx(path_output_press_xlsx)
+
+
+df_crs %>% 
+  filter(climate) %>% 
+  # filter(year > 2017) %>% 
+  arrange(desc(year), desc(usd_disbursement_defl)) %>% 
+  select(projecttitle,
+         longdescription, 
+         donorname = ch_name, 
+         recipientname, 
+         disbursement_year = year, 
+         usd_disbursement_defl, 
+         identified_as_climate_because = identified_by_climate, 
+         channelname, 
+         agencyname, 
+         sdgfocus, 
+         climatemitigation, 
+         climateadaptation, 
+         usd_commitment, 
+         commitmentdate, 
+         db_ref) %>% 
+  write.xlsx(path_output_just_climate_all_xlsx)
+print_time_diff(start_time )
+
 
 
