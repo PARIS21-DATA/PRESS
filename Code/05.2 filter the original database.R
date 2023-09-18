@@ -13,6 +13,11 @@ crs_path_new <- paste0("data/intermediate/crs05.2",
                                    year(Sys.Date()), 
                                    ".rds")
 
+crs_path_new_feather <- paste0("data/intermediate/crs05.2", 
+                       job_specific_suffix, 
+                       year(Sys.Date()), 
+                       ".feather")
+
 crs_path_01_1 <- paste0("data/intermediate/crs01_1", 
                       job_specific_suffix, 
                       year(Sys.Date()), 
@@ -84,6 +89,43 @@ unique(df_crs01$process_id) %>% length
 
 rm(df_crs_wFilters, df_crs01)
 
+## !!! this section below will be moved to a much earlier stage
+df_descriptions <- df_crs_01_filtered %>% 
+  # filter(!is.na(longdescription), 
+  #        longdescription!="") %>% 
+  select(db_ref, longdescription) 
+
+df_descriptions <- df_descriptions %>% 
+  mutate(hash_longdesc = digest(longdescription, algo = "sha256"))
+
+
+hash_longdesc <- df_descriptions$longdescription %>% 
+  lapply(function(x) digest(x, algo = "sha256"))
+beepr::beep()
+length(hash_longdesc)
+hash_longdesc %>% unique %>% length
+
+df_descriptions$hash_longdesc <- hash_longdesc
+
+df_descriptions$hash_longdesc %>% unique %>% length
+
+df_descriptions <- df_descriptions %>% 
+  mutate(hash_longdesc_num = as.numeric(as.factor(hash_longdesc)))
+
+df_crs_01_filtered <- df_descriptions %>% 
+  select(db_ref, hash_longdesc, hash_longdesc_num) %>% 
+  inner_join(df_crs_01_filtered)
+
+df_crs_01_filtered <- df_crs_01_filtered %>% 
+  mutate(year = as.numeric(year)) %>% 
+  filter(!is.na(year))
+
+rm(df_descriptions)
+rm(hash_longdesc)
+
+## !!! this section above will be moved to a much earlier stage
+
 write_rds(df_crs_01_filtered, file = crs_path_new)
+write_feather(df_crs_01_filtered, crs_path_new_feather)
 beep()
 print_time_diff(start)

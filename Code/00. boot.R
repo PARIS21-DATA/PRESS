@@ -26,6 +26,7 @@ packages <-
     "tm", 
     "data.table", 
     "feather" # for quick save and read of files
+    , "digest" # hash value generator
   )
 # Install uninstalled packages
 lapply(packages[!(packages %in% installed.packages())], install.packages)
