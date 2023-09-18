@@ -1,9 +1,9 @@
 rm(list =ls())
 
 # 1. set up parameters and constant variables
-path_input_sdg_markers <- paste0("data/intermediate/09.1 sdg markers ", 
-                      year(Sys.Date()), 
-                      ".feather")
+path_input_sdg_markers <- paste0("data/intermediate/09.1 sdg markers UNIQUE goals ", 
+                                 year(Sys.Date()), 
+                                 ".feather")
 path_output_just_climate_xlsx <- paste0("output/press/", 
                                         Sys.Date(), 
                                         " climate data projects 2018-2021",
@@ -69,20 +69,10 @@ rm(df_climate_filters_agency,
 df_crs <- df_crs %>% 
   mutate(climate_marker = climateadaptation == 2|climatemitigation==2) 
 
-tmp_df_goal_per_proj <- df_sdgs %>% 
-  select(db_ref, sdg_goal) %>% 
-  distinct 
-
-vec_only_sdg13 <- tmp_df_goal_per_proj %>% 
-  group_by(db_ref) %>% 
-  summarise(cnt = n()) %>% 
-  filter(cnt == 1) %>% 
-  select(db_ref) %>% 
-  inner_join(tmp_df_goal_per_proj) %>% 
+vec_only_sdg13 <- df_sdgs %>% 
   filter(sdg_goal == 13) %>% 
   .$db_ref
 
-rm(tmp_df_goal_per_proj)
 rm(df_sdgs)
 
 df_crs <- df_crs %>% 
