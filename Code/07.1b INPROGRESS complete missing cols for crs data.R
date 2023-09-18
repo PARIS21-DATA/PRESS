@@ -2,6 +2,7 @@ source("code/06.2 add unified rec and region code to CRS.R")
 source("code/06.3 add donor codes to crs and survey.R")
 rm(list = ls())
 source("Code/00. boot.R")
+time_start <- Sys.time()
 path_crs_4ref <- "data/Intermediate/06.3 crs with donor code_2023.feather"
 
 path_crs_output_constant <- paste0("Output/CH/", 
@@ -15,10 +16,6 @@ path_crs_output <- paste0("Output/CH/",
 path_crs_output_RDS <- paste0("Output/CH/", 
                               Sys.Date(), 
                               " PRESS 2023 data.RDS")
-
-path_projects_2remove <- paste0("data/intermediate/07.1b_b social protection projects 2 remove ",
-                                year(Sys.Date()),
-                                ".rds")
 
 df_crs <- read_feather(path_crs_4ref)
 
@@ -45,7 +42,7 @@ rm(df_crs_commitment_year)
 
 
 df_crs <- df_crs  %>% 
-  mutate(idenfied_by_stat = ifelse(scb, 
+  mutate(identified_by_stat = ifelse(scb, 
                                     "PP", 
                                     ifelse(text_detection, 
                                            "title", 
@@ -54,7 +51,7 @@ df_crs <- df_crs  %>%
                                                   ifelse(d4d_addition_search|d4d_addition_match, 
                                                          "d4d", 
                                                          "something else")))))
-df_crs$idenfied_by_stat %>% table
+df_crs$identified_by_stat %>% table
 
 
 df_crs <- df_crs %>% 
@@ -64,13 +61,26 @@ df_crs <- df_crs %>%
   rename(dac_donorcode = donorcode_dac, 
          dac_donorname = donorname_dac)
 
+
+df_crs <- df_crs %>% 
+  rename(gen_desc = gender_filter_desc, 
+         gen_title = text_detection_gender)
+
+source("code/07.1c fix wb project on social protection.R")
+source("code/07.1d adding more gender filters and create identified by column.R")
+
 write_feather(df_crs, path_crs_output_constant)
 write_feather(df_crs,path_crs_output)
 saveRDS(df_crs, path_crs_output_RDS)
+print_time_diff(time_start)
 
+# df_crs_old <- read_feather("output/ch/2023-09-13 PRESS 2023 data.feather")
+# df_crs_old %>% 
+#   group_by(year) %>% 
+#   summarise(total = sum(usd_disbursement_defl, na.rm = T))
 
 df_crs %>% 
-  filter(idenfied_by_stat =="d4d") %>%
+  # filter(identified_by_stat =="d4d") %>%
   # filter(d4d_addition_search) %>%
   group_by(year) %>% 
   summarise(total = sum(usd_disbursement_defl, na.rm = T))
@@ -78,15 +88,14 @@ df_crs %>%
 df_crs$d4d_addition_search %>% table
 
 
-df_d4d_searched <- df_crs %>% 
-  filter(d4d_addition_search) %>%
-  filter(year > 2018) %>%
-  arrange(desc(usd_disbursement_defl)) %>%
-  select(projecttitle, usd_disbursement_defl, 
-         db_original_id, 
-         projectnumber, 
-         d4d_addition_search)
+# df_d4d_searched <- df_crs %>% 
+#   filter(d4d_addition_search) %>%
+#   filter(year > 2018) %>%
+#   arrange(desc(usd_disbursement_defl)) %>%
+#   select(projecttitle, usd_disbursement_defl, 
+#          db_original_id, 
+#          projectnumber, 
+#          d4d_addition_search)
 
-df_d4d <- read_xlsx("data/D4D/D4D Profiles data_2022_c.xlsx")
-names(df_d4d) <- tolower(names(df_d4d))
+
 

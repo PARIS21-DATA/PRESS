@@ -95,13 +95,18 @@ df_descriptions <- df_crs_01_filtered %>%
   #        longdescription!="") %>% 
   select(db_ref, longdescription) 
 
-df_descriptions <- df_descriptions %>% 
-  mutate(hash_longdesc = digest(longdescription, algo = "sha256"))
+print("before hashing values")
+print_time_diff(start)
+
+print_time_diff(start)
 
 
 hash_longdesc <- df_descriptions$longdescription %>% 
   lapply(function(x) digest(x, algo = "sha256"))
 beepr::beep()
+
+
+hash_longdesc <- unlist(hash_longdesc)
 length(hash_longdesc)
 hash_longdesc %>% unique %>% length
 

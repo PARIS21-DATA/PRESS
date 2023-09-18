@@ -6,10 +6,8 @@ marriage
 birth
 gender
 sex
-social protection
 GBV
 VAW
-data disaggregation
 Gender statistics
 Gender data
 Gender equality

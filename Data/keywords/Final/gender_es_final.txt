@@ -7,13 +7,11 @@ matrimonio
 nacimiento
 género
 sexo
-protección social
 violencia de género
-GBV 
-violencia contra las mujeres 
+GBV
+violencia contra las mujeres
 violencia contra la mujer
 VAW
-desglose de datos
 desglose por sexo
 índice de género
 indicadores de género

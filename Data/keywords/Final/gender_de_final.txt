@@ -6,12 +6,10 @@ Ehe
 Geburt
 gender
 Sex
-Sozialschutz
 geschlechtsspezifische Gewalt
 gbv
 Gewalt gegen Frauen
 vaw
-Datendisaggregation
 Geschlechtertrennung
 gender index
 Gender-Indikatoren
@@ -35,4 +33,3 @@ srhr
 intersektionell
 fgm
 gender sensitive
-

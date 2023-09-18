@@ -6,12 +6,10 @@ mariage
 naissance
 genre
 sexe
-la protection sociale
 violence sexiste
 VBG
 la violence à l'égard des femmes
 VAW
-désagrégation des données
 désagrégation par sexe
 indice de genre
 indicateurs de genre

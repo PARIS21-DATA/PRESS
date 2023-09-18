@@ -13,7 +13,7 @@ crs_path_input <- paste0("data/intermediate/crs05.3_onlystats",
 crs_raw_path_input <- paste0("Data/Intermediate/crs05.2", 
                              job_specific_suffix, 
                              year(Sys.Date()), 
-                             ".rds")
+                             ".feather")
 
 d4d_path_still_missing_output <- paste0("Data/Intermediate/crs05.5 still missing", 
                                    job_specific_suffix, 
@@ -46,7 +46,7 @@ df_d4d_not_in_crs %>%
 
 rm(df_d4d)
 
-df_crs <- readRDS(crs_raw_path_input)
+df_crs <- read_feather(crs_raw_path_input)
 
 table(df_crs$year)
 df_crs <- df_crs %>% 
