@@ -98,7 +98,7 @@ df_crs_data %>%
   mutate(bi_multi_merged = ifelse(bi_multi ==3, 1,
                                   ifelse(bi_multi > 6, 1, bi_multi))) %>% 
   group_by(bi_multi_merged,
-           ,  group = (year - 2010) %/% 3) %>% 
+           group = (year - 2010) %/% 3) %>% 
   summarise(total = sum(usd_disbursement_defl, na.rm = T)) %>% 
   mutate(group = group*3, 
          group = group+2012, 
@@ -119,7 +119,7 @@ df_crs_data %>%
   mutate(bi_multi_merged = ifelse(bi_multi ==3, 1,
                                   ifelse(bi_multi > 6, 1, bi_multi))) %>% 
   group_by(bi_multi_merged,
-           ,  group = (year - 2010) %/% 3) %>% 
+           group = (year - 2010) %/% 3) %>% 
   summarise(total = sum(usd_disbursement_defl, na.rm = T)) %>% 
   mutate(group = group*3, 
          group = group+2012, 

@@ -23,6 +23,12 @@ path_output_press_xlsx <- paste0("output/press/",
                                         # year(Sys.Date()), 
                                         ".xlsx")
 
+path_output_RDS <- paste0("output/press/", 
+                                        Sys.Date(),
+                                        " PRESS data with climate markers",
+                                        year(Sys.Date()),
+                                        ".RDS")
+
 # 2. load data
 df_crs <- read_feather("output/ch/current PRESS 2023 data.feather")
 
@@ -139,6 +145,9 @@ df_crs <- df_crs %>%
   mutate(identified_by_climate = replace_na(identified_by_climate, "not climate"))
 rm(df_climate_filter_order, tmp_df_climate_key_filter)
 
+df_crs %>% 
+  saveRDS(path_output_RDS)
+
 # 5. calculations
 
 df_crs %>% 
@@ -222,5 +231,70 @@ df_crs %>%
   write.xlsx(path_output_just_climate_all_xlsx)
 print_time_diff(start_time )
 
+
+# 6 share data with DI
+
+rm(# path_output_RDS,
+   path_output_just_climate_all_xlsx, 
+   path_output_press_xlsx, 
+   path_output_just_climate_xlsx)
+
+# df_crs <- readRDS(path_output_RDS)
+
+path_output_2share_RDS <- paste0("output/press/", 
+                          Sys.Date(),
+                          " PRESS data sharing P21-DI ",
+                          year(Sys.Date()),
+                          ".RDS")
+
+df_crs_raw <- read_feather("data/intermediate/crs05.2_full_2023.feather")
+
+setdiff(names(df_crs_raw), names(df_crs))
+
+setdiff(names(df_crs), names(df_crs_raw))
+
+df_crs_2share <- df_crs %>% 
+  select(-regionname) %>%
+  rename_with(~ gsub("^dac_", "", .), starts_with("dac_"))
+
+
+setdiff(names(df_crs_2share), names(df_crs_raw))
+setdiff(names(df_crs_raw), names(df_crs_2share))
+
+df_crs_2share <- df_crs_2share %>%
+  rename(crsid = db_original_id ) 
+
+df_crs_2share <- df_crs_2share %>%
+  select(-all_of(setdiff(names(df_crs_2share), names(df_crs_raw))[1:5]))
+
+setdiff(names(df_crs_2share), names(df_crs_raw))
+setdiff(names(df_crs_raw), names(df_crs_2share))
+
+df_crs_2share <- df_crs_2share %>%
+  select(-all_of(setdiff(names(df_crs_2share), names(df_crs_raw))[3:4])) %>% 
+  rename(infosys_title = infosys) 
+
+setdiff(names(df_crs_2share), names(df_crs_raw))
+setdiff(names(df_crs_raw), names(df_crs_2share))
+
+df_crs_2share <- df_crs_2share %>%
+  select(-all_of(setdiff(names(df_crs_2share), names(df_crs_raw))[8:9])) 
+
+setdiff(names(df_crs_2share), names(df_crs_raw))
+setdiff(names(df_crs_raw), names(df_crs_2share))
+
+names(df_crs_2share)
+
+df_crs_2share <- df_crs_2share %>% 
+  select(-all_of(names(df_crs_2share)[2:17]))
+
+names(df_crs_2share)
+
+df_crs_2share <- df_crs_2share %>% 
+  select(-all_of(names(df_crs_2share)[3:11]))
+
+
+df_crs_2share %>% 
+  saveRDS(path_output_2share_RDS)
 
 
