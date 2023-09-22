@@ -12,7 +12,7 @@ path_input_crs <- paste0("Data/Intermediate/crs05.2",
                          job_specific_suffix, 
                          year(Sys.Date()), 
                          ".feather")
-path_output_summary <- paste0("Data/Output/10.2 Frequency of data mentioned in gender projects ", 
+path_output_summary <- paste0("Output/press/charts PRESS 2023/10.2 Frequency of data mentioned in gender projects ", 
                               year(Sys.Date()), 
                               ".xlsx")
 

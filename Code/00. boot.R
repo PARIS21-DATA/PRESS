@@ -43,3 +43,5 @@ print_time_diff <- function(start_time) {
   difftime(Sys.time(),start_time, units = "sec") %>% print
 }
 
+source("code/00.1a functions_stem_and_concat.R")
+source("code/00.1b function_ts_summary.R")

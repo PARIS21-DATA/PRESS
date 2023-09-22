@@ -66,8 +66,28 @@ df_crs <- df_crs %>%
   rename(gen_desc = gender_filter_desc, 
          gen_title = text_detection_gender)
 
-source("code/07.1c fix wb project on social protection.R")
+
+df_crs <- df_crs %>% 
+  mutate(donor_type = ifelse(bi_multi == 4, 
+                             "Multilateral", 
+                             ifelse(bi_multi == 6, 
+                                    "Private", 
+                                    "Bilateral")))
+
+df_crs$finance_t %>% table
+df_financing_type <- tibble(finance_t = c(110, 421, 520), 
+                            finance_t_name = c("Standard grant",
+                                               "Standard loan", 
+                                               "Shares in collective investment vehicles "))
+
+df_crs <- df_crs %>% 
+  inner_join(df_financing_type) 
+rm(df_financing_type)
+
+source("code/07.1e remove some mistakes in the rmnch marking.R")
+# source("code/07.1c fix wb project on social protection.R")
 source("code/07.1d adding more gender filters and create identified by column.R")
+source("code/07.1b_c filter for innovation.R")
 
 write_feather(df_crs, path_crs_output_constant)
 write_feather(df_crs,path_crs_output)
