@@ -1,0 +1,178 @@
+*********************
+*** negative list ***
+*********************
+* belgium
+replace other_stats = 0 if crsid=="20180C2918" // something with drones detecting explosive remnants???
+
+*CaDB
+replace other_stats = 0 if strpos(projecttitle, "contamination survey") & purposecode!=16062
+
+* czech republic
+replace other_stats = 0 if strpos(projecttitle, "hydrogeological survey") & purposecode!=16062
+
+* denmark
+replace other_stats = 0 if strpos(projecttitle, "fiber optic backbone link")
+
+* France
+replace other_stats = 0 if strpos(projecttitle, "fasep 1096-creation de data centers souverains")
+replace other_stats = 0 if strpos(projecttitle, "soutien de la politique de l'éducation nationale")
+replace other_stats = 0 if strpos(projecttitle, "soutien aux politiques d'éducation")
+replace other_stats = 0 if strpos(projecttitle, "soutienpolitiqueeduc")
+replace other_stats = 0 if strpos(projecttitle, "enquete qualitative")
+replace other_stats = 0 if strpos(projecttitle, "sediment survey")
+
+* germany
+
+replace other_stats = 0 if strpos(projecttitle, "database to document human rights violations") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "wreck management information system") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "wreck management information system") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "patent information system") & purposecode!=16062
+replace other_stats = 0 if strpos(longdescription, "support the implementation of environmental legislation in particular as regards compliance or restoration of forest policy for private ownership of land") & purposecode!=16062
+
+
+* italy
+replace other_stats = 0 if strpos(projecttitle, "penitentiary information system") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "geophisical survey of the valley of the kings") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "metallic artefacts") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "philosophy / data sciences") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "increasing the number of international students attending phd courses in: data science") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "database for election observation missions") & purposecode!=16062
+drop if crsid == "2017000137" & purposecode == 16062 & donorname == "Italy" // asked to remove in 2022
+
+
+* luxembourg
+replace other_stats = 0 if strpos(projecttitle, "minusma: commission d'enquête internationale") & purposecode!=16062
+
+* netherlands
+replace other_stats = 0 if strpos(projecttitle, "survey on nl & id history") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "cot_port_cotonou_quai_survey") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "court decision database") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "cot_port_cotonou_quai_survey") & purposecode!=16062
+replace purposecode = 0 if strpos(projecttitle, "ilo rmg program") // purpose code is 16062!!!
+
+* poland
+replace other_stats = 0 if channelreportedname == "national bank of poland" // keep it in
+
+* sweden
+replace other_stats = 0 if strpos(projecttitle, "surveying political candidates") // sweden
+
+* switzerland
+replace other_stats = 0 if strpos(projecttitle, "small arms survey") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "mine survey") & purposecode!=16062
+
+* uk
+replace other_stats = 0 if strpos(projecttitle, "national accountability") & purposecode!=16062 // also eu
+replace other_stats = 0 if strpos(projecttitle, "international account") & purposecode!=16062 // also eu
+
+* us
+replace other_stats = 0 if strpos(projecttitle, "geological survey") & purposecode!=16062 // also eu
+replace other_stats = 0 if strpos(projecttitle, "remnants survey") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "explosive remnants") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "cluster munition and other conventional weapons survey") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "unexploded ordnance") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "explosive ordnance") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "clearance") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "demining") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "mine action") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "demining") & purposecode!=16062
+
+* denmark
+replace other_stats = 0 if strpos(projecttitle, "hydrogeological survey") & purposecode!=16062
+
+* japan
+replace other_stats = 0 if strpos(projecttitle, "risques des mines") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "disaster management information system") & purposecode!=16062
+
+* korea
+replace other_stats = 0 if strpos(projecttitle, "mine hazard") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "law information system") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "emergency management information system") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "public safety management information system") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "public saftey management information system") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "immigration information system") & purposecode!=16062
+
+* eu
+replace other_stats = 0 if strpos(projecttitle, "survey of hydrogeological") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "catastrophe") & purposecode!=16062
+
+* spain
+replace other_stats = 0 if strpos(projecttitle, "catastrophic") & purposecode!=16062
+
+* switzerland
+replace other_stats = 0 if strpos(projecttitle, "demining") & purposecode!=16062
+replace other_stats = 0 if strpos(projecttitle, "mine victims") & purposecode!=16062
+*replace other_stats = 0 if strpos(projecttitle, "mine victims") & purposecode!=16062
+
+/* as per Switzerland''s request to remove these projects */
+replace other_stats = 0 if crsid=="2020003921" &  strpos(projecttitle, "financement enquête et plaidoyer sur l'exploitation de la forêt en amazonie") &  donorname == "Switzerland"
+replace other_stats = 0 if crsid=="2018005231" &  strpos(projecttitle, "medici senza frontiere - sostegno per interventi in caso di catastrofe") & donorname == "Switzerland"
+replace other_stats = 0 if crsid=="2020006913" &  strpos(projecttitle, "mission d'enquête sur les résultats des projets au kwilu") & donorname == "Switzerland"
+replace other_stats = 0 if crsid=="2020008519" &  strpos(projecttitle, "survey comprehensive sexuality education - small action credit") &  donorname == "Switzerland"
+replace other_stats = 0 if crsid=="2020006926" &  strpos(projecttitle, "enquête conjointe et plaidoyer auprès des nations unies sur l'impact négatif des mégaprojets au guatemala") &  donorname == "Switzerland"
+replace other_stats = 0 if crsid=="2020008679" &  strpos(projecttitle, "fao/pam: enquête sécurité alimentaire - small action credit") & purposecode == 31110 &  donorname == "Switzerland"
+replace other_stats = 0 if crsid=="2020008679" &  strpos(projecttitle, "fao/pam: enquête sécurité alimentaire - small action credit") & purposecode == 43071 &  donorname == "Switzerland"
+
+
+* united arab emiates (refugee costs, camp information system in Jordan)
+replace other_stats = 0 if strpos(projecttitle, "information system related to the comp") & purposecode!=16062
+
+* individual projects
+replace other_stats = 0 if crsid=="2011000041"
+replace other_stats = 0 if crsid=="2016000008"
+replace other_stats = 0 if crsid=="2010000119"
+replace other_stats = 0 if crsid=="2011000448"
+replace other_stats = 0 if crsid=="2012000002"
+replace other_stats = 0 if crsid=="2013021796"
+replace other_stats = 0 if crsid=="2012000094"
+replace other_stats = 0 if crsid=="2012000093"
+replace other_stats = 0 if crsid=="2011000180"
+replace other_stats = 0 if crsid=="2013000005"
+
+*** exclusion based on purpose codes
+replace other_stats = 0 if purposecode==15250  // Removal of land mines and explosive remnants of war
+
+
+
+
+
+# revision on the keywords search
+
+## common keywords
+
+1. does translations like nationaux in french get stemmed to nationa so it won't be a problem?
+
+2. we need to change birth registr to birth registration. and many other similar registr keywords
+
+3. need to add data innovation
+
+4. why don't just search for data? how much it willl change?
+
+5. d4d could be added to acronyms
+
+6. need to add data center
+
+7. need to add immigration data
+
+8. spatial data
+
+9. data compilation? compile data?
+
+10. data driven
+
+11. openstreetmap
+
+12. satellite data
+
+13. financial sector stability fund channelcode==43000!!!!
+
+14. 50X2030
+
+15. peacebuilding data
+
+16. data4development
+
+## manual curation
+
+### manual additions
+
+1. financial access survey
