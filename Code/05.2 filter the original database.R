@@ -23,6 +23,8 @@ crs_path_01_1 <- paste0("data/intermediate/crs01_1",
                       year(Sys.Date()), 
                       ".rds")
 
+path_finance_type <- "data/auxiliary/finance types 2023.xlsx"
+
 df_crs_wFilters <- read_rds(crs_path)
 ### load data with process ids 
 # df_crs02 <- read_rds("data/Intermediate/crs02_utf8_full.rds")
@@ -128,9 +130,38 @@ df_crs_01_filtered <- df_crs_01_filtered %>%
 rm(df_descriptions)
 rm(hash_longdesc)
 
+
+
+df_finance_t <- read_xlsx(path_finance_type)
+
+df_finance_t <- df_finance_t %>% 
+  rename(finance_t = sub_category_code, 
+         finance_t_father_code = category_code, 
+         finance_t_name_original = sub_category, 
+         finance_t_name_father = category)
+
+df_crs_01_filtered <- df_crs_01_filtered %>% 
+  left_join(df_finance_t)
+
+
+df_crs_01_filtered <- df_crs_01_filtered %>% 
+  mutate(donor_type = ifelse(bi_multi == 4, 
+                             "Multilateral", 
+                             ifelse(bi_multi == 6, 
+                                    "Private", 
+                                    "Bilateral")))
+
+rm(df_finance_t, path_finance_type)
+
+
+
+
+
 ## !!! this section above will be moved to a much earlier stage
 
 write_rds(df_crs_01_filtered, file = crs_path_new)
 write_feather(df_crs_01_filtered, crs_path_new_feather)
 beep()
 print_time_diff(start)
+
+
