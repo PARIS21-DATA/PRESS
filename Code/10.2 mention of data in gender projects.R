@@ -19,9 +19,12 @@ path_output_summary <- paste0("Output/press/charts PRESS 2023/10.2 Frequency of 
 rm(job_specific_suffix)
 # 2. load data
 df_crs_data <- read_feather("output/ch/2023-09-15 PRESS 2023 data.feather")
+df_crs <- df_crs_data
 
-df_crs <- read_feather(path_input_crs)
+df_crs_raw <- read_feather(path_input_crs)
 print_time_diff(start_time)
+
+## Rows below only ran once. To create hash values for the project descriptions. 
 
 # df_crs <- df_crs %>% 
 #   filter(year != '\032')
@@ -39,7 +42,7 @@ print_time_diff(start_time)
 #   inner_join(df_crs)
 # write_rds(df_crs, file = path_input_crs)
 
-df_descriptions <- df_crs %>% 
+df_descriptions <- df_crs_raw %>% 
   select(hash_longdesc, longdescription) %>% 
   # filter(!is.na(longdescription),
   #        longdescription!="") %>%
@@ -54,26 +57,41 @@ source("code/10.2a produce summary table.R")
 
 df_summary_by_3year %>% 
   write.xlsx(path_output_summary)
-
-
-df_crs_simplified %>%
-  mutate(gender_reported = !is.na(gender)) %>% 
-  mutate(bi_multi = ifelse(bi_multi %in% c(1, 3, 7,8), 1, bi_multi)) %>% 
-  group_by( year, gender_reported, bi_multi) %>% 
-  summarise(cnt = n()) %>% 
-  spread(key = gender_reported, value =  cnt) %>% 
-  filter(year > 2018)
-  
-
-df_crs_simplified %>% 
-  mutate(gender_reported = !is.na(gender)) %>% 
-  group_by(year, gender_reported) %>% 
-  summarise(#cnt = n()
-            # , 
-            total = sum(usd_disbursement_defl, na.rm = T)
-            ) %>%
-  spread(key = gender_reported, value = total)
   
 
 print_time_diff(start_time)
+
+vec_gender <- c("gender|sex|women|woman|femm|girl|femal|reproduc|FGM|time use|time-use|unpaid|marriag|gbv|femini|vaw|matern|reproduct|srhr|mother|disagg")
+
+source("code/10.2b data projects mentioning gender.R")
+
+
+## by share would even work better
+df_crs %>% 
+  filter(!is.na(longdescription)) %>% 
+  filter(nchar(longdescription) > 100) %>%
+  filter(!gender_filter_both_desc, 
+         !gen_rmnch2) %>% 
+  group_by(year) %>% 
+  summarise(total = sum(usd_disbursement_defl,na.rm = T))
+
+## by total amount
+df_crs %>% 
+  filter(!gender_filter_both_desc, 
+         !gen_rmnch2) %>% 
+  mutate(mention_gender = F) %>% 
+  filter(!is.na(longdescription)) %>%
+  filter(nchar(longdescription) > 100) %>%
+  mutate(mention_gender = grepl(vec_gender,
+                                longdescription,
+                                ignore.case = T)) %>%
+  # mutate(mention_gender = ifelse(gen_marker1, 
+  #                                T, 
+  #                                mention_gender)) %>% 
+  fun_summarise_ts("mention_gender") %>% 
+  # mutate(share = `TRUE`/(`TRUE`+`FALSE`)) %>%
+  # mutate(usd_disbursement_defl = share) %>%
+  mutate(usd_disbursement_defl = `TRUE`) %>%
+  mutate(by_var = "total") %>%
+  fun_summarise_ts("by_var",rolling = T, 3)  
 
