@@ -22,14 +22,19 @@ codepages <- setNames(iconvlist(), iconvlist())
 
 ls_possible <- list()
 ls_possible[[1]] <- codepages
+# codepages[grep("16", codepages, T)]
+# codepages[grep("utf", codepages, T)]
+# codepages[grep("uni", codepages, T)]
 # ls_possible[[1]] <- codepages[c(1:50,52:419)]
 
 start <- Sys.time()
-input_file <- crs_txt_files[11]
+input_file <- crs_text_files
+# input_file <- crs_text_files[11]
+# input_file <- "~/downloads/CRS 2021 data.txt"
 n_rows <- 10
 
 x <- lapply(ls_possible[[length(ls_possible)]],
-            FUN = testing_read,
+            FUN = fun_testing_read,
             n_rows = n_rows,
             input_file = input_file) # you get lots of errors/warning here
 
