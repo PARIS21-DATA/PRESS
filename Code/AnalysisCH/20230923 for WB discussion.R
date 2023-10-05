@@ -96,8 +96,11 @@ df_wb_raw %>%
   write.xlsx("output/press/20230921 discussion with WB - non data projects 2.xlsx")
 
 
-df_wb_raw %>% 
+e_fig$top_sector_projects <- df_wb_raw %>% 
   filter(grepl("health|education|epidem|social prot|regist", projecttitle, T)) %>%
+  # filter(grepl("data|statist|census|survey",
+  #              longdescription,
+  #              T)) %>%
   group_by(projecttitle
            # , projectnumber
            ,recipientname
@@ -107,7 +110,24 @@ df_wb_raw %>%
   select(projecttitle,
          # projectnumber, 
          recipientname,
-         total)%>% 
+         total) %>% 
+  filter(total > 150) %>% 
+  left_join(df_wb_raw %>% select(projecttitle, projectnumber) ) %>%
+  mutate(projectnumber = gsub(pattern = "\\.crs\\d+$", 
+                              "", 
+                              projectnumber)) %>% 
+  distinct %>% 
+  group_by(projecttitle, 
+           recipientname, 
+           total) %>% 
+  summarise(projectnumbers = paste(projectnumber, 
+                                   collapse = "; "))
+
+
+
+e_fig$top_sector_projects$projectnumbers
+
+e_fig$top_sector_projects  %>% 
   write.xlsx("output/press/20230921 discussion with WB - sectoral projects.xlsx")
 
 
