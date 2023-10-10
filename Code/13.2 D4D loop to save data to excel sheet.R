@@ -71,7 +71,7 @@ addWorksheet(wb, "by purpose code and agency")
 writeData(wb, "by purpose code and agency",e_output$by_ppcode)
 
 
-## 3 save the workbook
+# 3 save the workbook
 
 path_output_excel = paste0("output/CH/D4D Validation/", 
                            var_donor_working, 
@@ -80,6 +80,10 @@ path_output_excel = paste0("output/CH/D4D Validation/",
                            " - review.xlsx")
 # Save the workbook
 saveWorkbook(wb, path_output_excel, overwrite = TRUE)
+
+# e_output$master %>% write_feather("data/intermediate/13.2 master data of a specific donor.feather")
+# df_crs_d4d %>% write_feather("data/intermediate/13.2 master data for D4D.feather")
+
 rm(list = ls(e_output), envir = e_output)
 
 removeWorksheet(wb, "master")

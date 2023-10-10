@@ -1,5 +1,3 @@
-
-
 names(e_output$fig_4)[2] <- var_donor_working
 names(e_output$fig_4)[3] <- "Total DAC"
 
@@ -32,7 +30,7 @@ p <- ggplot(df_long, aes(x = country, y = value, fill = sector_label)) +
   scale_y_continuous(labels = scales::percent) +
   # theme_minimal() +
   theme(
-    legend.position = "top",
+    legend.position = "right",
     axis.text.y = element_blank()
   ) +
   guides(fill = guide_legend(reverse = TRUE))
@@ -40,3 +38,7 @@ p <- ggplot(df_long, aes(x = country, y = value, fill = sector_label)) +
 # Print the plot
 print(p)
 
+output_path_fig <- paste0("output/CH/D4D Validation/Charts/", 
+                          var_donor_working, 
+                          "_fig2b.png")
+ggsave(output_path_fig,p)
