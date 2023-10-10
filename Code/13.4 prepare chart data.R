@@ -138,6 +138,7 @@ e_output$fig_5 <- df_crs_d4d_donor %>%
   summarise(total = sum(usd_disbursement_defl,na.rm = T)) %>% 
   group_by(year) %>% 
   mutate(share = round(total/sum(total)*100, 1)) %>% 
-  select(-total)
+  select(-total) %>% 
+  mutate(aid_t = substring(aid_t, 1,1))
   # right_join(e_output$sector_shares)
 e_output$fig_5 
