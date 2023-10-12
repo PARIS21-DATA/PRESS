@@ -27,7 +27,11 @@ packages <-
     "data.table", 
     "feather" # for quick save and read of files
     , "digest" # hash value generator
+    , "stringi" # Used for case-insensitive string matching
+    , "scales" # for percentage format conversion
+    , "gridExtra" # charts side by side
   )
+
 # Install uninstalled packages
 lapply(packages[!(packages %in% installed.packages())], install.packages)
 lapply(packages, library, character.only = TRUE)

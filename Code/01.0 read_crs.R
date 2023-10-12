@@ -18,7 +18,7 @@ start <- Sys.time()
 crs_zip_files <- paste(crs_zip_folder, list.files(crs_zip_folder), sep = "/")
 crs_zip_files <- crs_zip_files[grepl(".zip", crs_zip_files, fixed = T)]
 
-# if(length(list.files("./data/Raw/CRS/txt/"))!=0)  lapply(crs_zip_files, unzip,overwrite = T, exdir = crs_txt_folder)
+if(length(list.files("./data/Raw/CRS/txt/"))==0)  lapply(crs_zip_files, unzip,overwrite = T, exdir = crs_txt_folder)
 rm(crs_zip_folder, crs_zip_files)
 print_time_diff(start) # Time difference of 52.25433 secs
 
@@ -28,17 +28,28 @@ crs_txt_files <- crs_txt_files[grepl(".txt", crs_txt_files, fixed = T)]
 ### ---------
 # read txt
 start <- Sys.time()
-fun_read_csv <- function(var) {
+fun_read_csv <- function(var, enc ) {
   start_mini <- Sys.time()
   x <- read.csv(var,  sep = "|", header = T,
                 stringsAsFactors = F, 
-                fileEncoding = "LATIN1" ) 
+                # fileEncoding = "LATIN1" 
+                fileEncoding = enc
+                ) 
   print(var)
   print(paste0(nrow(x), " rows"))
   print_time_diff(start_mini)
   return(x)
 }
-list_crs <- lapply( crs_txt_files, FUN = fun_read_csv )
+
+# always test it beofre 
+# 
+# x <- read.csv(crs_txt_files[1],  
+#               sep = "|", header = T,
+#               stringsAsFactors = F, 
+#               # fileEncoding = "LATIN1" 
+#               fileEncoding = "UTF-16" 
+# ) 
+list_crs <- lapply( crs_txt_files, FUN = fun_read_csv , enc = "UTF-8")
 print_time_diff(start)
 #Time difference of 148.4077 secs
 
@@ -59,7 +70,8 @@ names(df_crs)<- tolower(names(df_crs))
 df_crs$process_id <- 1:nrow(df_crs)
 
 start <- Sys.time()
-readr::write_rds(df_crs, file =paste0("./Data/Raw/CRS/crs_full_", year(Sys.Date()),".rds") )
+write_feather(df_crs, file =paste0("./Data/Raw/CRS/crs_full_", year(Sys.Date()),".feather") )
+write_feather(df_crs, file =paste0("./Data/Raw/CRS/crs_full_", Sys.Date(),".feather") )
 print_time_diff(start)
 # Time difference of 33.25225 secs
 

@@ -18,26 +18,26 @@ path_crs_output_RDS <- paste0("Output/CH/",
                               " PRESS 2023 data.RDS")
 
 df_crs <- read_feather(path_crs_4ref)
+# 
+# df_crs <- df_crs %>% 
+#   mutate(year = as.numeric(year))
 
-df_crs <- df_crs %>% 
-  mutate(year = as.numeric(year))
+# df_crs <- df_crs %>% 
+#   filter(purposecode != 15250)
 
-df_crs <- df_crs %>% 
-  filter(purposecode != 15250)
+# df_crs_commitment_year <- df_crs %>% 
+#   ungroup %>% 
+#   select(commitmentdate, year) %>%
+#   unique %>% 
+#   mutate(commitment_year =  substr(commitmentdate, 1, 4))  %>% 
+#   mutate(commitment_year = as.numeric(commitment_year)) %>% 
+#   mutate(commitment_year = ifelse(is.na(commitment_year), year, commitment_year)) %>% 
+#   unique
+# 
+# df_crs <- df_crs %>% 
+#   inner_join(df_crs_commitment_year)
 
-df_crs_commitment_year <- df_crs %>% 
-  ungroup %>% 
-  select(commitmentdate, year) %>%
-  unique %>% 
-  mutate(commitment_year =  substr(commitmentdate, 1, 4))  %>% 
-  mutate(commitment_year = as.numeric(commitment_year)) %>% 
-  mutate(commitment_year = ifelse(is.na(commitment_year), year, commitment_year)) %>% 
-  unique
-
-df_crs <- df_crs %>% 
-  inner_join(df_crs_commitment_year)
-
-rm(df_crs_commitment_year)
+# rm(df_crs_commitment_year)
 
 
 
@@ -67,26 +67,26 @@ df_crs <- df_crs %>%
          gen_title = text_detection_gender)
 
 
-df_crs <- df_crs %>% 
-  mutate(donor_type = ifelse(bi_multi == 4, 
-                             "Multilateral", 
-                             ifelse(bi_multi == 6, 
-                                    "Private", 
-                                    "Bilateral")))
+# df_crs <- df_crs %>% 
+#   mutate(donor_type = ifelse(bi_multi == 4, 
+#                              "Multilateral", 
+#                              ifelse(bi_multi == 6, 
+#                                     "Private", 
+#                                     "Bilateral")))
 
-df_crs$finance_t %>% table
-df_financing_type <- tibble(finance_t = c(110, 421, 520), 
-                            finance_t_name = c("Standard grant",
-                                               "Standard loan", 
-                                               "Shares in collective investment vehicles "))
+# df_crs$finance_t %>% table
+# df_financing_type <- tibble(finance_t = c(110, 421, 520), 
+#                             finance_t_name = c("Standard grant",
+#                                                "Standard loan", 
+#                                                "Shares in collective investment vehicles "))
+# 
+# df_crs <- df_crs %>% 
+#   inner_join(df_financing_type) 
+# rm(df_financing_type)
 
-df_crs <- df_crs %>% 
-  inner_join(df_financing_type) 
-rm(df_financing_type)
-
-source("code/07.1e remove some mistakes in the rmnch marking.R")
+# source("code/07.1e remove some mistakes in the rmnch marking.R")
 # source("code/07.1c fix wb project on social protection.R")
-source("code/07.1d adding more gender filters and create identified by column.R")
+# source("code/07.1d adding more gender filters and create identified by column.R")
 source("code/07.1b_c filter for innovation.R")
 
 write_feather(df_crs, path_crs_output_constant)
