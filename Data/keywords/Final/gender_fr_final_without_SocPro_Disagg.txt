@@ -6,14 +6,11 @@ mariage
 naissance
 genre
 sexe
-la protection sociale
 violence sexiste
+VBG
 la violence à l'égard des femmes
-la violence à l'egard des femmes
-désagrégation des données
+VAW
 désagrégation par sexe
-desagregation des donnees
-desagregation par sexe
 indice de genre
 indicateurs de genre
 Statistiques sur le genre
@@ -22,24 +19,19 @@ Données sur le genre
 féminicide
 données sur l'utilisation du temps
 enquête sur l'utilisation du temps
+sdg5
 travail non rémunéré
 émancipation des femmes
+WEE
 réceptif à l'égalité des sexes
 parité hommes-femmes
 l'égalité des sexes
 intégration de la dimension de genre
-Donnees sur le genre
-egalite des sexes
-féminicide
-donnees sur l'utilisation du temps
-enquete sur l'utilisation du temps
-travail non remunere
-émancipation des femmes
-receptif a l'egalite des sexes
-parite hommes-femmes
-l'egalite des sexes
-integration de la dimension de genre
 prestation d'aide et de soins
 reproduction
+SRHR
+DSSR
 intersectionnel
+FGM
+MGF
 sensible au genre

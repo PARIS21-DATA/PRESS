@@ -1,16 +1,15 @@
 Frauen
 weiblich
 Mädchen
-madchen
 schwanger
 Ehe
 Geburt
 gender
 Sex
-Sozialschutz
 geschlechtsspezifische Gewalt
+gbv
 Gewalt gegen Frauen
-Datendisaggregation
+vaw
 Geschlechtertrennung
 gender index
 Gender-Indikatoren
@@ -20,15 +19,17 @@ Gleichstellung der Geschlechter
 Feminizid
 Zeitverwendungsdaten
 Zeitbudgeterhebung
+sdg5
 unbezahlte Arbeit
 Ermächtigung von Frauen
-ermachtigung von frauen
+wee
 geschlechtsspezifisch orientiert
 Geschlechterparität
-Geschlechterparitat
 Geschlechtergerechtigkeit
 Gender-Mainstreaming
 Pflegearbeiten
 Fortpflanzung
+srhr
 intersektionell
+fgm
 gender sensitive
