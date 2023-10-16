@@ -38,9 +38,9 @@ df_crs <- df_crs %>%
   # select(db_ref, projecttitle, scb) %>%
   # mutate(projecttitle = tolower(projecttitle)) %>%
   mutate(projecttitle_stem = stem_and_concatenate(projecttitle_lower, lang2analyse)) %>%
-  mutate(text_detection = str_detect(projecttitle_stem, paste(list_keywords_stem, collapse = "|")))  %>%
-  mutate(text_detection_gender =str_detect(projecttitle_stem, paste(list_keywords_gender_stem, collapse = "|")) ) %>% 
-  mutate(mining = str_detect(projecttitle_stem, paste(list_blacklist, collapse = "|"))  ) 
+  mutate(stat_title = str_detect(projecttitle_stem, paste(list_keywords_stem, collapse = "|")))  %>%
+  mutate(gen_title =str_detect(projecttitle_stem, paste(list_keywords_gender_stem, collapse = "|")) ) %>% 
+  mutate(mining_title = str_detect(projecttitle_stem, paste(list_blacklist, collapse = "|"))  ) 
   
 print_time_diff(start)
 
@@ -49,9 +49,14 @@ list_acronyms <- readLines(paste0("data/keywords/final/statistics_reduced_acrony
   trimws()
 list_acronyms <- paste0(" ", list_acronyms, " ")
 
+list_acronyms_gender <- readLines(paste0("data/keywords/final/gender_acronym_", lang2analyse, "_final.txt"), encoding = "UTF-8")  %>%
+  trimws()
+list_acronyms_gender <- paste0(" ", list_acronyms_gender, " ")
+
 df_crs <- df_crs %>%
   mutate(projecttitle_lower = paste0(" ", projecttitle_lower, " ")) %>%
-  mutate(text_detection = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | text_detection) 
+  mutate(stat_title = str_detect(projecttitle_lower, paste(list_acronyms, collapse = "|"))  | stat_title) %>% 
+  mutate(gen_title = str_detect(projecttitle_lower, paste(list_acronyms_gender, collapse = "|"))  | gen_title)
 
 df_crs <- df_crs %>%
   # mutate(text_detection_wo_mining = text_detection & !mining) %>%

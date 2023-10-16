@@ -76,7 +76,7 @@ df_crs <- df_crs %>%
 # 2.3 numeric years
 ###
 df_crs <- df_crs %>% 
-  mutate(year = as.numeric(year)) %>% 
+  mutate(year = as.numeric(year)) %>%
   filter(!is.na(year))
 
 ### ---------------
@@ -85,15 +85,19 @@ df_crs <- df_crs %>%
 
 df_crs_commitment_year <- df_crs %>% 
   ungroup %>% 
-  select(commitmentdate, year) %>%
+  select(commitmentdate) %>%
   unique %>% 
   mutate(commitment_year =  substr(commitmentdate, 1, 4))  %>% 
   mutate(commitment_year = as.numeric(commitment_year)) %>% 
-  mutate(commitment_year = ifelse(is.na(commitment_year), year, commitment_year)) %>% 
+  # mutate(commitment_year = ifelse(is.na(commitment_year), year, commitment_year)) %>% 
   unique
 
 df_crs <- df_crs %>% 
-  inner_join(df_crs_commitment_year)
+  left_join(df_crs_commitment_year) %>% 
+  mutate(commitment_year = ifelse(is.na(commitment_year), year, commitment_year)) 
+
+df_crs %>% 
+  filter(is.na(commitment_year))
 
 rm(df_crs_commitment_year)
 
@@ -104,11 +108,14 @@ rm(df_crs_commitment_year)
 df_financing_type <- tibble(finance_t = c(110, 421, 520), 
                             finance_t_name_simplified = c("Standard grant",
                                                "Standard loan", 
-                                               "Shares in collective investment vehicles ")) %>% 
-  mutate(finance_t_name = finance_t_name_simplified)
+                                               "Shares in collective investment vehicles ")) 
 
 df_crs <- df_crs %>% 
-  inner_join(df_financing_type) 
+  left_join(df_financing_type)  %>% 
+  mutate(finance_t_name_simplified = ifelse(is.na(finance_t_name_simplified), 
+                                            "", 
+                                            finance_t_name_simplified))%>% 
+  mutate(finance_t_name = finance_t_name_simplified)
 rm(df_financing_type)
 
 

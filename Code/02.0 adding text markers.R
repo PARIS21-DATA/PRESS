@@ -15,7 +15,7 @@ skip_icov <- T
 job_specific_suffix <- "_full_"
 path_input_crs <- paste0("./Data/intermediate/crs01_1", job_specific_suffix,year(Sys.Date()),  ".feather")
 path_intermediate_crs_after_cleaning <- paste0("./Data/intermediate/crs02_int_clean_titles", job_specific_suffix,year(Sys.Date()),  ".feather")
-path_output_crs <- paste0("./Data/intermediate/crs02", job_specific_suffix,year(Sys.Date()), ".feather")
+path_output_crs <- paste0("./Data/intermediate/crs02.0", job_specific_suffix,year(Sys.Date()), ".feather")
 start <- Sys.time()
 
 
@@ -57,6 +57,8 @@ beep()
 ### ---------------
 # 2. processing text data
 ###
+df_crs <- df_crs %>% 
+  mutate(title_id = as.numeric(as.factor(tolower(projecttitle))))
 
 source("code/02.0a identify desc2mine of each project.R")
 
@@ -97,8 +99,7 @@ df_crs %>%
   select(-cols_needed[which(!cols_needed %in% c("process_id", "longdescription"))])
 
 
-df_crs <- df_crs  %>% 
-  mutate(title_id = as.numeric(as.factor(projecttitle))) 
+
   
 
 df_crs_lang <- df_crs %>%
@@ -142,6 +143,17 @@ vec_cols_2keep <- names(df_crs)[!names(df_crs) %in% names(df_crs_raw)]
 df_crs <- df_crs %>%
   select(process_id, all_of(vec_cols_2keep)) %>%
   right_join(df_crs_raw)
+names(df_crs)
+# df_crs <- df_crs %>% 
+#   select(-projecttitle, 
+#          -longdescription, 
+#          -purposecode, 
+#          -donorname, 
+#          -gender, 
+#          -channelcode,
+#          -rmnch
+#          # -year, 
+#          )
 
 
 rm(df_crs_lang)

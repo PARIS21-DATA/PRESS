@@ -31,34 +31,34 @@ print_time_diff(start)
 
 if(job == "gen") {
   df_crs_1 <- df_crs %>% 
-    filter( text_filter_gender_narrower
-            , language==lang
+    filter( gen_markers_title
+            , language_desc==lang
     ) %>% 
-    filter(!duplicated(text_id)) %>%
-    select(description = desc_2mine, text_id)
+    filter(!duplicated(desc_2mine_id)) %>%
+    select(description = desc_2mine, desc_2mine_id)
   
   df_crs_0 <- df_crs %>%
-    filter(!text_filter_gender_narrower 
-            , language==lang
+    filter(!gen_markers_title
+            , language_desc==lang
     ) %>% 
-    filter(!duplicated(text_id)) %>%
-    select(description = desc_2mine, text_id)
+    filter(!duplicated(desc_2mine_id)) %>%
+    select(description = desc_2mine, desc_2mine_id)
   print_time_diff(start)
 } else {
   
   df_crs_1 <- df_crs %>%
-    filter( stats_filter 
-            , language==lang
+    filter( stat_title_ppcode
+            , language_desc==lang
     ) %>% 
-    filter(!duplicated(text_id)) %>%
-    select(description = desc_2mine, text_id)
+    filter(!duplicated(desc_2mine_id)) %>%
+    select(description = desc_2mine, desc_2mine_id)
   
   df_crs_0 <- df_crs %>%
-    filter( !stats_filter 
-            , language==lang
+    filter( !stat_title_ppcode
+            , language_desc==lang
     ) %>% 
-    filter(!duplicated(text_id)) %>%
-    select(description = desc_2mine, text_id)
+    filter(!duplicated(desc_2mine_id)) %>%
+    select(description = desc_2mine, desc_2mine_id)
   print_time_diff(start)
   
 }
