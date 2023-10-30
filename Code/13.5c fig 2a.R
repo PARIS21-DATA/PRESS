@@ -1,11 +1,13 @@
-library(ggplot2)
-library(tidyr)
-library(dplyr)
 
 # 1. Data Preprocessing
 
 # Convert to title-case
+e_output$fig_3 <- e_output$fig_3 %>% 
+  mutate(marker = case_when(marker == "rmnch" ~ "reproductive,\nmaternal,\nnewborn\nand child\nhealth", 
+                            marker == "pdgg" ~ "participatory\ndevelopment,\ngood\ngovernance", 
+                            TRUE ~ marker))
 e_output$fig_3$marker <- tools::toTitleCase(e_output$fig_3$marker)
+
 
 # Convert to long format
 e_output$fig_3_long <- e_output$fig_3 %>%
@@ -13,8 +15,9 @@ e_output$fig_3_long <- e_output$fig_3 %>%
   mutate(
     category = factor(category, levels = c("<NA>", "0", "1", "2"),
                       labels = c("Not screened", "Not an objective", "Partial objective", "Principal objective")),
-    direction = ifelse(category %in% c("Not screened", "Not an objective"), "left", "right")
+    direction = ifelse(category %in% c("Not an objective", "Not screened"), "left", "right")
   ) %>%
+  # mutate(category = as.factor(category)) %>% 
   group_by(marker, direction) %>%
   arrange(desc(category)) %>%
   mutate(cumsum = cumsum(share)) %>%
@@ -23,13 +26,16 @@ e_output$fig_3_long <- e_output$fig_3 %>%
 e_output$fig_3_long <- e_output$fig_3_long %>%
   group_by(marker) %>%
   mutate(total = sum(share[category %in% c("Partial objective", "Principal objective")])) %>%
-  ungroup()
+  ungroup() %>% 
+  arrange(marker, category)
 
 # Define colors
 color_map <- c("Not screened" = "grey", 
                "Not an objective" = "#708090",
-               "Partial objective" = "blue", 
-               "Principal objective" = "red")
+               "Partial objective" = "#5B8CA2", 
+               "Principal objective" = "#04456A")
+
+
 
 # Assume e_output$fig_3_long is available as specified
 
@@ -45,7 +51,7 @@ label_data <- e_output$fig_3_long %>%
          category = "")
 
 # 2. Building the Plot
-p <- ggplot(e_output$fig_3_long, aes(x = marker, y = share, fill = category)) +
+p1 <- ggplot(e_output$fig_3_long, aes(x = marker, y = share, fill = category)) +
   geom_bar(data = ~ subset(., direction == "left"), 
            aes(y = -share), stat = "identity") +
   geom_bar(data = ~ subset(., direction == "right"),
@@ -68,14 +74,31 @@ p <- ggplot(e_output$fig_3_long, aes(x = marker, y = share, fill = category)) +
         axis.text.y = element_blank()) +
   guides(fill = guide_legend(reverse = TRUE)) 
 
-rm(label_data)
-# Display the plot
-print(p)
+# rm(label_data)
 
-output_path_fig <- paste0("output/CH/D4D Validation/Charts/", 
-                          var_donor_working, 
-                          "_fig2a.png")
-ggsave(output_path_fig,p)
+p1 <- p1 +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    axis.text.x = element_text(size = 12),
+    # axis.text.y = element_text(size = 12),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
+  ) +
+  labs(
+    title = "By Policy Objectives",
+    # subtitle = "2021 constant USD, millions",
+    x = "",
+    y = ""
+  )
+
+# Display the plot
+print(p1)
+
+# output_path_fig <- paste0("output/CH/D4D Validation/Charts/", 
+#                           var_donor_working, 
+#                           "_fig2a.png")
+# ggsave(output_path_fig,p1)
 
 
 

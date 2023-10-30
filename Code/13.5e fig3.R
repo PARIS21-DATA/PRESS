@@ -1,6 +1,3 @@
-library(dplyr)
-library(ggplot2)
-library(scales)
 
 # Sample data
 # Note: Always ensure to check with your actual data
@@ -89,7 +86,7 @@ p <- ggplot(final_data, aes(x = as.factor(year), y = share, fill = color)) +
                       breaks = col_assign,
                       labels = wrapped_labels) +  # Use wrapped labels
   labs(
-    title = "ODA to data and statistics by type of aid",
+    title = "By Types of Aid",
     x = "",
     y = "",
     fill = ""
@@ -105,8 +102,19 @@ p <- p +
   scale_y_continuous(labels = scales::percent_format(scale = 1, accuracy = 1))
 
 
+p <- p +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 14)
+  ) 
+
+
 # Display the plot
-print(p)
+# print(p)
 
 
 rm(col_assign, wrapped_labels)
@@ -115,6 +123,6 @@ rm(final_data)
 
 output_path_fig <- paste0("output/CH/D4D Validation/Charts/", 
                           var_donor_working, 
-                          "_fig3.png")
+                          "_fig3.svg")
 ggsave(output_path_fig,p)
 

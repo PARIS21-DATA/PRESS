@@ -10,11 +10,18 @@ df_long <- e_output$fig_4 %>%
 
 # Distinguishable, print-friendly and colorblind-friendly colors
 okabe_ito_palette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+# c("#04456A", "#F1E5C2")
+# c("#04456A","#376D8B","#5B8CA2","#BCBFA4", "#F1E5C2")
+# tmp_fun <- colorRampPalette(c("#1D7874", "#ED5539","#F5A242","#704943","#474970"))
+# okabe_ito_palette <- tmp_fun(8)
+# c("#04456A","#376D8B","#5B8CA2","#BCBFA4", "#F1E5C2")
+# rm(tmp_fun)
+# okabe_ito_palette <- c("#04456A","#1D7874","#325F72","#474970","#704943","#964E3E", "#ED5539","#F0783E")
 
 # Assign colors to each level (using additional grey for "Other")
 col_assign <- setNames(c( okabe_ito_palette, "white"), levels(e_output$fig_4$sector_label))
 
-p <- ggplot(df_long, aes(x = country, y = value, fill = sector_label)) +
+p2 <- ggplot(df_long, aes(x = country, y = value, fill = sector_label)) +
   geom_bar(stat = "identity") +
   geom_bar(data = subset(df_long, sector_label == "Other"), 
            aes(y = value), fill = NA, color = "black", linetype = "dotted", size = 0.5,
@@ -35,10 +42,27 @@ p <- ggplot(df_long, aes(x = country, y = value, fill = sector_label)) +
   ) +
   guides(fill = guide_legend(reverse = TRUE))
 
-# Print the plot
-print(p)
 
-output_path_fig <- paste0("output/CH/D4D Validation/Charts/", 
-                          var_donor_working, 
-                          "_fig2b.png")
-ggsave(output_path_fig,p)
+p2 <- p2 +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    axis.text.x = element_text(size = 12),
+    # axis.text.y = element_text(size = 12),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
+  ) +
+  labs(
+    title = "By Statistical Domains",
+    # subtitle = "2021 constant USD, millions",
+    x = "",
+    y = ""
+  )
+
+# Print the plot
+print(p2)
+
+# output_path_fig <- paste0("output/CH/D4D Validation/Charts/", 
+                          # var_donor_working, 
+                          # "_fig2b.png")
+# ggsave(output_path_fig,p2)
