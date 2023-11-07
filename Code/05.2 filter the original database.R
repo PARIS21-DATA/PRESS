@@ -4,28 +4,34 @@ start <- Sys.time()
 ### start merging filtered results to data
 ### load filtered results
 job_specific_suffix <- "_full_"
-crs_path <- paste0("Data/Intermediate/crs05", 
+path_input_crs_filters <- paste0("Data/Intermediate/crs05", 
                                    job_specific_suffix, 
                                    year(Sys.Date()), 
-                                   ".rds")
-crs_path_new <- paste0("data/intermediate/crs05.2", 
+                                   ".feather")
+path_output <- paste0("data/intermediate/crs05.2", 
                                    job_specific_suffix, 
                                    year(Sys.Date()), 
                                    ".rds")
 
-crs_path_new_feather <- paste0("data/intermediate/crs05.2", 
+path_output_feather <- paste0("data/intermediate/crs05.2", 
                        job_specific_suffix, 
                        year(Sys.Date()), 
                        ".feather")
 
-crs_path_01_1 <- paste0("data/intermediate/crs01_1", 
+path_input_crs_full_data <- paste0("data/intermediate/crs01_1", 
                       job_specific_suffix, 
                       year(Sys.Date()), 
-                      ".rds")
+                      ".feather")
 
-path_finance_type <- "data/auxiliary/finance types 2023.xlsx"
+path_output_stat_ids <- paste0("data/auxiliary/05.2 List of ids before d4d examine ",
+                               year(Sys.Date()),
+                               ".rds")
 
-df_crs_wFilters <- read_rds(crs_path)
+# path_finance_type <- "data/auxiliary/finance types 2023.xlsx"
+
+# df_crs_wFilters <- df_crs
+# rm(df_crs)
+df_crs_wFilters <- read_feather(path_input_crs_filters)
 ### load data with process ids 
 # df_crs02 <- read_rds("data/Intermediate/crs02_utf8_full.rds")
 
@@ -66,10 +72,11 @@ gc()
 
 # now merging with crs01. The very raw data
 
-df_crs01 <- read_rds(crs_path_01_1)
+df_crs01 <- read_feather(path_input_crs_full_data)
 
 names(df_crs_wFilters)
 names(df_crs01)
+
 
 names(df_crs_wFilters)[!names(df_crs_wFilters) %in% names(df_crs01)]
 names(df_crs01)[!names(df_crs01) %in% names(df_crs_wFilters)]
@@ -82,7 +89,18 @@ unique(df_crs01$process_id) %>% length
 
 df_crs_01_filtered <- df_crs_wFilters %>% 
   # only keep the filters you got
-  select(-projecttitle, -shortdescription, -longdescription, -purposecode, -donorname, -gender, -channelcode) %>% 
+  select(-projecttitle, 
+         -year, 
+         -bi_multi, 
+         -finance_t, 
+         -rmnch,
+         -commitmentdate,
+         -shortdescription, 
+         -longdescription, 
+         -purposecode, 
+         -donorname, 
+         -gender, 
+         -channelcode) %>% 
   # use innerjoin to check the consistency
   inner_join(df_crs01)
 
@@ -90,47 +108,7 @@ unique(df_crs_wFilters$process_id) %>% length
 unique(df_crs01$process_id) %>% length
 
 rm(df_crs_wFilters, df_crs01)
-
-## !!! this section below will be moved to a much earlier stage
-df_descriptions <- df_crs_01_filtered %>% 
-  # filter(!is.na(longdescription), 
-  #        longdescription!="") %>% 
-  select(db_ref, longdescription) 
-
-print("before hashing values")
-print_time_diff(start)
-
-print_time_diff(start)
-
-
-hash_longdesc <- df_descriptions$longdescription %>% 
-  lapply(function(x) digest(x, algo = "sha256"))
-beepr::beep()
-
-
-hash_longdesc <- unlist(hash_longdesc)
-length(hash_longdesc)
-hash_longdesc %>% unique %>% length
-
-df_descriptions$hash_longdesc <- hash_longdesc
-
-df_descriptions$hash_longdesc %>% unique %>% length
-
-df_descriptions <- df_descriptions %>% 
-  mutate(hash_longdesc_num = as.numeric(as.factor(hash_longdesc)))
-
-df_crs_01_filtered <- df_descriptions %>% 
-  select(db_ref, hash_longdesc, hash_longdesc_num) %>% 
-  inner_join(df_crs_01_filtered)
-
-# df_crs_01_filtered <- df_crs_01_filtered %>% 
-#   mutate(year = as.numeric(year)) %>% 
-#   filter(!is.na(year))
-
-rm(df_descriptions)
-rm(hash_longdesc)
-
-
+gc()
 
 # df_finance_t <- read_xlsx(path_finance_type)
 # 
@@ -159,8 +137,13 @@ rm(hash_longdesc)
 
 ## !!! this section above will be moved to a much earlier stage
 
-write_rds(df_crs_01_filtered, file = crs_path_new)
-write_feather(df_crs_01_filtered, crs_path_new_feather)
+# write_rds(df_crs_01_filtered, file = path_output)
+write_feather(df_crs_01_filtered, path_output_feather)
+# vec_stat_ids <- df_crs_01_filtered %>% 
+#   filter(stat) %>% 
+#   .$process_id
+# vec_stat_ids %>% 
+#   saveRDS(path_output_stat_ids)
 beep()
 print_time_diff(start)
 

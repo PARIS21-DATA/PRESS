@@ -67,13 +67,13 @@ list_identified <- tidytext::tidy(dtm_crs_0) %>%
   as.numeric
 print_time_diff(start)
 
-positive_text_id <- df_crs_0 %>%
+positive_desc_id <- df_crs_0 %>%
   mutate(document = 1:nrow(df_crs_0)) %>%
   filter(document %in% list_identified) %>%
-  .$text_id 
+  .$desc_2mine_id 
 beep()
 
-df_crs_0 %>% filter(text_id %in% positive_text_id) %>% .$description %>% head(20) %>%  print 
+df_crs_0 %>% filter(desc_2mine_id %in% positive_desc_id) %>% .$description %>% head(20) %>%  print 
 # a = df_crs_0 %>% 
 #   select(text_id, description) %>% 
 #   filter(text_id %in% positive_text_id)
@@ -86,7 +86,7 @@ df_crs_0 %>% filter(text_id %in% positive_text_id) %>% .$description %>% head(20
 #   filter(is.na(description.x)|is.na(description.y))
 # c$description.x
 
-write_rds(positive_text_id, file = crs_path_new)
+write_rds(positive_desc_id, file = crs_path_new)
 
 print_time_diff(start)
 # rm(list = ls())

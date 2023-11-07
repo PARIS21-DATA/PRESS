@@ -1,6 +1,6 @@
 rm(list = ls())
 source("code/00. boot.R")
-source("code/00.1 functions.R")
+# source("code/00.1 functions.R")
 
 # reading in the data from the survey 
 ####################################
@@ -21,14 +21,19 @@ path_output_survey <- paste0("Data/Intermediate/06.3 survey with donor code_",
                           year(Sys.Date())
                           ,".feather")
 
-path_donors_crs <- "data/auxiliary/reporters_crs_2023.rds"
+path_donors_crs <- "data/auxiliary/reporters_crs_2023.feather"
 path_donors_survey <- "data/auxiliary/reporters_survey_2022.rds"
 
 
 # 1 load data::
 load(path_input)
-df_reporters_crs <- read_rds(file = path_donors_crs)
+df_reporters_crs <- read_feather(path_donors_crs)
 df_reporters_survey <- read_rds(file = path_donors_survey)
+
+# df_reporters_crs_addition <- read_xlsx("data/auxiliary/reporters_d4d_2023_202310.xlsx")
+# df_reporters_crs <- rbind(df_reporters_crs, 
+#                           df_reporters_crs_addition)
+# write_feather(df_reporters_crs, "data/auxiliary/reporters_crs_2023.feather")
 
 # 2 work on CRS data:
 names(df_reporters_crs)
@@ -47,6 +52,17 @@ df_crs %>%
   select(donorname, donorcode) %>% 
   distinct 
 
+# df_crs_donors_missing <- df_crs %>% 
+#   left_join(df_reporters_crs_4merge) %>% 
+#   filter(is.na(ch_name)) %>% 
+#   select(donorname, donorcode) %>% 
+#   distinct 
+
+# df_crs_donors_missing$donorname
+
+# df_crs_donors_missing %>% 
+#   filter(donorcode %in% df_reporters_crs_4merge)
+
 # after testing merge only by donorcode
 df_reporters_crs_4merge <- df_reporters_crs %>% 
   select(#donorname = crs_name_en, 
@@ -59,8 +75,8 @@ df_crs <- df_crs %>%
   inner_join(df_reporters_crs_4merge)
 
 df_crs <- df_crs %>% 
-  rename(donorname_dac = donorname, 
-         donorcode_dac = donorcode)
+  rename(dac_donorname = donorname, 
+         dac_donorcode = donorcode)
 rm(df_crs_new)
 
 # # add Liechtenstein in 2023

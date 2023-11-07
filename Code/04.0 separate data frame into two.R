@@ -6,7 +6,7 @@ source("code/00.3 functions_yu.R")
 job <- read_rds("data/Intermediate/crs04_job_utf8_full.rds")
 job_specific_suffix <- "_full_"
 crs_path <- paste0("./Data/intermediate/crs03",
-                   job_specific_suffix, year(Sys.Date()), ".rds")
+                   job_specific_suffix, year(Sys.Date()), ".feather")
 
 if(job == "gen") job_specific_suffix <- "_gen_full_"
 
@@ -16,7 +16,7 @@ crs_path_new_1 <- paste0("./Data/intermediate/crs04.0_crs1_", lang,job_specific_
 crs_path_new_0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang,job_specific_suffix, year(Sys.Date()), ".rds")
 start <- Sys.time()
 
-df_crs <- read_rds(crs_path)
+df_crs <- read_feather(crs_path)
 print_time_diff(start)
 
 

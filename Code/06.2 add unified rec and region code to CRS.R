@@ -1,6 +1,5 @@
 rm(list = ls())
 source("code/00. boot.R")
-source("code/00.1 functions.R")
 
 # reading in the data from the survey 
 ####################################
@@ -15,17 +14,18 @@ path_input_survey <- paste0("Data/Intermediate/06.1b survey merged with correcte
 
 path_input_crs <- paste0("Data/Intermediate/crs05.3_onlystats_full_", 
                          year(Sys.Date())
-                         ,".rds")
+                         ,".feather")
 
 path_output <- paste0("Data/Intermediate/06.2 crs and press with region and country code_", 
                                   year(Sys.Date())
                                   ,".Rdata")
 
-path_aux_region <- "data/auxiliary/regions.rds"
+path_aux_region <- "data/auxiliary/new_regions_2023.feather"
 
 # 5 merge with CRS data
-df_region <- readRDS(path_aux_region)
-df_crs <- read_rds(path_input_crs) 
+# df_region <- readRDS(path_aux_region)
+df_region <- read_feather(path_aux_region)
+df_crs <- read_feather(path_input_crs) 
 df_survey <- readRDS(path_input_survey)
 
 df_crs %>% 
@@ -35,7 +35,7 @@ df_crs %>%
 df_crs <- df_crs %>%
   dplyr::rename(db_original_id = crsid) %>% 
   rename(dac_regionname = regionname, 
-         dac_regionncode = regioncode, 
+         dac_regioncode = regioncode, 
          dac_recipientcode = recipientcode
   )
 
@@ -49,6 +49,8 @@ df_region %>%
   distinct %>% 
   filter(duplicated(recipientname))
 
+names(df_region)
+
 df_region_simplified <- df_region %>% 
   select(-regioncode_larger, -regionname_larger, -recipientname) %>% 
   distinct
@@ -57,6 +59,8 @@ df_crs <- df_crs %>%
   left_join(df_region_simplified)
 
 df_crs %>% filter(is.na(regionname)) %>% nrow()
+
+df_crs %>% filter(is.na(regionname)) %>% select(dac_regionname, recipientname)
 # fix an isssue of no matching.
 # 20230627 adding another row on Bilateral, unspecified
 # df_crs %>% filter(is.na(regionname)) %>% select(recipientname, dac_recipientcode) %>% unique

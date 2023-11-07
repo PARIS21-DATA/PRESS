@@ -107,15 +107,13 @@ df_crs <- df_crs %>%
 
 # attributes(df_crs$stats_filter)$description = "title contains keywords for statistics or purposecode 16062, but not keywords for demining and small arms"
 
-table(df_crs$stats_title_ex_mining) %>% print
-table(df_crs$stats_title_ppcode) %>% print
+table(df_crs$stat_title_ex_mining) %>% print
+table(df_crs$stat_title_ppcode) %>% print
 # which(is.na(df_crs$text_detection_wo_mining_w_scb))
 print_time_diff(start)
 
 df_crs <- df_crs %>%
   mutate(gen_markers_title = gen_donor|gen_ppcode|gen_title|gen_marker2|gen_channel|gen_agency|gen_sdg|gen_rmnch2)  
-
-
 
 
 # legacy columns
