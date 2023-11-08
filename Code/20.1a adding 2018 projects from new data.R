@@ -67,7 +67,7 @@ df_crs_2018_joined <- df_crs_2018_joined %>%
                                   ifelse(commitment_year < 2013,
                                          year, 
                                          commitment_year))) %>% 
-  mutate(donor_type = NA, 
+  mutate(#donor_type = NA, 
          finance_t_name = NA)
 
 df_donors <- read_feather("data/auxiliary/reporters_crs_2023.feather")
@@ -84,6 +84,14 @@ df_crs_2018_joined <- df_crs_2018_joined %>%
 
 df_crs_2018_joined <- df_crs_2018_joined %>% 
   mutate(finance_t_name = ifelse(finance_t == 421, "Standard loan", "Standard grant"))
+
+df_crs_2018_joined$bi_multi 
+
+df_crs_2018_joined <- df_crs_2018_joined %>% 
+  mutate(donor_type = case_when(bi_multi == 1 ~ "Bilateral", 
+                                bi_multi == 4 ~ "Multilateral", 
+                                bi_multi == 6 ~ "Private", 
+                                TRUE ~"NA"))
 
 df_crs_new <- df_crs %>% 
   plyr::rbind.fill(df_crs_2018_joined)

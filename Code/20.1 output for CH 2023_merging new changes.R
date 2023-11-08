@@ -1,16 +1,16 @@
-rm(list = ls())
-
-df_crs <- read_feather("output/CH/2023-09-15 PRESS 2023 data.feather")
-df_crs_morecols <- read_feather("output/CH/2023-09-19 PRESS 2023 data.feather")
-setdiff(names(df_crs_morecols),
-        names(df_crs))
-
-df_crs <- df_crs_morecols %>% 
-  select(db_ref, 
-         donor_type, 
-         finance_t_name) %>% 
-  inner_join(df_crs)
-rm(df_crs_morecols)
+# rm(list = ls())
+# 
+# df_crs1 <- read_feather("output/CH/2023-09-15 PRESS 2023 data.feather")
+# df_crs_morecols <- read_feather("output/CH/2023-09-19 PRESS 2023 data.feather")
+# setdiff(names(df_crs_morecols),
+#         names(df_crs))
+# 
+# df_crs <- df_crs_morecols %>% 
+#   select(db_ref, 
+#          donor_type, 
+#          finance_t_name) %>% 
+#   inner_join(df_crs)
+# rm(df_crs_morecols)
 # 
 # df_crs %>% 
 #   group_by(year) %>% 
@@ -58,18 +58,18 @@ names(df_standard)
 #   write_feather("data/auxiliary/new_regions_2023.feather")
 
 
-df_standard$bi_multi
-df_crs$bi_multi
+# df_standard$bi_multi
+# df_crs$bi_multi
 # no need to change bi_multi
 
-df_standard$ReporterType %>% table
-df_crs$donor_type %>% table
-df_standard$role %>% table
+# df_standard$ReporterType %>% table
+# df_crs$donor_type %>% table
+# df_standard$role %>% table
 
-
-df_crs %>% 
-  select(regioncode, regionname, dac_regionncode, dac_regionname) %>% 
-  unique
+# 
+# df_crs %>% 
+#   select(regioncode, regionname, dac_regionncode, dac_regionname) %>% 
+#   unique
 
 df_sdg_regions <- df_sdg_regions %>% 
   filter(region_type == "sdg_region") %>% 
@@ -235,21 +235,26 @@ rm(df_regions)
 #   mutate(ReporterType = "Multilateral") %>% 
 #   rbind(df_donor_types) %>% 
 #   write_feather("data/auxiliary/reporters_types_2023.feather")
+df_crs_output %>% 
+  write_feather(paste0("output/ch/", 
+                       Sys.Date(), 
+                       " PRESS 2023 Data for CH.featehr"))
 
+df_crs_output_original_names <- df_crs_output
 
 df_crs_output <- df_crs_output %>% 
   select(db_ref, 
          db_original = db_original_id, 
          ProgramName = projecttitle,
          Objectives = longdescription, 
-         ExpectedEndDate = completiondate, 
+         ExpectedEndDate = completion_year, 
          ListRecip = recipientname, 
          institutions = agencyname, 
          # usd_disbursements = usd_disbursement,
          usd_disbursements = usd_disbursement, 
          # CommitmentDate = commitmentdate, 
          CommitmentDate = commitment_year, 
-         endyear = completiondate, 
+         endyear = completion_year, 
          RecipientCode = isocode, 
          RecipientCodeNumeric = dac_recipientcode, 
          # usd_commitment = usd_commitment, 
@@ -282,6 +287,9 @@ df_crs_output <- df_crs_output %>%
          dac_regionname,
          dac_regioncode = dac_regionncode
          )
+
+
+
 
 df_crs_output %>% 
   filter(gend) %>%
