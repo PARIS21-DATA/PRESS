@@ -25,11 +25,14 @@ packages <-
     "stringdist",
     "tm", 
     "data.table", 
+    "kableExtra",
+    "rmarkdown",
     "feather" # for quick save and read of files
     , "digest" # hash value generator
     , "stringi" # Used for case-insensitive string matching
     , "scales" # for percentage format conversion
     , "gridExtra" # charts side by side
+    , "grDevices" # create colours
   )
 
 # Install uninstalled packages
@@ -39,14 +42,8 @@ rm(packages)
 
 # Set wd
 setwd(getwd())
-# extremely important for mac os:
-# if(Sys.info()[1]=="Darwin") Sys.setlocale("LC_ALL", "C")
 
-# source("data/functions.R")
 print_time_diff <- function(start_time) {
   difftime(Sys.time(),start_time, units = "sec") %>% print
 }
 
-source("code/00.1a functions_stem_and_concat.R")
-source("code/00.1b function_ts_summary.R")
-source("code/00.1c function_top_partners.R")

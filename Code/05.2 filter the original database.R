@@ -23,7 +23,7 @@ path_input_crs_full_data <- paste0("data/intermediate/crs01_1",
                       year(Sys.Date()), 
                       ".feather")
 
-path_output_stat_ids <- paste0("data/auxiliary/05.2 List of ids before d4d examine ",
+path_output_stat_ids <- paste0("data/intermediate/05.2 List of ids before d4d examine ",
                                year(Sys.Date()),
                                ".rds")
 
