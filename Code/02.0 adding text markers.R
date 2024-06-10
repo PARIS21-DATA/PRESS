@@ -57,6 +57,7 @@ beep()
 ### ---------------
 # 2. processing text data
 ###
+df_crs <- df_crs_raw 
 df_crs <- df_crs %>% 
   mutate(title_id = as.numeric(as.factor(tolower(projecttitle))))
 
@@ -76,10 +77,10 @@ df_crs <- df_crs %>%
          gen_marker = (gender %in% c(1, 2) & (!is.na(gender))), 
          gen_marker1 = (gender == 1), 
          gen_marker2 = ( gender ==2)
-         # , 
-         # gen_rmnch = (rmnch ==1)|(rmnch==2), 
-         # gen_rmnch1 = (rmnch == 1), 
-         # gen_rmnch2 = (rmnch == 2)
+         ,
+         gen_rmnch = (rmnch ==1)|(rmnch==2),
+         gen_rmnch1 = (rmnch == 1),
+         gen_rmnch2 = (rmnch == 2)
   ) 
 
 df_crs <- df_crs %>% 
@@ -89,7 +90,9 @@ df_crs <- df_crs %>%
 # 3.1 RMNCH analysis
 ###
 
-source("code/02.0b fix issues in RMNCH mark.R")
+df_crs$rmnch %>% table
+
+# source("code/02.0b fix issues in RMNCH mark.R")
 
 
 ### ---------------
@@ -110,7 +113,7 @@ df_crs_lang <- df_crs %>%
   select(-desc_2mine)
 
 df_crs_lang_title <- df_crs %>% 
-  select(title_id, projecttitle) %>% 
+  select(title_id , projecttitle) %>% 
   distinct %>% 
   mutate(language_title = cld2::detect_language(projecttitle)) %>% 
   select(-projecttitle)
@@ -123,7 +126,7 @@ df_crs_lang_title <- df_crs %>%
 
 print("Detecting Lanugage")
 print_time_diff(start)
-
+beep()
 
 names(df_crs_lang)
 df_crs <- df_crs %>%

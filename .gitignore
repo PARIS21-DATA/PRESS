@@ -102,3 +102,13 @@ data/intermediate/02.2a sdg markers*
 data/intermediate/02.2b sdg markers*
 # same for the onlyStructure data
 *crs05.2a_onlyStructure_2023.feather
+
+# ignore some 2024 process data
+*_full_2024.feather
+*_full_2024.rds
+*_full_2024.rdata
+*_temp_.feather
+*_temp_.rds
+
+# just for d4d files
+*_2024.feather

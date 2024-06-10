@@ -60,7 +60,7 @@ df_finance_t <- df_finance_t %>%
 df_crs <- df_crs%>% 
   left_join(df_finance_t)
 rm(df_finance_t)
-
+beep()
 ### ---------------
 # 2.2 donor_type
 ###

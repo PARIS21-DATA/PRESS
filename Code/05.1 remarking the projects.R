@@ -24,14 +24,17 @@ path_output <- paste0("Data/Intermediate/crs05",
                        year(Sys.Date()), 
                        ".feather")
 
-path_input_black_list <- paste0("data/intermediate/04.5b d4d manual blacklist ",
-                          year(Sys.Date()), 
-                          ".feather")
-path_input_white_list <- paste0("data/intermediate/04.5a d4d manual additions ",
-                          year(Sys.Date()), 
-                          ".feather")
+path_input_black_list <- paste0("data/intermediate/07.3b d4d manual blacklist_",
+                                year(Sys.Date()), 
+                                ".feather")
+path_input_white_list <- paste0("data/intermediate/07.3a d4d manual additions_",
+                                year(Sys.Date()), 
+                                ".feather")
 
-path_input_db_ref <- paste0("./Data/intermediate/crs02.4 db_ref and process id list", job_specific_suffix, year(Sys.Date()), ".feather")
+path_input_db_ref <- paste0("./Data/intermediate/crs02.4 db_ref and process id list", 
+                            job_specific_suffix, 
+                            year(Sys.Date()), 
+                            ".feather")
 
 # crs_path_new_1 <- paste0("./Data/intermediate/crs04.0_crs1_", lang,job_specific_suffix, ".rds")
 # crs_path_new_0 <- paste0("./Data/intermediate/crs04.0_crs0_", lang,job_specific_suffix, ".rds")
@@ -76,7 +79,7 @@ df_crs <- df_crs %>%
          stats = stat, 
          d4d_addition_search = stat_d4d)
 
-# write_feather(df_crs, path_intermediate)
+write_feather(df_crs, path_intermediate)
 
 
 rm(list = ls())
@@ -94,9 +97,14 @@ df_crs <- read_feather(path_intermediate)
 job_specific_suffix <- "_gen_full_"
 
 path_input_ids_gender <- paste0("./Data/intermediate/crs04_positive_id",
-                       job_specific_suffix, year(Sys.Date()), ".rds")
+                       job_specific_suffix, year(Sys.Date()), ".feather")
 
-ls_ids <- read_rds(path_input_ids_gender)
+path_output <- paste0("Data/Intermediate/crs05", 
+                      job_specific_suffix, 
+                      year(Sys.Date()), 
+                      ".feather")
+
+ls_ids <- read_feather(path_input_ids_gender)
 
 df_crs <- df_crs %>% 
   mutate(gen_desc = ifelse(desc_2mine_id %in% ls_ids, T, F)) %>% 

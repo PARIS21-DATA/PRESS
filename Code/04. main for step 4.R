@@ -2,8 +2,8 @@ rm(list = ls())
 source("code/00. boot.R")
 
 ## setting up the job type
-job <- "gen"
-# job <- "stat"
+# job <- "gen"
+job <- "stat"
 write_rds(job, file ="data/intermediate/crs04_job_utf8_full.rds" )
 
 ## setting up and save languages

@@ -70,8 +70,8 @@ names(df_crs)<- tolower(names(df_crs))
 df_crs$process_id <- 1:nrow(df_crs)
 
 start <- Sys.time()
-write_feather(df_crs, file =paste0("./Data/Raw/CRS/crs_full_", year(Sys.Date()),".feather") )
-write_feather(df_crs, file =paste0("./Data/Raw/CRS/crs_full_", Sys.Date(),".feather") )
+write_feather(df_crs, paste0("./Data/Raw/CRS/crs_full_", year(Sys.Date()),".feather") )
+write_feather(df_crs, paste0("./Data/Raw/CRS/crs_full_", Sys.Date(),".feather") )
 print_time_diff(start)
 # Time difference of 33.25225 secs
 

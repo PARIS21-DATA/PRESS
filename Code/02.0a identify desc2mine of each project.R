@@ -22,7 +22,7 @@ df_crs <- df_crs_raw %>%
          shortdescription = clean_titles(shortdescription),
          longdescription = clean_titles(longdescription))
 df_crs %>% 
-  write_feather(crs_path_intermediate_after_cleaning )
+  write_feather(path_intermediate_crs_after_cleaning )
 print("Cleaning 3 text columns")
 print_time_diff(start)
 gc()

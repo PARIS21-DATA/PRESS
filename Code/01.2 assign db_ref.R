@@ -53,14 +53,14 @@ df_crs <- df_crs_raw %>%
     crsid,
     # donorcode,
     year,
-    # usd_commitment,
+    usd_commitment,
     purposecode,
     usd_disbursement
     ,recipientcode
     # ,usd_received
     # , sdgfocus:pba
     # , grantequiv
-    # ,finance_t
+    ,finance_t
     # ,aid_t
     # , bi_multi
     # ,currencycode
@@ -90,7 +90,7 @@ df_crs <- df_crs %>%
 # df_crs_raw %>% filter(is.na(crsid)| crsid =="") %>% nrow
 # head(df_crs$text_identifier)
 
-df_crs$text_identifier %>% unique %>% length
+# df_crs$text_identifier %>% unique %>% length
 df_crs %>% select(text_identifier) %>% distinct %>% nrow
 
 # rm(df_crs_raw)
@@ -141,7 +141,7 @@ for (i in 1:tmp_n_subsets) {
     .$text_identifier
   
   ls_hashvalues[[i]] <-vec_subset %>% 
-    lapply(function(x) digest(x, algo = "sha1")) %>% unlist
+    lapply(function(x) digest(x, algo = "md5")) %>% unlist
   rm(vec_subset)
   if(i%%20 == 0) print(i)
   print_time_diff(start)

@@ -96,7 +96,7 @@ names(df_crs)
 # 4. save
 ###
 
-df_crs <- df_crs %>% 
+df_crs_gender <- df_crs %>% 
   select(#-process_id,
          -channelcode, 
          -agencycode, 

@@ -53,3 +53,4 @@ df_crs <- df_crs_marker %>%
 ###
 write_feather(df_crs, path_output)
 
+print_time_diff(start)

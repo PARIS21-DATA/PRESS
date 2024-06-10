@@ -1,7 +1,11 @@
 source("code/00. boot.R")
 rm(list = ls())
-path_input <- "data/intermediate/07.3 d4d analysis.feather"
-path_output <- "data/intermediate/07.3b d4d manual blacklist.feather"
+path_input <-paste0("data/intermediate/07.3 d4d analysis_",
+                    year(Sys.Date()), 
+                    ".feather")
+path_output <- paste0("data/intermediate/07.3b d4d manual blacklist_",
+                      year(Sys.Date()), 
+                      ".feather")
 
 df <- read_feather(path_input)
 

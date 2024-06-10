@@ -2,36 +2,42 @@ rm(list = ls())
 source("code/00. boot.R")
 start_time <- Sys.time()
 
-# df <-readRDS("data/intermediate/crs01_1_full_2023.rds")
-# gc()
-# names(df)
-# df_full <- df
-# df <- df %>%
-#   select(db_ref,
-#          year,
-#          longdescription,
-#          channelreportedname,
-#          purposecode,
-#          donorname,
-#          agencyname,
-#          crsid,
-#          projecttitle,
-#          usd_disbursement_defl)
-# df <- df %>%
-#   mutate(across(c("longdescription",
-#                   "projecttitle",
-#                   "channelreportedname"), ~ tolower(.x)))
-# path_donors <- "data/d4d/d4d donors.txt"
-# vec_d4d_donors <- readLines(path_donors)
-# df <- df %>% 
-#   filter(donorname %in% vec_d4d_donors)
-# df %>% select(donorname) %>% distinct
-# write_feather(df,  "data/intermediate/07.3 d4d analysis.feather")
-# print_time_diff(start_time)
-# rm(df_full)
+df <-read_feather("data/intermediate/crs01_1_full_2024.feather")
+gc()
+names(df)
+df_full <- df
+df <- df %>%
+  select(db_ref,
+         year,
+         longdescription,
+         channelreportedname,
+         purposecode,
+         donorname,
+         agencyname,
+         crsid,
+         projecttitle,
+         usd_disbursement_defl)
+df <- df %>%
+  mutate(across(c("longdescription",
+                  "projecttitle",
+                  "channelreportedname"), ~ tolower(.x)))
+path_donors <- "data/d4d/d4d donors.txt"
+vec_d4d_donors <- readLines(path_donors)
+df <- df %>%
+  filter(donorname %in% vec_d4d_donors)
+df %>% select(donorname) %>% distinct
+write_feather(df,  paste0("data/intermediate/07.3 d4d analysis_",
+                          year(Sys.Date()), 
+                          ".feather"))
+print_time_diff(start_time)
+rm(df_full)
 
-path_input <- "data/intermediate/07.3 d4d analysis.feather"
-path_output <- "data/intermediate/07.3a d4d manual additions.feather"
+path_input <- paste0("data/intermediate/07.3 d4d analysis_",
+                     year(Sys.Date()), 
+                     ".feather")
+path_output <- paste0("data/intermediate/07.3a d4d manual additions_",
+                      year(Sys.Date()), 
+                      ".feather")
 
 
 df <- read_feather(path_input)
