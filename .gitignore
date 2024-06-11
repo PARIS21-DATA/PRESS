@@ -8,6 +8,11 @@
 data/intermediate
 data/raw
 output
+Emails
+code/.ipynb_checkpoints
+code/AnalysisCH
+code/Archive
+code/YTnewcodes
 # data/data_sub
 # !data/intermediate
 # data/intermediate/*
