@@ -5,18 +5,15 @@
 *.Rapp.history
 
 .DS_Store
-# data/intermediate
-Data/Raw/CRS/txt/**
-data/raw/crs/crs_full.rds
-data/raw/CRS/zip/**
-data/raw/CRS/Other crs/**
-data/raw/IATI
-
+data/intermediate
+data/raw
+output
 # data/data_sub
 # !data/intermediate
 # data/intermediate/*
 # !data/intermediate/crs02.rds
 # !data/intermediate/crs03.rds
+
 
 # some additional lines added during the review process
 code/YTnewcodes
