@@ -1,5 +1,0 @@
-Landmine
-Handfeuerwaffe
-Minenentschärfung
-Minenräumung
-entmienen
