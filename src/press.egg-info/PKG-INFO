@@ -1,0 +1,22 @@
+Metadata-Version: 2.4
+Name: press
+Version: 0.1.0
+Summary: A package for analyzing CRS data
+Author-email: Your Name <your.email@example.com>
+License: MIT
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Requires-Dist: pandas==2.2.3
+Requires-Dist: numpy==2.0.2
+Requires-Dist: mkdocs==1.6.1
+Requires-Dist: mkdocs-material==9.6.11
+Requires-Dist: mkdocstrings==0.29.1
+Requires-Dist: mkdocstrings-python==1.16.8
+Requires-Dist: requests==2.32.3
+Requires-Dist: pyarrow==19.0.1
+
+# PRESS
+
+Due to file size, data files in `data/raw/crs` are not fully uploaded. You can download these data from [here](https://oecd-my.sharepoint.com/:f:/g/personal/yu_tian_oecd_org/ElcFbNhUusNKpUNn-LC5Kr4BxvQep1SEJ3lJ1u5xiX18AA?e=pwu3Fj). The .zip files are downloaded from [the OECD](https://stats.oecd.org/DownloadFiles.aspx?DatasetCode=CRS1). 
+
+For the reviewing phase. Only English projects are analysed. 
