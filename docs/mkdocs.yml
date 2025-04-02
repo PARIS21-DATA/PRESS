@@ -1,0 +1,49 @@
+site_name: Press technical methodology documentation
+site_url: http://localhost:8000
+theme:
+  name: material
+  font:
+    text: Merriweather Sans
+    code: Red Hat Mono
+  features:
+    - navigation.footer
+  palette:
+    # Dark Mode
+    - scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Dark mode
+      primary: green
+      accent: deep purple
+
+    # Light Mode
+    - scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Light mode
+      primary: gray
+      accent: deep orange
+
+# Optional: Plugins to enhance functionality
+plugins:
+  - search
+  - mkdocstrings
+  - autorefs:
+      link_titles: false
+
+# Navigation (sidebar) structure
+nav:
+  - Home: index.md
+  - notebooks:
+      - all steps: notebooks/collect_all_steps.md
+  - src:
+      - text processing: src/text-processing.md
+  - About: about.md
+
+# Markdown Extensions for better formatting
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - toc:
+      permalink: "#"
