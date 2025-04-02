@@ -21,7 +21,7 @@ theme:
       toggle:
         icon: material/weather-night
         name: Light mode
-      primary: gray
+      primary: black
       accent: deep orange
 
 # Optional: Plugins to enhance functionality
