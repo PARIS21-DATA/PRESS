@@ -1,5 +1,10 @@
 # Ignore data/raw files
 data/raw/*
+data/development/*
+
+# Exclude all files in development/models
+notebooks/development/models/*
 
 # Ignore .Rproj.user files
 .Rproj.user
+

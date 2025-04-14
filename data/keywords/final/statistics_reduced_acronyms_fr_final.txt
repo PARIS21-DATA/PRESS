@@ -1,0 +1,16 @@
+dhs
+enquêtes démographiques et de santé 
+EDS
+crvs
+cpi
+IPC
+d4d
+paris21
+gpsdd
+odw
+data4sdg
+devinfo
+nsds
+afristat
+ckan
+enquête emploi
