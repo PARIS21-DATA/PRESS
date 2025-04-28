@@ -25,7 +25,8 @@ dependencies = [
     "spacy",
     "nltk",
     "rapidfuzz",
-    "swifter"
+    "swifter",
+    "openpyxl"
 ]
 readme = "README.md"  # Optional, path to your README file
 requires-python = ">=3.7"  # Specify the minimum Python version

@@ -21,6 +21,7 @@ Requires-Dist: spacy
 Requires-Dist: nltk
 Requires-Dist: rapidfuzz
 Requires-Dist: swifter
+Requires-Dist: openpyxl
 
 # PRESS
 
