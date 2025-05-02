@@ -37,7 +37,7 @@ nav:
   - Home: index.md
   - src:
       - download crs: src/download_crs.md
-      - text processing: src/text-processing.md
+      - text processing: src/text_processing.md
   - notebooks:
       - all steps: notebooks/collect_all_steps.md
   - About: about.md

@@ -192,7 +192,7 @@ def detect_keywords(text: str, lang: str, keyword_df: pd.DataFrame) -> list:
         return None
     
 
-def process_keywords(keywords_df, langauges = ['en', 'fr', 'es', 'de']):
+def process_keywords(keywords_df: pd.DataFrame, langauges = ['en', 'fr', 'es', 'de']) -> pd.DataFrame: 
     """
     Processes a DataFrame of keywords by normalizing, lemmatizing, and adding de-accented versions.
     
