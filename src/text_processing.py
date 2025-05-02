@@ -191,6 +191,47 @@ def detect_keywords(text: str, lang: str, keyword_df: pd.DataFrame) -> list:
     else:
         return None
     
+def detect_acronyms(text: str, lang: str, acronyms_df: pd.DataFrame) -> list:
+    """
+    Detect an acronym in a given text based on the specified language and a DataFrame of keywords.
+
+    Args:
+        text (str): The input text to search for keywords.
+        lang (str): The language code (e.g., 'en', 'de', etc.).
+        acronyms_df (pd.DataFrame): A DataFrame containing acronyms for different languages.
+
+    Returns:
+        list: A list of matched acronyms, or None if no matches are found.
+    """
+    
+    if pd.isna(text):
+        return None
+    if lang not in acronyms_df.columns:
+        lang = 'en'  # Default to English if language is not in keywords_dict
+
+    # Load the keywords for the given language
+    acronyms = acronyms_df[lang]
+    # Remove empty strings and NaN values from keywords
+    acronyms = acronyms.dropna().unique()
+    # Add a leading and trailing space to each acronym to ensure exact matching
+    acronyms = [" " + acr + " " for acr in acronyms if isinstance(acr, str) and acr.strip() != ""]
+
+    # Detect keywords in the text with leading and trailing spaces to ensure exact matching also in the beginning and end of the text
+    text = " " + text + " "
+    matches = [acr for acr in acronyms if acr in text]
+
+    # Additionally check for English acronyms if the language is not English
+    if lang != 'en':
+        english_acronyms = acronyms_df['en']
+        english_acronyms = english_acronyms.dropna().unique()
+        english_acronyms = [" " + acr + " " for acr in acronyms if isinstance(acr, str) and acr.strip() != ""]
+        matches += [acr for acr in english_acronyms if acr in text]
+
+    if matches:
+        return matches
+    else:
+        return None
+    
 
 def process_keywords(keywords_df: pd.DataFrame, langauges = ['en', 'fr', 'es', 'de']) -> pd.DataFrame: 
     """
