@@ -1,6 +1,7 @@
 # Ignore data/raw files
 data/raw/*
 data/development/*
+data/processed/*
 
 # Exclude all files in development/models
 notebooks/development/models/*
