@@ -23,6 +23,11 @@ spacy_models = {
     'de': spacy.load('de_core_news_sm'),
 }
 
+# Remove 'cuenta' as stopword in Spanish
+spacy_models['es'].Defaults.stop_words.remove('cuenta')
+# Remove 'mine' as stopword in English to preserve 'land mine'
+spacy_models['en'].Defaults.stop_words.remove('mine')
+
 # Load the fasttext language detection model
 fasttext_model = fasttext.load_model("./models/lid.176.bin")  
 
@@ -54,11 +59,12 @@ def normalize_str(text: str) -> str:
     # Replace hyphens with spaces to split hyphenated words
     text = text.replace('-', ' ')
     
-    # Remove punctuation/symbols except apostrophes
+    # Replace punctuation/symbols with a space except apostrophes
     text = ''.join(
-        ch for ch in text
-        if (unicodedata.category(ch)[0] not in ('P', 'S') or ch == "'")
+        ch if (unicodedata.category(ch)[0] not in ('P', 'S') or ch == "'") else ' '
+        for ch in text
     )
+
     # Replace multiple spaces with a single space
     text = re.sub(r'\s+', ' ', text)
 
@@ -112,10 +118,11 @@ def lemmatize_str(text: str, lang: str, remove_stopwords: bool = False) -> str:
     
     if lang in spacy_models:
         doc = spacy_models[lang](text)
+        
         if remove_stopwords:
-            lemmas = [token.lemma_ if token.lemma_ else token.text for token in doc if token.is_alpha and not token.is_stop]
+            lemmas= [token.lemma_ if token.lemma_ and not token.lemma_ == '--' else token.text for token in doc if token.is_alpha and not token.is_stop]
         else:
-            lemmas = [token.lemma_ if token.lemma_ else token.text for token in doc if token.is_alpha]
+            lemmas= [token.lemma_ if token.lemma_ and not token.lemma_ == '--' else token.text for token in doc if token.is_alpha]
         return " ".join(lemmas)
     else:
         # Fallback: Return the original text if the language is not supported
@@ -144,9 +151,9 @@ def lemmatize_batch(texts: list, lang: str, batch_size: int = 100, remove_stopwo
 
     for doc in docs:
         if remove_stopwords:
-            lemmas = [token.lemma_ if token.lemma_ else token.text for token in doc if token.is_alpha and not token.is_stop]
+            lemmas= [token.lemma_ if token.lemma_ and not token.lemma_ == '--' else token.text for token in doc if token.is_alpha and not token.is_stop]
         else:
-            lemmas = [token.lemma_ if token.lemma_ else token.text for token in doc if token.is_alpha]
+            lemmas= [token.lemma_ if token.lemma_ and not token.lemma_ == '--' else token.text for token in doc if token.is_alpha]
         lemmatized_texts.append(" ".join(lemmas))
 
     return lemmatized_texts
@@ -187,7 +194,7 @@ def detect_keywords(text: str, lang: str, keyword_df: pd.DataFrame) -> list:
         matches += [kw for kw in english_keywords if kw in text]
 
     if matches:
-        return matches
+        return list(set(matches))  # Return unique matches
     else:
         return None
     
@@ -228,12 +235,12 @@ def detect_acronyms(text: str, lang: str, acronyms_df: pd.DataFrame) -> list:
         matches += [acr for acr in english_acronyms if acr in text]
 
     if matches:
-        return matches
+        return list(set(matches)) # return unique matches
     else:
         return None
     
 
-def process_keywords(keywords_df: pd.DataFrame, langauges = ['en', 'fr', 'es', 'de']) -> pd.DataFrame: 
+def process_keywords(keywords_df: pd.DataFrame, langauges: list = ['en', 'fr', 'es', 'de'], remove_stopwords: bool = False) -> pd.DataFrame: 
     """
     Processes a DataFrame of keywords by normalizing, lemmatizing, and adding de-accented versions.
     
@@ -247,23 +254,15 @@ def process_keywords(keywords_df: pd.DataFrame, langauges = ['en', 'fr', 'es', '
 
     # Check that the dataframe has only the specified languages as columns 
     if not all(lang in keywords_df.columns for lang in langauges):
-        raise ValueError(f"DataFrame must contain only the following columns: {langauges}")
+        raise ValueError(f"DataFrame must contain only the following columns: {langauges}, but found {keywords_df.columns.tolist()}")
 
     for lang in keywords_df.columns:
         if lang == 'de':  # Special handling for German: split on hyphens and lemmatize each part keeping capitalization, then normalize
-            keywords_df[lang] = keywords_df[lang].map(
-                lambda x: x.replace('-', ' ') if isinstance(x, str) else x
-            )
-            keywords_df[lang] = keywords_df[lang].map(
-                lambda x: lemmatize_str(x, lang, remove_stopwords=False) if isinstance(x, str) else x
-            )
-            keywords_df[lang] = keywords_df[lang].map(
-                lambda x: normalize_str(x) if isinstance(x, str) else x
-            )
+            keywords_df[lang] = keywords_df[lang].map(lambda x: x.replace('-', ' ') if isinstance(x, str) else x)
+            keywords_df[lang] = keywords_df[lang].map(lambda x: lemmatize_str(x, lang, remove_stopwords=remove_stopwords) if isinstance(x, str) else x)
+            keywords_df[lang] = keywords_df[lang].map(lambda x: normalize_str(x) if isinstance(x, str) else x)
         else:
-            keywords_df[lang] = keywords_df[lang].map(
-                lambda x: lemmatize_str(normalize_str(x), lang, remove_stopwords=False) if isinstance(x, str) else x
-            )
+            keywords_df[lang] = keywords_df[lang].map(lambda x: lemmatize_str(normalize_str(x), lang, remove_stopwords=remove_stopwords) if isinstance(x, str) else x)
 
     # Add de-accented versions of the keywords
     for lang in keywords_df.columns:
