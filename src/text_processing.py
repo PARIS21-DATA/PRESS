@@ -23,7 +23,7 @@ spacy_models = {
     'de': spacy.load('de_core_news_sm'),
 }
 
-# Remove 'cuenta' as stopword in Spanish
+# Remove 'cuenta' as stopword in Spanish to preserve 'cuenta nacional'
 spacy_models['es'].Defaults.stop_words.remove('cuenta')
 # Remove 'mine' as stopword in English to preserve 'land mine'
 spacy_models['en'].Defaults.stop_words.remove('mine')
@@ -120,9 +120,9 @@ def lemmatize_str(text: str, lang: str, remove_stopwords: bool = False) -> str:
         doc = spacy_models[lang](text)
         
         if remove_stopwords:
-            lemmas= [token.lemma_ if token.lemma_ and not token.lemma_ == '--' else token.text for token in doc if token.is_alpha and not token.is_stop]
+            lemmas = [token.lemma_ if token.lemma_ and not token.lemma_ == '--' else token.text for token in doc if token.is_alpha and not token.is_stop]
         else:
-            lemmas= [token.lemma_ if token.lemma_ and not token.lemma_ == '--' else token.text for token in doc if token.is_alpha]
+            lemmas = [token.lemma_ if token.lemma_ and not token.lemma_ == '--' else token.text for token in doc if token.is_alpha]
         return " ".join(lemmas)
     else:
         # Fallback: Return the original text if the language is not supported
@@ -151,9 +151,9 @@ def lemmatize_batch(texts: list, lang: str, batch_size: int = 100, remove_stopwo
 
     for doc in docs:
         if remove_stopwords:
-            lemmas= [token.lemma_ if token.lemma_ and not token.lemma_ == '--' else token.text for token in doc if token.is_alpha and not token.is_stop]
+            lemmas = [token.lemma_ if token.lemma_ and not token.lemma_ == '--' else token.text for token in doc if token.is_alpha and not token.is_stop]
         else:
-            lemmas= [token.lemma_ if token.lemma_ and not token.lemma_ == '--' else token.text for token in doc if token.is_alpha]
+            lemmas = [token.lemma_ if token.lemma_ and not token.lemma_ == '--' else token.text for token in doc if token.is_alpha]
         lemmatized_texts.append(" ".join(lemmas))
 
     return lemmatized_texts
