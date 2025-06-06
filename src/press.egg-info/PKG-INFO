@@ -22,6 +22,14 @@ Requires-Dist: nltk
 Requires-Dist: rapidfuzz
 Requires-Dist: swifter
 Requires-Dist: openpyxl
+Requires-Dist: torch
+Requires-Dist: transformers
+Requires-Dist: scikit-learn
+Requires-Dist: datasets
+Requires-Dist: sentencepiece
+Requires-Dist: accelerate
+Requires-Dist: ray
+Requires-Dist: wordcloud
 
 # PRESS
 

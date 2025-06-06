@@ -2,6 +2,7 @@ README.md
 pyproject.toml
 src/__init__.py
 src/download_crs.py
+src/text_processing.py
 src/press.egg-info/PKG-INFO
 src/press.egg-info/SOURCES.txt
 src/press.egg-info/dependency_links.txt

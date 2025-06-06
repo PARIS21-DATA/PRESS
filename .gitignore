@@ -2,6 +2,7 @@
 data/raw/*
 data/development/*
 data/processed/*
+data/output/*
 
 # Exclude all files in development/models
 notebooks/development/models/*

@@ -1,0 +1,8 @@
+{
+  "gradient_accumulation_steps": 2,
+  "learning_rate": 2.6938837692324746e-05,
+  "num_train_epochs": 6,
+  "per_device_train_batch_size": 4,
+  "warmup_ratio": 0.1,
+  "weight_decay": 0.1705560851249875
+}

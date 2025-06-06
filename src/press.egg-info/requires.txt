@@ -14,3 +14,11 @@ nltk
 rapidfuzz
 swifter
 openpyxl
+torch
+transformers
+scikit-learn
+datasets
+sentencepiece
+accelerate
+ray
+wordcloud
