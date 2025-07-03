@@ -31,7 +31,7 @@ econ_codes <- c(15123, 15124, 15196, 15111, 15117, 15118, 15119,
                 15114, 15116, 15155, 15156, 15125)
 df_crs_d4d$sector[df_crs_d4d$purposecode %in% econ_codes] <- 5
 df_crs_d4d$sector[df_crs_d4d$purposecode == 15142 |
-              between(df_crs_d4d$purposecode, 23000, 25999) |
+              between(df_crs_d4d$purposecode, 23000, 25999) |   
               between(df_crs_d4d$purposecode, 32000, 32999) |
               between(df_crs_d4d$purposecode, 33000, 33999) |
               between(df_crs_d4d$purposecode, 21000, 21999)] <- 5

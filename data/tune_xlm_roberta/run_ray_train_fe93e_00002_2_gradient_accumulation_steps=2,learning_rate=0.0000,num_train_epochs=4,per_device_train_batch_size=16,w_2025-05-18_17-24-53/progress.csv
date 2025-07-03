@@ -1,2 +1,0 @@
-eval_loss,eval_accuracy,eval_f1,eval_precision,eval_recall,eval_runtime,eval_samples_per_second,eval_steps_per_second,epoch,timestamp,checkpoint_dir_name,done,training_iteration,trial_id,date,time_this_iter_s,time_total_s,pid,hostname,node_ip,time_since_restore,iterations_since_restore
-0.24635379016399384,0.9393139841688655,0.937584803256445,0.9650837988826816,0.9116094986807388,5.2181,290.529,36.412,3.975438596491228,1747590572,,False,1,fe93e_00002,2025-05-18_17-49-32,361.2085404396057,361.2085404396057,39214,4d07688ae0ce,172.28.0.12,361.2085404396057,1
