@@ -8,19 +8,16 @@ BULK_DOWNLOAD_URL = "https://stats.oecd.org/wbos/fileview2.aspx?IDFile="
 BASE_DATAFLOW = "https://sdmx.oecd.org/public/rest/dataflow/OECD.DCD.FSD/"
 CRS_FLOW_URL = BASE_DATAFLOW + "DSD_CRS@DF_CRS/"
 
-def get_full_crs_parquet_url(latest_flow: float = 1.3) -> str:
+def get_full_crs_parquet_url() -> str:
     """
         Fetch the latest CRS Parquet file ID from the OECD website. Necessary since the file ID changes with each update.
-        
-        Args:
-            latest_flow (float): The latest flow version to fetch the CRS Parquet file ID.
         
         Returns:
             str: The full URL of the CRS Parquet file.
     """
 
     # Make a request to the OECD website 
-    response = requests.get(f"{CRS_FLOW_URL}{latest_flow}")
+    response = requests.get(f"{CRS_FLOW_URL}")
     response.raise_for_status()
     content = response.text
     
