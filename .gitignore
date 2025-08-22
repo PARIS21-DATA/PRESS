@@ -4,12 +4,10 @@ data/development/*
 data/processed/*
 data/output/*
 data/models/checkpoints/*
+data/models/fasttext/*
 
 # Don't ignore certain file in data/ouput
 !data/output/press_1973-2023.xlsx
-
-# Exclude all files in development/models
-notebooks/development/models/*
 
 # Ignore .Rproj.user files
 .Rproj.user

@@ -29,7 +29,7 @@ spacy_models['es'].Defaults.stop_words.remove('cuenta')
 spacy_models['en'].Defaults.stop_words.remove('mine')
 
 # Load the fasttext language detection model
-fasttext_model = fasttext.load_model("./models/lid.176.bin")  
+fasttext_model = fasttext.load_model("../../data/models/fasttext/lid.176.bin")  
 
 
 def normalize_str(text: str) -> str:
