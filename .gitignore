@@ -1,18 +1,22 @@
-# Ignore data/raw files
-data/raw/*
-data/development/*
-data/processed/*
-data/output/*
-data/models/checkpoints/*
-data/models/fasttext/*
+# Ignore data folders 
+data/raw/**
+data/development/**
+data/output/**
+data/models/checkpoints/**
+data/models/fasttext/**
+data/processed/**
+
+# Re-include directories so .gitkeep exceptions below take effect
+!data/processed/**/
 
 # Don't ignore certain file in data/ouput
 !data/output/press_1973-2023.xlsx
+!data/processed/manually_corrected/training_set_manually_corrected.xlsx
 
 # Ignore .Rproj.user files
 .Rproj.user
 
 # Allow keeping empty subfolders via .gitkeep
+!data/processed/.gitkeep
 !data/processed/**/.gitkeep
-!data/processed/manually_corrected/training_set_manually_corrected.xlsx
 
