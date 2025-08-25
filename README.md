@@ -1,6 +1,6 @@
 # PRESS
 
-This repository contains the code for creating PRESS from OECD CRS data. In brief, the methodology combines purpose codes and keyword matching on project titles with classification by a fine‑tuned large language model on project descriptions to produce the final PRESS outputs.
+This repository contains the code for creating PRESS from OECD CRS data. The methodology combines purpose codes and keyword matching on project titles with classification by a fine‑tuned large language model on project descriptions to produce the final PRESS outputs. For the full methodology note, see the documentation page.
 
 ## Repository structure
 
@@ -35,15 +35,6 @@ Other files:
 - `pyproject.toml` — Python project metadata and dependencies
 - `mkdocs.yml` — Configuration for building the documentation site
 
-## Methodology in brief
-
-The identification of PRESS projects combines:
-
-- Purpose codes: Projects are filtered using relevant CRS purpose codes
-- Keyword matching: Project titles are matched with curated keyword lists
-- LLM classification: A fine‑tuned large language model classifies the project descriptions
-
-For the full methodology note, see the documentation page
 
 ## How to use this repository
 
@@ -79,18 +70,14 @@ Run the notebooks in `notebooks/final/` in the order below. Each notebook docume
 	 - Applies purpose‑code filters and keyword/acronym rules per language (EN/FR/ES/DE)
 	 - Produces candidate tables with columns such as normalized/lemmatized titles, detected language, matched keywords/acronyms, and blacklist flags
 	 - Outputs:
-        
-        in `data/processed/title_matched`:
 		 - `crs_lemmatized_titles_wo_stopwords.feather.feather` (intermediate dataset as checkpoint)
-		 - `crs_titles_matched_wo_stopwords.feather` (output of title pattern matching)
-
-        in `data/processed/prediction_sets`:
+		 - `crs_titles_matched_wo_stopwords.feather` (output of title pattern matching) 
          - `stat_to_mine.feather`
          - `gen_to_mine.fether`
          - `conflicting_descr_stat.feather`
          - `conflicting_descr_gen.feather`
 
-2) Colab — Predict with fine‑tuned model 
+2) Notebook B Colab — Predict with fine‑tuned model 
 	- Upload `notebooks/final/colab_predict_with_finetuned_model.ipynb` to Google Colab. 
     - Upload `.._to_mine.feather` and `conflicting_descr_....feather` datasets
     - Upload model checkpoints
@@ -98,14 +85,14 @@ Run the notebooks in `notebooks/final/` in the order below. Each notebook docume
     - Runs batched inference with Hugging Face `Trainer` using the fine-tuned models
     - Saves predictions       
 
-3) Notebook B — Merge LLM predictions back to CRS
+3) Notebook C — Merge LLM predictions back to CRS
 	 - Inputs:
 		 - `crs_titles_matched_wo_stopwords.feather`
 		 - Predicted descriptions exported from Colab saved under `data/processed/predicted/`
 	 - Merges predictions with results of keyword matching
 	 - Writes entire merged data to `data/output/crs_predicted.feather` 
 
-4) Notebook C — Create PRESS
+4) Notebook D - Create PRESS
 	 - Sets threshold on statistics and gender and adds additional information from `data/auxiliary/`
 	 - Writes final outputs to `data/output/` 
 
