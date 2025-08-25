@@ -12,3 +12,7 @@ data/models/fasttext/*
 # Ignore .Rproj.user files
 .Rproj.user
 
+# Allow keeping empty subfolders via .gitkeep
+!data/processed/**/.gitkeep
+!data/processed/manually_corrected/training_set_manually_corrected.xlsx
+
