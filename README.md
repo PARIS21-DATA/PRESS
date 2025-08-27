@@ -17,7 +17,7 @@ Folder structure:
 - `notebooks/` — Jupyter notebooks that implement the workflow
   - `final/` — Production notebooks to run in order:
 	 1. `A_title_pattern_matching.ipynb` — Applies purpose‑code filters and keyword matching to project titles
-	 2. `B_colab_predict_with_finetuned_model.ipynb` (on Google Colab) — Uses a fine‑tuned large language model (LLM) to classify project descriptions
+	 2. `B_colab_predict_with_finetuned_model.ipynb` (on Google Colab) — Uses a fine‑tuned large language model to classify project descriptions
 	 3. `C_merge_predictions.ipynb` — Merges the rule‑based candidates with LLM predictions
 	 4. `D_create_press.ipynb` — Creates the final PRESS dataset
 
@@ -138,4 +138,9 @@ The module `src/text_processing.py` handles multilingual preprocessing for title
 ### Documentation
 
 The `docs/` folder and `mkdocs.yml` define a static documentation site (MkDocs with the Material theme). The folder also contains background PDFs/PPTs on PRESS methodology modernization.
+
+### Potential directions for future devlopment
+
+- modularization of Colab classify notebooks into helper functions with export to `src` as e.g. `train.py`, `data.py`, ...
+- generalization of workflow to generic topics instead of hard-coded statistics and gender, e.g. climate change
 
