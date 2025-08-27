@@ -20,8 +20,10 @@ Folder structure:
 	 2. `B_colab_predict_with_finetuned_model.ipynb` (on Google Colab) — Uses a fine‑tuned large language model (LLM) to classify project descriptions
 	 3. `C_merge_predictions.ipynb` — Merges the rule‑based candidates with LLM predictions
 	 4. `D_create_press.ipynb` — Creates the final PRESS dataset
+
+	 not part of the workflow:
 	 - `visual_checks_and_diagnostics.ipynb` — Visualizations and diagnostics that can be used at different stages of the pipeline
-     - `colab_classify_....ipynb` — Self-contained notebooks that can be uploaded to Colab and used to arrive at a fine-tuned model from scratch for statistics and gender
+     - `colab_classify_....ipynb` — Self-contained notebooks that can be uploaded to Colab and used to train at a fine-tuned model from scratch for statistics and gender 
   - `development/` — All notebooks as they have been used to set up the pipeline. Kept for completness.
 
 - `docs/` — Documentation sources (MkDocs site configuration and reference material). Contains PDFs/PPTs describing methodology proposals and background
@@ -65,43 +67,44 @@ The `-c constraints.txt` flag applies repository-specific installation constrain
 
 Run the notebooks in `notebooks/final/` in the order below. Each notebook documents its inputs and writes outputs back to `data/processed/` or `data/output/`.
 
-1) Notebook A — Title pattern matching 
+1) **Notebook A**: Title pattern matching 
 	 - Loads CRS from `data/raw/` and uses `src/text_processing.py` to normalize titles, detect language (fastText), and lemmatize (spaCy)
 	 - Applies purpose‑code filters and keyword/acronym rules per language (EN/FR/ES/DE)
 	 - Produces candidate tables with columns such as normalized/lemmatized titles, detected language, matched keywords/acronyms, and blacklist flags
 	 - Outputs:
-		 - `crs_lemmatized_titles_wo_stopwords.feather.feather` (intermediate dataset as checkpoint)
+		 - `crs_lemmatized_titles_wo_stopwords.feather` (intermediate dataset as checkpoint)
 		 - `crs_titles_matched_wo_stopwords.feather` (output of title pattern matching) 
          - `stat_to_mine.feather`
          - `gen_to_mine.fether`
          - `conflicting_descr_stat.feather`
          - `conflicting_descr_gen.feather`
 
-2) Notebook B Colab — Predict with fine‑tuned model 
+2) **Notebook B Colab**: Predict with fine‑tuned model 
 	- Upload `notebooks/final/colab_predict_with_finetuned_model.ipynb` to Google Colab. 
     - Upload `.._to_mine.feather` and `conflicting_descr_....feather` datasets
-    - Upload model checkpoints
+    - Upload model checkpoints (found in shared Teams PRESS folder)
 	- Set configuration cell with all paths to data and model checkpoints
-    - Runs batched inference with Hugging Face `Trainer` using the fine-tuned models
-    - Saves predictions       
+    - Runs batched inference with Hugging Face Trainer using the fine-tuned models
+    - Outputs: 
+		- `unlabeled_predicted_<stat/gen>.feather`
+		- `conflicting_predicted_<stat/gen>.feather`
 
-3) Notebook C — Merge LLM predictions back to CRS
+3) **Notebook C**: Merge LLM predictions back to CRS
 	 - Inputs:
 		 - `crs_titles_matched_wo_stopwords.feather`
 		 - Predicted descriptions exported from Colab saved under `data/processed/predicted/`
 	 - Merges predictions with results of keyword matching
 	 - Writes entire merged data to `data/output/crs_predicted.feather` 
 
-4) Notebook D - Create PRESS
+4) **Notebook D**: Create PRESS
 	 - Sets threshold on statistics and gender and adds additional information from `data/auxiliary/`
 	 - Writes final outputs to `data/output/` 
 
-5) Visual checks and diagnostics
-	 - `notebooks/final/visual_checks_and_diagnostics.ipynb` provides QA and diagnostics:
-		 - Descriptive stats and histograms on CRS 
-		 - Inspection of title‑matching outputs 
-		 - Keyword frequency plots by language and simple threshold sensitivity plots for probabilities.
-         - ...
+- **Visual checks and diagnostics**: `notebooks/final/visual_checks_and_diagnostics.ipynb` provides QA and diagnostics:
+	- Descriptive stats and histograms on CRS 
+	- Inspection of title‑matching outputs 
+	- Keyword frequency plots by language and simple threshold sensitivity plots for probabilities.
+    - ...
 
 ### Text processing (fastText + spaCy)
 
