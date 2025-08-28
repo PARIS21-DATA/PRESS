@@ -46,7 +46,7 @@ Other files:
 - Ability to run Jupyter notebooks locally and, for the classification step, access to Google Colab (recommended for GPU acceleration)
 - fastText language identification model file placed at `data/models/fasttext/lid.176.bin` (see Text processing section below)
 - spaCy plus these language models installed: `en_core_web_sm`, `fr_core_news_sm`, `es_core_news_sm`, `de_core_news_sm`
-- CRS data downloaded from [OECD data explorer](https://data-explorer.oecd.org/vis?tm=crs&pg=0&snb=26&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_CRS%40DF_CRS&df[ag]=OECD.DCD.FSD&df[vs]=1.4&dq=DAC..1000.100._T._T.D.Q._T..&lom=LASTNPERIODS&lo=5&to[TIME_PERIOD]=false&isAvailabilityDisabled=false) and stored as `data/raw/CRS.parquet` 
+- CRS data downloaded from [OECD data explorer](https://data-explorer.oecd.org/vis?tm=crs&pg=0&snb=26&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_CRS%40DF_CRS&df[ag]=OECD.DCD.FSD&df[vs]=1.4&dq=DAC..1000.100._T._T.D.Q._T..&lom=LASTNPERIODS&lo=5&to[TIME_PERIOD]=false&isAvailabilityDisabled=false) and stored as `data/raw/CRS.parquet`. In 2025 the data was updated a second time unexpectedly in June, so making sure the most recent dataset is downloaded is helpful.
 
 To install dependencies in a fresh environment (example workflow):
 
