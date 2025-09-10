@@ -21,3 +21,6 @@ data/processed/**
 !data/processed/.gitkeep
 !data/processed/**/.gitkeep
 
+# Ignore site 
+site/
+

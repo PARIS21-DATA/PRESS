@@ -1,4 +1,4 @@
-site_name: Press technical methodology documentation
+site_name: PRESS Methodology Note
 site_url: https://paris21-data.github.io/PRESS/
 docs_dir: docs
 theme:
@@ -9,21 +9,27 @@ theme:
   features:
     - navigation.footer
   palette:
-    # Dark Mode
-    - scheme: slate
-      toggle:
-        icon: material/weather-sunny
-        name: Dark mode
-      primary: green
-      accent: deep purple
-
     # Light Mode
     - scheme: default
       toggle:
         icon: material/weather-night
         name: Light mode
-      primary: black
+      primary: teal
       accent: deep orange
+    
+    # Dark Mode
+    - scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Dark mode
+      primary: teal
+      accent: deep orange
+  
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/PARIS21-DATA
+
 
 # Optional: Plugins to enhance functionality
 plugins:
@@ -35,11 +41,14 @@ plugins:
 # Navigation (sidebar) structure
 nav:
   - Home: index.md
-  - src:
-      - download crs: src/download_crs.md
-      - text processing: src/text_processing.md
-  - notebooks:
-      - all steps: notebooks/collect_all_steps.md
+  - 1 Introduction: 01_introduction.md
+  - 2 Data Sources: 02_data_sources.md
+  - Code: 
+      src:
+        - download crs: src/download_crs.md
+        - text processing: src/text_processing.md
+      notebooks:
+        - all steps: notebooks/collect_all_steps.md
   - About: about.md
 
 # Markdown Extensions for better formatting

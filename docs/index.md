@@ -1,23 +1,4 @@
-# Press Technical Methodology Note 
+# PRESS Methodology Note
 
-All technical documentation concerning the PRESS methodology modernization.
+PARIS21 produces the Partner Report on Support to Statistics (PRESS) annually to report on trends in support to statistics. The methodology is applied retrospectively for all previous years to ensure comparability over time. This document presents the methodology used in 2025.
 
-## Project layout
-
-    data/
-        raw/                # contains read-only data  
-        processed/          # contains intermediate datasets 
-        output/             # contains the final output data
-    former_code/
-        Yu/                 # contains former code from previous PRESS rounds 
-    src/                    # the utility functions used for the PRESS pipeline 
-        download_crs.py     # contains functions to bulk-downlaod the entire CRS data set.
-        text_processing.py  # contains all functions to process text.
-    notebooks/
-        development/        # contains the current state of development
-        final/              # contains the final pipeline
-    docs/
-        index.md            # The documentation homepage.
-        about.md            # Other markdown pages, images and other files.
-    pyproject.toml          # configuration file with requirements for env
-    mkdocs.yml              # The mkdocs configuration file.
