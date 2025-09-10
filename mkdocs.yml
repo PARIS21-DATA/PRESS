@@ -1,5 +1,5 @@
 site_name: Press technical methodology documentation
-site_url: http://localhost:8000
+site_url: https://paris21-data.github.io/PRESS/
 docs_dir: docs
 theme:
   name: material
