@@ -50,6 +50,8 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -134,7 +136,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue-grey" data-md-color-accent="deep-orange"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_1">
     
       <label class="md-header__button md-icon" title="Dark mode" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
@@ -678,7 +680,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../src/download_crs/" class="md-nav__link">
+      <a href="../download_crs/" class="md-nav__link">
         
   
   
@@ -701,7 +703,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../src/text_processing/" class="md-nav__link">
+      <a href="../text_processing/" class="md-nav__link">
         
   
   
@@ -770,7 +772,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../notebooks/collect_all_steps/" class="md-nav__link">
+      <a href="../collect_all_steps/" class="md-nav__link">
         
   
   
@@ -1020,7 +1022,56 @@
 <p>The resulting model was subsequently used to classify all remaining unlabelled CRS projects. As PARIS21 issues the PRESS on an annual basis, the trained model was stored and can be reapplied in future PRESS cycles, enabling the simple and consistent classification of new data releases with little manual intervention. </p>
 <p>The finetuned model produces, for each project description, a <strong>probability score</strong> indicating how closely the text resembles the linguistic and contextual structure of projects in the positive (statistical) training set. This score can be interpreted as the model’s degree of confidence that a given project includes a substantial statistical component. In practice, higher scores reflect a stronger similarity to the patterns and terminology characteristic of statistical activities — such as references to data collection, surveys, censuses, or statistical systems — while lower scores indicate that the project text aligns more closely with non-statistical projects in the training data. These probability scores thus serve as a quantitative measure of the model’s classification certainty and provide a transparent basis for determining which projects are considered as supporting statistical development.</p>
 <h5 id="prediction-results">Prediction results<a class="headerlink" href="#prediction-results" title="Permanent link">#</a></h5>
-<p>The model’s ability to handle linguistic complexity and contextual nuance across diverse reporting situations is illustrated through some examples in Table 1. A project description in Spanish, containing numerous encoding errors and incomplete words, was nevertheless correctly identified as statistical, demonstrating the model’s robustness to imperfect text inputs and its ability to generalise meaning even under suboptimal data quality conditions. Similarly, a project reported in Dutch — a language not explicitly represented in the training process — was accurately classified, underscoring the strength of the multilingual architecture and its capacity to transfer knowledge across languages. In another case, a project written in English with an uninformative title and a purpose code unrelated to statistics was still recognised as having a major statistical component, reflecting the model’s contextual understanding. Conversely, the model assigned a low probability score to a wildlife conservation program censusing lions, correctly distinguishing the use of the word “census” in this context from its use in the context of official statistics. Collectively, these examples highlight the model’s ability to interpret meaning, context, and linguistic variety in a way that allows to measure funding towards statistical systems with high accuracy.</p>
+<p>The model’s ability to handle linguistic complexity and contextual nuance across diverse reporting situations is illustrated through some examples in Table <a href="#table-1-contextual-nuance">1</a>. A project description in Spanish, containing numerous encoding errors and incomplete words, was nevertheless correctly identified as statistical, demonstrating the model’s robustness to imperfect text inputs and its ability to generalise meaning even under suboptimal data quality conditions. Similarly, a project reported in Dutch — a language not explicitly represented in the training process — was accurately classified, underscoring the strength of the multilingual architecture and its capacity to transfer knowledge across languages. In another case, a project written in English with an uninformative title and a purpose code unrelated to statistics was still recognised as having a major statistical component, reflecting the model’s contextual understanding. Conversely, the model assigned a low probability score to a wildlife conservation program censusing lions, correctly distinguishing the use of the word “census” in this context from its use in the context of official statistics. Collectively, these examples highlight the model’s ability to interpret meaning, context, and linguistic variety in a way that allows to measure funding towards statistical systems with high accuracy.</p>
+<h6 id="table-1-contextual-nuance">Table 1: Examples of handling of contextual nuance in various reporting situations.</h6>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Project title</th>
+<th style="text-align: left;">Purpose Name</th>
+<th style="text-align: left;">Description combination (input)</th>
+<th style="text-align: left;">Description combination translated</th>
+<th style="text-align: right;">Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">'DiseÃ±o e ingenierÃ­a de sistemas, procura de equipos, instalaciÃ³n de software y hardware, pruebas y puesta en servicio, de un Sistema InformaciÃ³n EstadÃ­stica FUNDEI (SIEF) y de intermediaciÃ³n electrÃ³nica EducaciÃ³n-Industria (PNP-o</td>
+<td style="text-align: left;">Employment creation</td>
+<td style="text-align: left;">EMPLOYMENT POLICY AND ADMIN. MGMT.: Â¿DiseÃ±o e ingenierÃ­a de sistemas, procura de equipos, instalaciÃ³n de software y hardware, pruebas y puesta en servicio, de un Sistema InformaciÃ³n EstadÃ­stica FUNDEI (SIEF) y de intermediaciÃ³n electrÃ³nica EducaciÃ³n-Industria (PNP-online).Â¿</td>
+<td style="text-align: left;">EMPLOYMENT POLICY AND ADMIN. MGMT.: Systems design and engineering, equipment procurement, software and hardware installation, testing and commissioning of a FUNDEI Statistical Information System (SIEF) and an Education-Industry electronic intermediation system (PNP-online).</td>
+<td style="text-align: right;">0.9996</td>
+</tr>
+<tr>
+<td style="text-align: left;">DMV VN databank geweld vrouwen</td>
+<td style="text-align: left;">Human rights</td>
+<td style="text-align: left;">DMV VN DATABANK GEWELD VROUWEN: Oprichting door DAW van een databank met info over geweld tegen vrouwen wereldwijd.</td>
+<td style="text-align: left;">DMV VN DATABASE ON VIOLENCE AGAINST WOMEN: Establishment by DAW of a database with information on violence against women worldwide.</td>
+<td style="text-align: right;">0.9996</td>
+</tr>
+<tr>
+<td style="text-align: left;">Food and Agriculture Organization of the United Nations</td>
+<td style="text-align: left;">Agricultural policy and administrative management</td>
+<td style="text-align: left;">FOOD AND AGRICULTURE ORGANIZATION OF THE UNITED NATIONS: to support the globally accessible and transparent MIS platform, and build the capacity of Bangladesh, India, Nigeria and other countries to produce, disseminate and analyze quality agriculture market statistics using digital technologies</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">0.9996</td>
+</tr>
+<tr>
+<td style="text-align: left;">DP1 Programme FSTP 2013</td>
+<td style="text-align: left;">Agricultural policy and administrative management</td>
+<td style="text-align: left;">DP1 PROGRAMME FSTP 2013: Résultat 1 : Les structures centrales et déconcentrées du MARNDR et du MSPP sont en mesure de coordonner et de suivre les interventions en matière de sécurité alimentaire et de donner des appuis de qualité, en collaboration/synergie avec les autres parties prenantes du secteur. Résultat 2 : Des informations de qualité sur le secteur agricole sont produites régulièrement par le MARNDR à travers un Système Permanent de Statistiques Agricoles, afin de contribuer à l'analyse de la situation et de</td>
+<td style="text-align: left;">DP1 FSTP PROGRAM 2013: Result 1: The central and decentralized structures of the MARNDR and the MSPP are able to coordinate and monitor food security interventions and provide quality support, in collaboration/synergy with other stakeholders in the sector. Result 2: Quality information on the agricultural sector is regularly produced by the MARNDR through a Permanent System of Agricultural Statistics, in order to contribute to the analysis of the situation and</td>
+<td style="text-align: right;">0.9996</td>
+</tr>
+<tr>
+<td style="text-align: left;">Usaid-Africa Small Grants</td>
+<td style="text-align: left;">Biodiversity</td>
+<td style="text-align: left;">USAID-AFRICA SMALL GRANTS: This project conserves lions in the Benoue ecosystem of Cameroon by implementing priority actions outlined in the National Lion Conservation Action Plan. It will [...] and lion products and problems with legal hunting. Specific activities include: 1) census of lions conducted under the parks authority, MINFOF, 2) building […]</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">0.0015</td>
+</tr>
+</tbody>
+</table>
 <h5 id="ai-based-classification-of-projects-by-gender-relevance">AI-based Classification of Projects by Gender Relevance<a class="headerlink" href="#ai-based-classification-of-projects-by-gender-relevance" title="Permanent link">#</a></h5>
 <p>As PARIS21 has a long history of promoting gender equality within the context of statistical systems worldwide, a gender classification was developed following the same process as the statistics classification, except for two adjustments.</p>
 <p>First, the pre-identification of gender-focused projects drew on a comprehensive combination of criteria previously used in PRESS analyses. These included gender-related purpose codes,<sup id="fnref:13"><a class="footnote-ref" href="#fn:13">6</a></sup> gender-specific keywords and acronyms (see Appendix <a href="../appendix_keywords_acronyms/#acronyms">Keywords and Acronyms</a>), the gender equality and RMNCH policy markers, donors focused on gender issues, as well as funding channels primarily dedicated to gender equality, such as UN Women and other specialised organisations. This approach ensured that the pre-identified set captured the full range of projects explicitly targeting gender-related objectives.</p>
@@ -1044,7 +1095,7 @@
 <p>The XLM-RoBERTa <a href="https://arxiv.org/pdf/1911.02116">(Conneau et al., 2019)</a> by Meta AI was pre-trained on a 2.5TB CommonCrawl corpus covering 100 languages. It was chosen due to its widespread use and strong performance on multilingual text in comparison to other multilingual models like mBERT (see <a href="https://arxiv.org/pdf/2003.11080">Hu et al., 2020</a>, <a href="https://arxiv.org/pdf/2105.00572v1">Goyal et al., 2021</a>).&#160;<a class="footnote-backref" href="#fnref:10" title="Jump back to footnote 3 in the text">&#8617;</a></p>
 </li>
 <li id="fn:11">
-<p>For all technical details outlined in this section, please see Appendix <a href="../notebooks/collect_all_steps/">Code</a>.&#160;<a class="footnote-backref" href="#fnref:11" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+<p>For all technical details outlined in this section, please see Appendix <a href="../collect_all_steps/">Code</a>.&#160;<a class="footnote-backref" href="#fnref:11" title="Jump back to footnote 4 in the text">&#8617;</a></p>
 </li>
 <li id="fn:12">
 <p>See model evaluation in Appendix Model Evaluation.&#160;<a class="footnote-backref" href="#fnref:12" title="Jump back to footnote 5 in the text">&#8617;</a></p>

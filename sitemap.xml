@@ -37,23 +37,19 @@
          <lastmod>2025-10-15</lastmod>
     </url>
     <url>
+         <loc>https://paris21-data.github.io/PRESS/collect_all_steps/</loc>
+         <lastmod>2025-10-15</lastmod>
+    </url>
+    <url>
+         <loc>https://paris21-data.github.io/PRESS/download_crs/</loc>
+         <lastmod>2025-10-15</lastmod>
+    </url>
+    <url>
          <loc>https://paris21-data.github.io/PRESS/references/</loc>
          <lastmod>2025-10-15</lastmod>
     </url>
     <url>
-         <loc>https://paris21-data.github.io/PRESS/docs/</loc>
-         <lastmod>2025-10-15</lastmod>
-    </url>
-    <url>
-         <loc>https://paris21-data.github.io/PRESS/notebooks/collect_all_steps/</loc>
-         <lastmod>2025-10-15</lastmod>
-    </url>
-    <url>
-         <loc>https://paris21-data.github.io/PRESS/src/download_crs/</loc>
-         <lastmod>2025-10-15</lastmod>
-    </url>
-    <url>
-         <loc>https://paris21-data.github.io/PRESS/src/text_processing/</loc>
+         <loc>https://paris21-data.github.io/PRESS/text_processing/</loc>
          <lastmod>2025-10-15</lastmod>
     </url>
 </urlset>
