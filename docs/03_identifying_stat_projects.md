@@ -11,7 +11,7 @@ To ensure comparability over time, the complete methodology is applied retrospec
 
 All CRS records were first filtered using SCB purpose code 16062, which captures projects explicitly reported as supporting statistical systems. The subsequent text analysis of project titles then follows a structured, language-sensitive process designed to maximise consistency and accuracy across different reporting languages by using techniques from the field of natural language processing (NLP).[^8] 
 
-[^8]: For all technical details outlined in this subsection, please see the [pre-identification notebook](https://github.com/PARIS21-DATA/PRESS/blob/methodology-modernization/notebooks/final/A_title_pattern_matching.ipynb).
+[^8]: For all technical details outlined in this subsection, please see the [pre-identification notebook](https://github.com/PARIS21-DATA/PRESS/blob/main/notebooks/final/A_title_pattern_matching.ipynb).
 
 ##### Text preparation
 
@@ -34,7 +34,7 @@ Building on the pre-identified set of statistical projects described in Section 
 
 [^10]: The XLM-RoBERTa [(Conneau et al., 2019)](https://arxiv.org/pdf/1911.02116) by Meta AI was pre-trained on a 2.5TB CommonCrawl corpus covering 100 languages. It was chosen due to its widespread use and strong performance on multilingual text in comparison to other multilingual models like mBERT (see [Hu et al., 2020](https://arxiv.org/pdf/2003.11080), [Goyal et al., 2021](https://arxiv.org/pdf/2105.00572v1)).
 
-[^11]: For all technical details outlined in this subsection, please see the [classification notebook](https://github.com/PARIS21-DATA/PRESS/blob/methodology-modernization/notebooks/final/colab_classify_statistics.ipynb).
+[^11]: For all technical details outlined in this subsection, please see the [classification notebook](https://github.com/PARIS21-DATA/PRESS/blob/main/notebooks/final/colab_classify_statistics.ipynb).
 
 ##### Building the Training data
 
@@ -85,7 +85,7 @@ The subsequent AI-based classification process—including model training, itera
 
 After obtaining a certainty score for every project in the CRS which was not previously pre-identified — reflecting the probability that it relates to statistics — the final inclusion in the PRESS dataset was determined by applying a certainty threshold.[^16] Projects with scores above the threshold were classified as statistical (or gender-related, respectively), while those below were excluded. The selection of this threshold followed a two-step process. First, the Receiver Operating Characteristic (ROC) curve on the test set was used to identify the interval offering the best trade-off between the true positive rate and the false positive rate. Second, this interval was refined through manual inspection of project descriptions located near the boundary, ensuring that the chosen threshold reflected both precision and expert judgement. This process resulted in a threshold of 0.9994 for statistical relevance and 0.991 for gender relevance.
 
-[^16]: For all technical details outlined in this section, please consult the [dataset creation notebook](https://github.com/PARIS21-DATA/PRESS/blob/methodology-modernization/notebooks/final/D_create_press.ipynb).
+[^16]: For all technical details outlined in this section, please consult the [dataset creation notebook](https://github.com/PARIS21-DATA/PRESS/blob/main/notebooks/final/D_create_press.ipynb).
 
 The certainty score itself can be interpreted along a continuum — from core statistical projects such as support to censuses or national statistical strategies, to projects with a major or moderate data component, and finally to those unrelated to statistics. The higher threshold for statistics reflects the need to more strictly exclude projects with only a minor data element, which are increasingly common in ODA activities.
 
