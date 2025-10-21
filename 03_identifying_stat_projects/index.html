@@ -620,7 +620,7 @@
   
   
   <span class="md-ellipsis">
-    Code
+    Code Documentation
     
   </span>
   
@@ -631,7 +631,7 @@
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8_2">
             <span class="md-nav__icon md-icon"></span>
-            Code
+            Code Documentation
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -709,75 +709,6 @@
   
   <span class="md-ellipsis">
     text processing
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_2_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_8_2_2" id="__nav_8_2_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    notebooks
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_2_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_2_2">
-            <span class="md-nav__icon md-icon"></span>
-            notebooks
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../collect_all_steps/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    all steps
     
   </span>
   
@@ -1009,7 +940,7 @@
 <h2 id="32-ai-based-classification-by-relevance-to-statistics">3.2 AI-based Classification by Relevance to Statistics<a class="headerlink" href="#32-ai-based-classification-by-relevance-to-statistics" title="Permanent link">#</a></h2>
 <p>Building on the pre-identified set of statistical projects described in Section <a href="./#31-pre-identification-of-statistical-projects">3.1</a>, the second stage applies the large multilingual transformer model XLM-RoBERTa<sup id="fnref:10"><a class="footnote-ref" href="#fn:10">3</a></sup> to recognise projects that include a substantial statistical component, even when not explicitly labelled or coded as such.<sup id="fnref:11"><a class="footnote-ref" href="#fn:11">4</a></sup></p>
 <h5 id="building-the-training-data">Building the Training data<a class="headerlink" href="#building-the-training-data" title="Permanent link">#</a></h5>
-<p>To provide the model with sufficient contextual information, the project’s short and long descriptions were combined into a single text input in the format “short description: long description.” This ensures that the model is supplied with both concise and detailed aspects of project documentation, allowing for more accurate understanding of project objectives. This description combination was, however, not normalized or lemmatized, since modern transformer architectures such as XLM-RoBERTa process text through built-in tokenization and are designed to handle natural language directly, capturing morphological and contextual information without requiring explicit lemmatization (Toporkov and Agerri, 2024).</p>
+<p>To provide the model with sufficient contextual information, the project’s short and long descriptions were combined into a single text input in the format “short description: long description.” This ensures that the model is supplied with both concise and detailed aspects of project documentation, allowing for more accurate understanding of project objectives. This description combination was, however, not normalized or lemmatized, since modern transformer architectures such as XLM-RoBERTa process text through built-in tokenization and are designed to handle natural language directly, capturing morphological and contextual information without requiring explicit lemmatization <a href="https://arxiv.org/pdf/2302.00407">(Toporkov and Agerri, 2024)</a>.</p>
 <p>The pre-identified set of clearly statistical projects served as positive training examples. However, as there are no explicitly labelled non-statistical projects in the CRS to serve as negative examples in the training set, a strategy was needed to identify reliable negative samples. Initially, a set of negative (non-statistical) examples was drawn from the remainder of the CRS database using stratified random sampling under the assumption that the vast majority of projects has no statistical component. Stratification ensured that the sampled negatives reflected the overall distribution of description lengths and reporting language, thereby avoiding bias that might arise if negatives were drawn unevenly. Then, an iterative training process was implemented:</p>
 <ol>
 <li>An initial model was trained using the pre-identified positives and the stratified sample of negatives.</li>
@@ -1086,7 +1017,7 @@
 <hr />
 <ol>
 <li id="fn:8">
-<p>For all technical details outlined in this section, please see Appendix Code.&#160;<a class="footnote-backref" href="#fnref:8" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+<p>For all technical details outlined in this subsection, please see the <a href="https://github.com/PARIS21-DATA/PRESS/blob/methodology-modernization/notebooks/final/A_title_pattern_matching.ipynb">pre-identification notebook</a>.&#160;<a class="footnote-backref" href="#fnref:8" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 <li id="fn:9">
 <p>Lemmatization was implemented through the NLP package <a href="https://spacy.io/">spaCy</a>.&#160;<a class="footnote-backref" href="#fnref:9" title="Jump back to footnote 2 in the text">&#8617;</a></p>
@@ -1095,10 +1026,10 @@
 <p>The XLM-RoBERTa <a href="https://arxiv.org/pdf/1911.02116">(Conneau et al., 2019)</a> by Meta AI was pre-trained on a 2.5TB CommonCrawl corpus covering 100 languages. It was chosen due to its widespread use and strong performance on multilingual text in comparison to other multilingual models like mBERT (see <a href="https://arxiv.org/pdf/2003.11080">Hu et al., 2020</a>, <a href="https://arxiv.org/pdf/2105.00572v1">Goyal et al., 2021</a>).&#160;<a class="footnote-backref" href="#fnref:10" title="Jump back to footnote 3 in the text">&#8617;</a></p>
 </li>
 <li id="fn:11">
-<p>For all technical details outlined in this section, please see Appendix <a href="../collect_all_steps/">Code</a>.&#160;<a class="footnote-backref" href="#fnref:11" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+<p>For all technical details outlined in this subsection, please see the <a href="https://github.com/PARIS21-DATA/PRESS/blob/methodology-modernization/notebooks/final/colab_classify_statistics.ipynb">classification notebook</a>.&#160;<a class="footnote-backref" href="#fnref:11" title="Jump back to footnote 4 in the text">&#8617;</a></p>
 </li>
 <li id="fn:12">
-<p>See model evaluation in Appendix Model Evaluation.&#160;<a class="footnote-backref" href="#fnref:12" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+<p>See model evaluation in Appendix <a href="../appendix_model_evaluation/">Model Evaluation</a>.&#160;<a class="footnote-backref" href="#fnref:12" title="Jump back to footnote 5 in the text">&#8617;</a></p>
 </li>
 <li id="fn:13">
 <p>Purpose codes 15170 “Women's rights organisations and movements, and government institutions” and 15180 “Ending violence against women and girls” were used.&#160;<a class="footnote-backref" href="#fnref:13" title="Jump back to footnote 6 in the text">&#8617;</a></p>
@@ -1110,10 +1041,10 @@
 <p>Projects flagged only by the term “women” were deliberately excluded for the training set construction due to its high frequency and use across areas not exclusively concerned with gender issues.&#160;<a class="footnote-backref" href="#fnref:15" title="Jump back to footnote 8 in the text">&#8617;</a></p>
 </li>
 <li id="fn:16">
-<p>For all technical details outlined in this section, please consult Appendix Code.&#160;<a class="footnote-backref" href="#fnref:16" title="Jump back to footnote 9 in the text">&#8617;</a></p>
+<p>For all technical details outlined in this section, please consult the <a href="https://github.com/PARIS21-DATA/PRESS/blob/methodology-modernization/notebooks/final/D_create_press.ipynb">dataset creation notebook</a>.&#160;<a class="footnote-backref" href="#fnref:16" title="Jump back to footnote 9 in the text">&#8617;</a></p>
 </li>
 <li id="fn:17">
-<p>For a complete list of financial instruments in the CRS, please consult the CRS codebook.&#160;<a class="footnote-backref" href="#fnref:17" title="Jump back to footnote 10 in the text">&#8617;</a></p>
+<p>For a complete list of financial instruments in the CRS, please consult the <a href="https://webfs.oecd.org/oda/DataCollection/Resources/DAC-tables-CRS-codebook.xlsx">CRS codebook</a>.&#160;<a class="footnote-backref" href="#fnref:17" title="Jump back to footnote 10 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div>
