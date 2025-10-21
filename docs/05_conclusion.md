@@ -1,0 +1,5 @@
+The methodology presented in this note ensures that PRESS continues to serve as the most reliable and comprehensive source of information on funding towards statistical systems, providing a consistent evidence base for analysing trends in funding. 
+
+Drawing on the CRS, the methodology builds on a data source that offers detailed and comparable reporting across donors and sectors. While the use of CRS data also presents specific challenges when measuring support to statistics, such as linguistic variation, imprecise reporting, or partial project objectives, PARIS21 provides a methodological framework to address these challenges.
+
+Building on the already effective text analysis approach used in previous cycles, this refined methodology takes advantage of the capabilities of state-of-the-art LLMs to handle linguistic complexity and contextual nuance to accurately classify projects regarding their relevance to statistics. This ensures that the database remains an up-to-date reference for understanding how international aid contributes to strengthening data and statistical systems worldwide.

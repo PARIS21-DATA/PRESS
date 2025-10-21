@@ -3,18 +3,21 @@ site_url: https://paris21-data.github.io/PRESS/
 docs_dir: docs
 theme:
   name: material
+  favicon: assets/P21_icon.ico
+  logo: assets/P21_logo.png
   font:
-    text: Merriweather Sans
+    text: Source Sans Pro
     code: Red Hat Mono
   features:
     - navigation.footer
+    - navigation.instant.preview
   palette:
     # Light Mode
     - scheme: default
       toggle:
         icon: material/weather-night
         name: Light mode
-      primary: teal
+      primary: white
       accent: deep orange
     
     # Dark Mode
@@ -22,13 +25,29 @@ theme:
       toggle:
         icon: material/weather-sunny
         name: Dark mode
-      primary: teal
+      primary: blue grey
       accent: deep orange
-  
+
+extra_css:
+  - stylesheets/extra.css
+# Repository
+repo_name: PARIS21-DATA/PRESS
+repo_url: https://github.com/PARIS21-DATA/PRESS
+
 extra:
   social:
+    - icon: fontawesome/solid/house
+      link: https://paris21.org
     - icon: fontawesome/brands/github
       link: https://github.com/PARIS21-DATA
+    - icon: fontawesome/brands/x-twitter
+      link: https://x.com/contactparis21
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/paris21/
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/user/PARIS21OECD  
+    
+copyright: '&copy; 2025 PARIS21. ALL RIGHTS RESERVED.'
 
 
 # Optional: Plugins to enhance functionality
@@ -37,18 +56,25 @@ plugins:
   - mkdocstrings
   - autorefs:
       link_titles: false
+  - table-reader
+
 
 # Navigation (sidebar) structure
 nav:
-  - Home: index.md
+  - Abstract: index.md
   - 1 Introduction: 01_introduction.md
-  - 2 Data Sources: 02_data_sources.md
-  - Code: 
-      src:
-        - download crs: src/download_crs.md
-        - text processing: src/text_processing.md
-      notebooks:
-        - all steps: notebooks/collect_all_steps.md
+  - 2 Data Source: 02_data_source.md
+  - 3 Identifying Funding towards Statistics: 03_identifying_stat_projects.md
+  - 4 Topic Focus: 04_topic_focus.md
+  - 5 Conclusion: 05_conclusion.md
+  - References: references.md
+  - Appendix:
+    - Model Evaluation: appendix_model_evaluation.md
+    - Code Documentation: 
+        - src:
+          - download crs: download_crs.md
+          - text processing: text_processing.md
+    - Keywords and Acronyms: appendix_keywords_acronyms.md
   - About: about.md
 
 # Markdown Extensions for better formatting
@@ -66,3 +92,6 @@ markdown_extensions:
       guess_lang: false
   - toc:
       permalink: "#"
+  - attr_list
+  - md_in_html
+  - pymdownx.blocks.caption

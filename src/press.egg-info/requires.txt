@@ -4,6 +4,7 @@ mkdocs
 mkdocs-material
 mkdocstrings
 mkdocstrings-python
+mkdocs-table-reader-plugin
 requests
 pyarrow
 matplotlib

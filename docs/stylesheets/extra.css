@@ -1,0 +1,4 @@
+/* For active link color in nav sidebar */
+.md-nav__link--active {
+  color: rgb(0, 117, 117) !important;
+}
