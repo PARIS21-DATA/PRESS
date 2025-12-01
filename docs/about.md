@@ -1,7 +1,7 @@
 <h5> Acknowledgements </h5>
 
 The 2025 methodology modernization was implemented by Johannes Abele and Jeanne Jadeau, with inputs from Mercedes Fogarassy.
-The 2025 update of the methodology note is authored by Johannes Abele and Mercedes Fogarassy with inputs from Jeanne Jadeau and Johannes Jütting. 
+The 2025 update of the methodology note is authored by Johannes Abele and Mercedes Fogarassy with inputs from Jeanne Jadeau and Johannes Jütting, and editorial support by Susan Sachs. 
 
 <br>
 

@@ -11,7 +11,7 @@ The CRS identifies project donors by looking at the source of the funding. Count
   ![funding_flows](./assets/CRS_funding_flow.png){ width="550" }
 </figure>
 
-While each project contained in the CRS is associated with a wide range of information such as sectorial and geographical coverage, financial flows or SDG and policy designations, the information most relevant to produce the PRESS will be covered in the following.
+While each project contained in the CRS is associated with a wide range of information such as sectorial and geographical coverage, financial flows or SDG and policy designations, the information most relevant to produce the PRESS will be covered in the following methodology note.
 
 Donors report to the CRS using specific **purpose codes** for the sectors targeted by their aid activity. Statistical Capacity Building (SCB) is designated by the sector code 16062[^2] and will be a cornerstone in identifying support to statistics in the CRS. Each activity reported in CRS can be assigned with one of the over 100 purpose codes.[^3]
 
