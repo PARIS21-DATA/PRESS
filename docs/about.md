@@ -7,7 +7,7 @@ Since 2006, the annual PARIS21 Partner Report on Support to Statistics (PRESS) h
 
 The 2025 methodology modernisation was implemented by Johannes Abele and Jeanne Jadeau with inputs from Mercedes Fogarassy.
 
-The 2025 update of the methodology note is authored by Johannes Abele and Mercedes Fogarassy with inputs from Jeanne Jadeau and Johannes Jütting, and editorial support by Susan Sachs. 
+The 2025 update of the methodology note is authored by Johannes Abele and Mercedes Fogarassy with inputs from Carla Schanz, Jeanne Jadeau and Johannes Jütting, and editorial support by Susan Sachs. 
 
 
 <br>
