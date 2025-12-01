@@ -38,6 +38,6 @@ While the CRS is one of the most reliable and comprehensive databases that accou
 
 [^6]: E.g. project title: “Support for Poverty Assessment and Reduction in Caribbean Countries”, purpose code: “Social protection”, long description: “The TC will improve capabilities of the national statistical offices in the Anglophone Caribbean countries to...”.
 
-[^7]: Languages detected via MetaAI’s [fasttext package](https://fasttext.cc/) [(Joulin et al., 2016)](https://arxiv.org/pdf/1607.01759)
+[^7]: Languages detected via MetaAI’s [fasttext package](https://fasttext.cc/) [(Joulin et al., 2016)](https://arxiv.org/pdf/1607.01759).
 
 To address these challenges, PARIS21 has developed an effective methodology to measure trends in support to statistics accurately.

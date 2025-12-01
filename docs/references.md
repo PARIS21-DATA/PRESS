@@ -1,4 +1,4 @@
-Conneau, A. et al. (2019). *Unsupervised Cross-lingual Representation Learning at Scale*, Cornell University, [http://arXiv:1911.02116](http://arXiv:1911.02116).
+Conneau, A. et al. (2019). *Unsupervised Cross-lingual Representation Learning at Scale*, Cornell University, [https://arxiv.org/abs/1911.02116](https://arxiv.org/abs/1911.02116).
 
 Goyal, N. et al. (2021). *Larger-scale Transformers for Multilingual Masked Language mModeling*, [https://arxiv.org/abs/2105.00572](https://arxiv.org/abs/2105.00572).
 
