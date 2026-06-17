@@ -5,6 +5,10 @@ data/output/**
 data/models/checkpoints/**
 data/models/fasttext/**
 data/processed/**
+data/review/**
+
+# Ignore visualizations
+visualizations/**
 
 # Re-include directories so .gitkeep exceptions below take effect
 !data/processed/**/
