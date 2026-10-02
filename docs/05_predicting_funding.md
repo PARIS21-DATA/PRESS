@@ -94,3 +94,5 @@ As an additional robustness check, the historical series and medium-term project
 The nowcasting and forecasting framework is designed primarily for operational prediction rather than formal time-series inference. The historical annual series is relatively short, limiting the complexity of models that can be estimated reliably and increasing uncertainty around model comparisons. Formal stationarity diagnostics, such as Augmented Dickey-Fuller tests, are not conducted for the autoregressive models because model selection is based on out-of-sample rolling-origin performance.
 
 The framework can be refined as additional annual observations become available. Potential extensions include alternative model-selection criteria, additional exogenous predictors, probabilistic scenario analysis and bootstrap prediction intervals. The modular structure of the workflow allows these improvements to be incorporated in future PRESS cycles while retaining a transparent and reproducible validation process.
+
+<br><br>

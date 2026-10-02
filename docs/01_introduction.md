@@ -3,3 +3,5 @@ The Partner Report on Support to Statistics (PRESS) is issued annually by the Se
 This note presents the methodology used to compile the PRESS database, outlining the data source, analytical processes, and innovations introduced in 2025.
 
 Drawing on the Organisation for Economic Co‐operation and Development (OECD) Creditor Reporting System (CRS), the PRESS methodology combines targeted filtering techniques with a novel AI-based classification framework introduced as part of a methodological modernisation in 2025. In light of the growing potential of artificial intelligence (AI), in particular large language models (LLMs), PARIS21 leverages their contextual understanding capabilities to enhance the classification of projects according to their relevance to statistics, enabling a more nuanced understanding of the funding landscape towards statistics within development co-operation.
+
+<br><br>
