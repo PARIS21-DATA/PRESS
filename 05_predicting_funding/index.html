@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://paris21-data.github.io/PRESS/01_introduction/">
+        <link rel="canonical" href="https://paris21-data.github.io/PRESS/05_predicting_funding/">
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../04_topic_focus/">
       
       
-        <link rel="next" href="../02_data_source/">
+        <link rel="next" href="../06_conclusion/">
       
       
       <link rel="icon" href="../assets/P21_icon.ico">
@@ -22,7 +22,7 @@
     
     
       
-        <title>1 Introduction - PRESS Methodology Note</title>
+        <title>5 Nowcasting and Forecasting - PRESS Methodology Note</title>
       
     
     
@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#51-nowcasting-and-forecasting-workflow" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -108,7 +113,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              1 Introduction
+              5 Nowcasting and Forecasting
             
           </span>
         </div>
@@ -272,17 +277,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../01_introduction/" class="md-nav__link">
         
   
   
@@ -293,7 +291,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -368,10 +365,30 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../05_predicting_funding/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    5 Nowcasting and Forecasting
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -382,6 +399,78 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#51-nowcasting-and-forecasting-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.1 Nowcasting and forecasting workflow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#52-candidate-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.2 Candidate models
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#53-rolling-origin-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.3 Rolling-origin validation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#54-model-comparison-and-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.4 Model comparison and selection
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#55-operational-forecast-and-conditional-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.5 Operational forecast and conditional extensions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#56-limitations-and-future-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.6 Limitations and future development
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -699,6 +788,68 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#51-nowcasting-and-forecasting-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.1 Nowcasting and forecasting workflow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#52-candidate-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.2 Candidate models
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#53-rolling-origin-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.3 Rolling-origin validation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#54-model-comparison-and-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.4 Model comparison and selection
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#55-operational-forecast-and-conditional-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.5 Operational forecast and conditional extensions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#56-limitations-and-future-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.6 Limitations and future development
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -716,11 +867,78 @@
   
 
 
-  <h1>1 Introduction</h1>
+  <h1>5 Nowcasting and Forecasting</h1>
 
-<p>The Partner Report on Support to Statistics (PRESS) is issued annually by the Secretariat of the Partnership in Statistics for Development in the 21st Century (PARIS21) to report on global trends in support to statistics. Since its first edition in 2006, the PRESS has provided the international community with a comprehensive and reliable overview of funding directed towards strengthening data and statistical systems. The report serves as a resource for policymakers, donors and development partners seeking to make informed funding decisions and to promote more co-ordinated and effective support to statistics worldwide.</p>
-<p>This note presents the methodology used to compile the PRESS database, outlining the data source, analytical processes, and innovations introduced in 2025.</p>
-<p>Drawing on the Organisation for Economic Co‐operation and Development (OECD) Creditor Reporting System (CRS), the PRESS methodology combines targeted filtering techniques with a novel AI-based classification framework introduced as part of a methodological modernisation in 2025. In light of the growing potential of artificial intelligence (AI), in particular large language models (LLMs), PARIS21 leverages their contextual understanding capabilities to enhance the classification of projects according to their relevance to statistics, enabling a more nuanced understanding of the funding landscape towards statistics within development co-operation.</p>
+<p>To address the reporting lag in the Creditor Reporting System (CRS) described in Section <a href="../02_data_source/">2</a>, PARIS21 complements the observed PRESS time series with a supply-side nowcasting and forecasting approach. The objective is to provide an early estimate of annual disbursements before complete CRS data become available, while making the uncertainty of the estimate explicit and keeping the procedure reproducible across PRESS cycles.</p>
+<p>The approach is based on annual aggregate PRESS data and combines model comparison, rolling-origin validation and scenario-based extensions. For the PRESS 2025 cycle, the modelling dataset covers 2018–2024 and uses annual commitments and disbursements. Seven candidate models are evaluated, and the model with the strongest out-of-sample predictive performance is selected to produce the operational estimate for 2025.</p>
+<h2 id="51-nowcasting-and-forecasting-workflow">5.1 Nowcasting and forecasting workflow<a class="headerlink" href="#51-nowcasting-and-forecasting-workflow" title="Permanent link">#</a></h2>
+<p>The workflow consists of five main steps:</p>
+<ol>
+<li>Aggregate annual PRESS commitments and disbursements and construct the lagged variables required by the candidate models.</li>
+<li>Fit seven alternative statistical models representing different assumptions about the relationship between commitments, past disbursements and time.</li>
+<li>Evaluate the models using rolling-origin validation, in which each model is repeatedly re-estimated using only information that would have been available before the year being predicted.</li>
+<li>Select the operational model based primarily on out-of-sample prediction error and use it to produce the 2025 estimate together with a 95% prediction interval.</li>
+<li>Extend the operational estimate conditionally to 2026–2027 using the OECD DAC Higher-cut and Lower-cut ODA projection scenarios.</li>
+</ol>
+<p>This sequence is designed to mimic the annual PRESS production setting as closely as possible. In particular, model selection is based on historical one-step-ahead predictions rather than in-sample fit alone.</p>
+<h2 id="52-candidate-models">5.2 Candidate models<a class="headerlink" href="#52-candidate-models" title="Permanent link">#</a></h2>
+<p>The nowcasting and forecasting framework compares seven candidate specifications. These models were selected to capture different potential sources of predictive information while remaining sufficiently transparent for operational use:</p>
+<ol>
+<li><strong>Baseline log-linear regression.</strong> Annual disbursements are predicted from the previous year's commitments after logarithmic transformation.</li>
+<li><strong>Bias-corrected log-linear regression.</strong> The baseline specification is retained, but retransformation to the original scale is adjusted using Duan's smearing estimator to reduce retransformation bias.</li>
+<li><strong>Trend regression.</strong> A deterministic time trend is used to capture systematic changes in disbursements over time.</li>
+<li><strong>Autoregressive regression.</strong> The previous year's disbursements are used as a predictor of the current year.</li>
+<li><strong>Trend + autoregressive regression.</strong> The deterministic trend and lagged disbursements are combined in a single specification.</li>
+<li><strong>ARIMA.</strong> An autoregressive integrated moving-average model is fitted to the historical disbursement series. The model order is selected automatically using the corrected Akaike Information Criterion (AICc).</li>
+<li><strong>ARIMAX.</strong> The time-series structure of disbursements is combined with lagged commitments as an external regressor. A fixed ARIMAX(1,0,0) specification is used.</li>
+</ol>
+<p>Comparing several model classes reduces reliance on a single structural assumption. Some specifications emphasise the relationship between commitments and later disbursements, while others rely primarily on the historical trajectory of disbursements themselves.</p>
+<h2 id="53-rolling-origin-validation">5.3 Rolling-origin validation<a class="headerlink" href="#53-rolling-origin-validation" title="Permanent link">#</a></h2>
+<p>Because the PRESS series is annual and temporally ordered, the candidate models are assessed using <strong>rolling-origin validation</strong> rather than a random train/test split. At each validation step, a model is estimated using only observations available up to that point and then used to generate a one-step-ahead prediction for the following year. The estimation window is subsequently expanded and the procedure repeated. This mimics the conditions under which an operational forecast would have been produced in previous PRESS cycles.</p>
+<p>The resulting predictions allow the observed and predicted trajectories to be compared across candidate models.</p>
+<h6 id="fig-rolling-origin-predictions">Figure 2: Rolling-origin one-step-ahead predictions produced by each candidate forecasting model.</h6>
+<figure id="fig-rolling_origin_predictions">
+  <img alt="rolling_origin_predictions" src="../assets/forecast_backtesting_timeseries.png" width="700" />
+</figure>
+<p>A complementary observed-versus-predicted comparison provides a direct indication of how closely the model outputs align with the realised disbursements across all validation years. Values closer to the 45-degree reference line indicate stronger predictive agreement.</p>
+<h6 id="fig-observed-vs-predicted">Figure 3: Observed versus predicted disbursements obtained from rolling-origin validation.</h6>
+<figure id="fig-observed_vs_predicted">
+  <img alt="observed_vs_predicted" src="../assets/forecast_observed_vs_predicted.png" width="650" />
+</figure>
+<h2 id="54-model-comparison-and-selection">5.4 Model comparison and selection<a class="headerlink" href="#54-model-comparison-and-selection" title="Permanent link">#</a></h2>
+<p>Model performance is evaluated using several indicators:</p>
+<ul>
+<li><strong>Mean Absolute Percentage Error (MAPE)</strong>, measuring the average percentage difference between observed and predicted values;</li>
+<li><strong>Root Mean Squared Error (RMSE)</strong>, measuring the magnitude of prediction errors while giving greater weight to larger deviations;</li>
+<li><strong>R²</strong>, as a complementary measure of agreement between observed and predicted values; and</li>
+<li><strong>direction accuracy</strong>, indicating whether the model correctly predicts the direction of year-to-year change.</li>
+</ul>
+<p>Operational model selection is based primarily on out-of-sample MAPE and RMSE. Lower values indicate stronger predictive performance.</p>
+<h6 id="fig-mape-comparison">Figure 4: Out-of-sample Mean Absolute Percentage Error (MAPE) for each candidate forecasting model.</h6>
+<figure id="fig-mape_comparison">
+  <img alt="mape_comparison" src="../assets/forecast_mape_comparison.png" width="650" />
+</figure>
+<h6 id="fig-rmse-comparison">Figure 5: Out-of-sample Root Mean Squared Error (RMSE) for each candidate forecasting model.</h6>
+<figure id="fig-rmse_comparison">
+  <img alt="rmse_comparison" src="../assets/forecast_rmse_comparison.png" width="650" />
+</figure>
+<p>For the PRESS 2025 cycle, the trend regression achieves the lowest out-of-sample MAPE and RMSE among the candidate models. It is therefore selected as the operational forecasting model. The autoregressive and trend + autoregressive specifications also show competitive predictive performance, while the baseline log-linear regression and ARIMAX produce comparatively larger errors.</p>
+<h2 id="55-operational-forecast-and-conditional-extensions">5.5 Operational forecast and conditional extensions<a class="headerlink" href="#55-operational-forecast-and-conditional-extensions" title="Permanent link">#</a></h2>
+<p>After model selection, the preferred specification is re-estimated using the complete observed time series and used to generate the 2025 operational forecast. A <strong>95% prediction interval</strong> is calculated alongside the point forecast to represent the uncertainty associated with predicting an unobserved annual value.</p>
+<p>The selected trend regression indicates a moderate decline in disbursements from the unusually high level observed in 2024. This estimate is then conditionally extended to 2026–2027 using the OECD DAC <strong>Higher-cut</strong> and <strong>Lower-cut</strong> ODA projection scenarios.</p>
+<p>The OECD DAC scenarios are not included as explanatory variables during model estimation and therefore do not affect model selection. Instead, the selected 2025 forecast is scaled according to the annual ODA growth rates implied by the two scenarios. The resulting values should therefore be interpreted as <strong>conditional scenario extensions</strong>, rather than independent statistical forecasts.</p>
+<h6 id="fig-oecd-scenario-extensions">Figure 6: Operational forecast and conditional extensions under OECD DAC Higher-cut and Lower-cut ODA projection scenarios.</h6>
+<figure id="fig-oecd_scenario_extensions">
+  <img alt="oecd_scenario_extensions" src="../assets/forecast_selected_model_with_scenarios.png" width="700" />
+</figure>
+<p>As an additional robustness check, the historical series and medium-term projections can also be compared across all candidate models. Although the models differ in their statistical formulation, their projected medium-term trajectories are broadly consistent, with most specifications indicating a modest decline following the high disbursement level observed in 2024.</p>
+<h6 id="fig-all-model-forecast-comparison">Figure 7: Forecast comparison across all candidate forecasting models with conditional OECD DAC scenario extensions.</h6>
+<figure id="fig-all_model_forecast_comparison">
+  <img alt="all_model_forecast_comparison" src="../assets/forecast_all_models_forecast_facets.png" width="750" />
+</figure>
+<h2 id="56-limitations-and-future-development">5.6 Limitations and future development<a class="headerlink" href="#56-limitations-and-future-development" title="Permanent link">#</a></h2>
+<p>The nowcasting and forecasting framework is designed primarily for operational prediction rather than formal time-series inference. The historical annual series is relatively short, limiting the complexity of models that can be estimated reliably and increasing uncertainty around model comparisons. Formal stationarity diagnostics, such as Augmented Dickey-Fuller tests, are not conducted for the autoregressive models because model selection is based on out-of-sample rolling-origin performance.</p>
+<p>The framework can be refined as additional annual observations become available. Potential extensions include alternative model-selection criteria, additional exogenous predictors, probabilistic scenario analysis and bootstrap prediction intervals. The modular structure of the workflow allows these improvements to be incorporated in future PRESS cycles while retaining a transparent and reproducible validation process.</p>
 <p><br><br></p>
 
 
@@ -751,7 +969,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: Abstract">
+          <a href="../04_topic_focus/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 4 Topic Focus">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -761,20 +979,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Abstract
+                4 Topic Focus
               </div>
             </div>
           </a>
         
         
           
-          <a href="../02_data_source/" class="md-footer__link md-footer__link--next" aria-label="Next: 2 Data Source">
+          <a href="../06_conclusion/" class="md-footer__link md-footer__link--next" aria-label="Next: 6 Conclusion">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                2 Data Source
+                6 Conclusion
               </div>
             </div>
             <div class="md-footer__button md-icon">
