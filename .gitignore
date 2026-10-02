@@ -5,7 +5,9 @@ data/output/**
 data/models/checkpoints/**
 data/models/fasttext/**
 data/processed/**
-data/review/**
+
+# Ignore 2026 review data
+data/review/PRESS_2026_top_funding_AI_review.xlsx
 
 # Ignore visualizations
 visualizations/**

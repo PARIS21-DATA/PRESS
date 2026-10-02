@@ -53,8 +53,12 @@ def normalize_str(text: str) -> str:
     """
 
     # Return None if the input is None
-    if text is None:
+    # if text is None:
+    #     return None
+    if pd.isna(text):
         return None
+    
+    text = str(text)
 
     # Replace hyphens with spaces to split hyphenated words
     text = text.replace('-', ' ')

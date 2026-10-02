@@ -66,7 +66,8 @@ nav:
   - 2 Data Source: 02_data_source.md
   - 3 Identifying Funding towards Statistics: 03_identifying_stat_projects.md
   - 4 Topic Focus: 04_topic_focus.md
-  - 5 Conclusion: 05_conclusion.md
+  - 5 Nowcasting and Forecasting: 05_predicting_funding.md
+  - 6 Conclusion: 06_conclusion.md
   - References: references.md
   - Appendix:
     - Model Evaluation: appendix_model_evaluation.md
